@@ -1,0 +1,17 @@
+import { IStudent } from "@/interfaces/student.interface";
+import mongoose, { Schema } from "mongoose";
+
+
+const StudentSchema = new Schema<IStudent>({
+    parentId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    dateOfBirth: {
+        type: Date,
+        required: true
+    },
+});
+
+export const StudentModel = mongoose.model<IStudent>("Student", StudentSchema);
