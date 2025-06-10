@@ -9,7 +9,7 @@ export interface IMedicationRequest {
 }
 
 export interface IRequestItem {
-  requestId: Types.ObjectId;
+  medicationRequestId: Types.ObjectId;
   medicationName: string;
   dosage: string;
   instruction: string;
