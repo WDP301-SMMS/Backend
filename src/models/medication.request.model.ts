@@ -27,7 +27,7 @@ const MedicationRequestSchema = new Schema<IMedicationRequest>({
 });
 
 const RequestItemSchema = new Schema<IRequestItem>({
-    requestId: {
+    medicationRequestId: {
         type: Schema.Types.ObjectId,
         ref: "MedicationRequest",
         required: true

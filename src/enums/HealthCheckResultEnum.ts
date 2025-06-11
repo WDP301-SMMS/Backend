@@ -1,0 +1,10 @@
+export enum DataSource {
+  DIRECT_INPUT = 'DIRECT_INPUT',
+  FILE_IMPORT = 'FILE_IMPORT',
+}
+
+export enum ResultStatus {
+  PENDING_REVIEW = 'PENDING_REVIEW',
+  CONFIRMED = 'CONFIRMED',
+  SENT_TO_PARENT = 'SENT_TO_PARENT',
+}

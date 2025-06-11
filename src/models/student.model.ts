@@ -8,6 +8,11 @@ const StudentSchema = new Schema<IStudent>({
         ref: "User",
         required: true
     },
+    classId: {
+        type: Schema.Types.ObjectId,
+        ref: "Class",
+        required: true
+    },
     dateOfBirth: {
         type: Date,
         required: true

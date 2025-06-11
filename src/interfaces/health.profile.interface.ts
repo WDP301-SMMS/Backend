@@ -6,6 +6,7 @@ export interface IHealthProfile {
   chronicConditions: string;
   visionStatus: string;
   hearingStatus: string;
+  vaccines: IInjectedVaccine[];
 }
 
 export interface IInjectedVaccine {
