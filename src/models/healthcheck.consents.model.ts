@@ -13,7 +13,7 @@ const HealthCheckConsentSchema = new Schema(
     studentId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: 'Student',
     },
     parentId: {
       type: Schema.Types.ObjectId,
