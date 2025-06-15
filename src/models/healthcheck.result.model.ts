@@ -1,4 +1,4 @@
-import { DataSource, ResultStatus } from '@/enums/HealthCheckResultEnum';
+import { DataSource, ResultStatus } from '../enums/HealthCheckResultEnum';
 import { IHealthCheckResult } from '@/interfaces/healthcheck.result.interface';
 import mongoose, { Schema, model, Document } from 'mongoose';
 
