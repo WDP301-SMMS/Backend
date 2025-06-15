@@ -7,11 +7,11 @@ import { MedicalInventoryModel } from '../models/medical.inventory.model';
 import { MedicationRequestModel } from '../models/medication.request.model';
 import { StudentModel } from '../models/student.model';
 
-// Giả định bạn có các file enums này
+// Import các interface và enum (đây là cách làm đúng)
+// Giả định bạn có các file này tại đúng đường dẫn
 import { ConsentStatus } from '@/enums/ConsentsEnum';
-
-// Bạn nên tạo file interface này để code an toàn hơn
 import { IDashboardData, IHealthAnalytics, IOperationalMonitoring, IQuickStats } from '@/interfaces/dashboard.interface';
+import mongoose from 'mongoose';
 
 
 export class DashboardService {
@@ -51,7 +51,7 @@ export class DashboardService {
         ] = await Promise.all([
             StudentModel.countDocuments(),
             MedicalIncidentModel.countDocuments({ incidentTime: { $gte: new Date(new Date().setDate(new Date().getDate() - 7)) } }),
-            MedicationRequestModel.countDocuments({ status: 'PENDING' }), // Xác nhận giá trị enum nếu có
+            MedicationRequestModel.countDocuments({ status: 'PENDING' }), // Chú ý: Thay 'PENDING' bằng giá trị enum nếu có
             MedicalInventoryModel.countDocuments({ $expr: { $lte: ['$quantityTotal', '$lowStockThreshold'] } })
         ]);
         return { totalStudents, incidentsThisWeek, pendingMedicationRequests, inventoryAlerts };
@@ -76,13 +76,12 @@ export class DashboardService {
             recentIncidents,
         ] = await Promise.all([
             this._getLatestCampaignStatus(),
-            // Đã cập nhật: populate fullName từ StudentModel
             MedicalIncidentModel.find()
                 .sort({ incidentTime: -1 })
                 .limit(5)
                 .populate({
                     path: 'studentId',
-                    select: 'fullName' // Chỉ lấy trường fullName từ StudentModel
+                    select: 'fullName' // Populate tên học sinh từ StudentModel
                 })
         ]);
         return { latestCampaignStatus, recentIncidents };
@@ -93,10 +92,11 @@ export class DashboardService {
     // =================================================================
     
     private static async _getHealthClassification(): Promise<any[]> {
+        // GIẢ ĐỊNH: studentId trong HealthCheckResult đã được sửa để ref: 'Student'
         return HealthCheckResult.aggregate([
             { $sort: { studentId: 1, checkupDate: -1 } },
             { $group: { _id: "$studentId", latestClassification: { $first: "$overallConclusion" } } },
-            { $match: { latestClassification: { $ne: null, $ne: "" } } },
+            { $match: { latestClassification: { $nin: [null, ""] } } }, // Loại bỏ các giá trị rỗng
             { $group: { _id: "$latestClassification", count: { $sum: 1 } } },
             { $project: { _id: 0, classification: "$_id", count: "$count" } }
         ]);
@@ -120,7 +120,8 @@ export class DashboardService {
             { $match: { "resultsData.itemName": "BMI" } },
             {
                 $lookup: {
-                    from: "healthcheckcampaigns",
+                    // ĐÃ SỬA: Tên collection trong MongoDB là chữ thường và có 's'
+                    from: "healthcheckcampaigns", 
                     localField: "campaignId",
                     foreignField: "_id",
                     as: "campaignInfo"
@@ -159,14 +160,17 @@ export class DashboardService {
         // BƯỚC 1: Lấy danh sách các lớp thuộc khối lớp mục tiêu
         const targetClasses = await Class.find({
             gradeLevel: { $in: latestCampaign.targetGradeLevels }
-        }).select('students'); // Chỉ lấy trường 'students'
+        }).select('students');
 
         // BƯỚC 2: Gộp tất cả học sinh từ các lớp đó vào một mảng ID duy nhất
-        const targetStudentIds = targetClasses.flatMap(cls => cls.students);
+        const targetStudentIds = targetClasses.flatMap(
+            (cls: { students: mongoose.Types.ObjectId[] }) => cls.students
+        );
         const totalTargeted = targetStudentIds.length;
 
         // BƯỚC 3: Đếm consent DỰA TRÊN danh sách học sinh mục tiêu đã tìm được
         const [approvedCount, declinedCount] = await Promise.all([
+            // GIẢ ĐỊNH: studentId trong HealthCheckConsent đã được sửa để ref: 'Student'
             HealthCheckConsent.countDocuments({
                 campaignId,
                 status: ConsentStatus.APPROVED,
