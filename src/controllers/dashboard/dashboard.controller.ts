@@ -1,4 +1,5 @@
-const DashboardService = require('@/services/dashboard.service');
+
+import { DashboardService } from '@/services/dashboard.service';
 import { Request, Response, NextFunction } from 'express';
 
 
