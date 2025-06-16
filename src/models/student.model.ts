@@ -13,6 +13,10 @@ const StudentSchema = new Schema<IStudent>({
         ref: "Class",
         required: true
     },
+    fullName: {
+        type: String,
+        required: true,
+    },
     dateOfBirth: {
         type: Date,
         required: true

@@ -1,0 +1,121 @@
+import AdminUserStudentService from '@/services/admin.users.service';
+import { NextFunction, Request, Response } from 'express';
+
+
+class AdminUserStudentController {
+  public adminUserStudentService = new AdminUserStudentService();
+
+  /**
+   * =================================================================
+   *                     CONTROLLER CHO NGƯỜI DÙNG
+   * =================================================================
+   */
+
+  /**
+   * @description Handler cho route GET /api/admin/users
+   */
+  public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      // Query đã được chuẩn hóa kiểu string trong Express
+      const query = req.query as {
+        page?: string;
+        limit?: string;
+        search?: string;
+        role?: string;
+        status?: string;
+      };
+
+      const result = await this.adminUserStudentService.getUsers(query);
+      res.status(200).json({ data: result, message: 'Users retrieved successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * @description Handler cho route PATCH /api/admin/users/:userId/status
+   */
+  public updateUserStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { userId } = req.params;
+      const { isActive } = req.body; // Mong đợi { "isActive": true } hoặc { "isActive": false }
+
+      if (typeof isActive !== 'boolean') {
+        res.status(400).json({ message: 'Invalid input: isActive must be a boolean' });
+        return;
+      }
+
+      const updatedUser = await this.adminUserStudentService.updateUserStatus(userId, isActive);
+      res.status(200).json({ data: updatedUser, message: 'User status updated successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * =================================================================
+   *                     CONTROLLER CHO HỌC SINH
+   * =================================================================
+   */
+
+  /**
+   * @description Handler cho route GET /api/admin/students
+   */
+  public getStudents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const query = req.query as {
+        page?: string;
+        limit?: string;
+        search?: string;
+        classId?: string;
+      };
+
+      const result = await this.adminUserStudentService.getStudents(query);
+      res.status(200).json({ data: result, message: 'Students retrieved successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * @description Handler cho route POST /api/admin/students
+   */
+  public createStudent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const studentData = req.body; // Mong đợi { fullName, dateOfBirth, parentId, classId }
+
+      // (Tùy chọn) Thêm validation ở đây (ví dụ: dùng Joi, Zod, hoặc check thủ công)
+      if (!studentData.fullName || !studentData.dateOfBirth || !studentData.parentId || !studentData.classId) {
+        res.status(400).json({ message: 'Missing required fields: fullName, dateOfBirth, parentId, classId' });
+        return;
+      }
+
+      const newStudent = await this.adminUserStudentService.createStudent(studentData);
+      res.status(201).json({ data: newStudent, message: 'Student created successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  /**
+   * @description Handler cho route PUT /api/admin/students/:studentId
+   */
+  public updateStudent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { studentId } = req.params;
+      const studentData = req.body;
+
+      if (Object.keys(studentData).length === 0) {
+        res.status(400).json({ message: 'Request body cannot be empty' });
+        return;
+      }
+
+      const updatedStudent = await this.adminUserStudentService.updateStudent(studentId, studentData);
+      res.status(200).json({ data: updatedStudent, message: 'Student updated successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+}
+
+export default AdminUserStudentController;

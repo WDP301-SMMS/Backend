@@ -3,8 +3,8 @@ import { Types } from "mongoose";
 
 export interface IClass {
   className: string;
-  gradeLevel?: number; // Optional, e.g., 1 for Grade 1
-  schoolYear?: string; // Optional, e.g., "2024-2025"
+  gradeLevel?: number; 
+  schoolYear?: string; 
   totalStudents: number;
-  students: Types.ObjectId[]; // References to students in the users collection
+  students: Types.Array<Types.ObjectId>; 
 }

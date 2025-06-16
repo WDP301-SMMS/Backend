@@ -6,8 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/server.ts",
-    "lint": "eslint 'src/**/*.ts'"
+    "dev": "nodemon --watch src --ext ts --exec ts-node -r tsconfig-paths/register src/server.ts",
+    "lint": "eslint 'src/**/*.ts'",
+    "db:seed": "ts-node src/scripts/seed.ts"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
   },
   "homepage": "https://github.com/WDP301-SMMS/Backend#readme",
   "devDependencies": {
+    "@faker-js/faker": "^9.8.0",
     "@types/express": "^5.0.2",
     "@types/node": "^22.15.29",
     "@types/swagger-ui-express": "^4.1.8",
@@ -33,6 +35,7 @@
     "npm": "^11.4.1",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
   },
   "dependencies": {
@@ -50,10 +53,13 @@
     "yamljs": "^0.3.0"
   },
   "_moduleAliases": {
+    "@": "./src",
     "@controllers": "./src/controllers",
     "@routes": "./src/routes",
     "@middlewares": "./src/middlewares",
     "@models": "./src/models",
-    "@config": "./src/config"
+    "@config": "./src/config",
+    "@enums": "./src/enums",
+    "@interfaces": "./src/interfaces"
   }
 }

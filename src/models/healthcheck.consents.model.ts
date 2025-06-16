@@ -1,4 +1,4 @@
-import { ConsentStatus } from '@/enums/ConsentsEnum';
+import { ConsentStatus } from '../enums/ConsentsEnum';
 import { IHealthCheckConsent } from '@/interfaces/healthcheck.consents.interface';
 import mongoose, { Schema, model, Document } from 'mongoose';
 
@@ -13,7 +13,7 @@ const HealthCheckConsentSchema = new Schema(
     studentId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: 'Student',
     },
     parentId: {
       type: Schema.Types.ObjectId,

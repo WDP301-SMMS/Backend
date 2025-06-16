@@ -1,4 +1,4 @@
-import { DataSource, ResultStatus } from '@/enums/HealthCheckResultEnum';
+import { DataSource, ResultStatus } from '../enums/HealthCheckResultEnum';
 import { IHealthCheckResult } from '@/interfaces/healthcheck.result.interface';
 import mongoose, { Schema, model, Document } from 'mongoose';
 
@@ -47,7 +47,7 @@ const HealthCheckResultSchema: Schema = new Schema(
     studentId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',
+      ref: 'Student',
     },
     checkupDate: {
       type: Date,
