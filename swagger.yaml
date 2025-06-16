@@ -4,26 +4,254 @@ info:
   version: 1.0.0
   description: API documentation for School Medical Management System
 servers:
-  - url: http://localhost:3000
+  - url: http://localhost:3000/api
 paths:
-  /users:
-    get:
-      summary: Get all users
-      responses:
-        '200':
-          description: A list of users
+    /auth/google:
+      get:
+        tags:
+          - Authentication
+        summary: Redirect to Google OAuth
+        description: Redirects the user to Google's OAuth consent screen
+        operationId: redirectToGoogleOAuth
+        responses:
+          '302':
+            description: Redirects to Google OAuth URL
+    /auth/google/callback:
+      get:
+        tags:
+          - Authentication
+        summary: Handle Google OAuth callback
+        description: Processes the Google OAuth callback and returns user information
+        operationId: handleGoogleCallback
+        parameters:
+          - name: code
+            in: query
+            required: true
+            schema:
+              type: string
+        responses:
+          '200':
+            description: Successful authentication with Google
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/LoginRequest'
+          '400':
+            description: Invalid code provided
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+    /auth/login:
+      post:
+        summary: Login with JWT
+        tags:
+          - Authentication
+        description: Authenticates a user with username and password, returns JWT tokens
+        operationId: loginWithJwt
+        requestBody:
+          required: true
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/LoginRequest'
+        responses:
+          '200':
+            description: Successful login
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/TokenResponse'
+            headers:
+              Set-Cookie:
+                schema:
+                  type: string
+                  example: refreshToken=abc123; HttpOnly; SameSite=Strict; Expires=...
+                description: Sets refreshToken cookie
+          '401':
+            description: Invalid credentials
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '404':
+            description: User not found
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+    /auth/register:
+      post:
+        summary: Register a new user
+        tags:
+          - Authentication
+        description: Registers a new user with local authentication
+        operationId: registerWithJwt
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterRequest'
+        responses:
+          '200':
+            description: Successful registration
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: User registered successfully
+          '400':
+            description: Account already exists
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+    /auth/refresh-token:
+      post:
+        summary: Refresh JWT token
+        tags:
+          - Authentication
+        description: Generates a new access token using a refresh token
+        operationId: refreshToken
+        responses:
+          '200':
+            description: Successful token refresh
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/TokenResponse'
+          '401':
+            description: Invalid or expired refresh token
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
+          '500':
+            description: Internal server error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     User:
       type: object
       properties:
-        id:
-          type: number
-        name:
+        _id:
           type: string
+          description: Unique identifier for the user
+        username:
+          type: string
+          description: Username for authentication
+        email:
+          type: string
+          description: User's email address
+        role:
+          type: string
+          enum: [Parent, Admin, Teacher]
+          description: User's role
+        dob:
+          type: string
+          format: date
+          description: Date of birth for local authentication
+        phone:
+          type: string
+          description: Phone number for local authentication
+        isActive:
+          type: boolean
+          description: Indicates if the user account is active
+        googleId:
+          type: string
+          nullable: true
+          description: Google ID for users authenticated via Google
+        authProvider:
+          type: string
+          enum: [local, google]
+          description: Authentication provider used
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the user was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when the user was last updated
+      required:
+        - _id
+        - username
+        - email
+        - role
+        - dob
+        - phone
+        - isActive
+        - authProvider
+        - googleId
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        dob:
+          type: string
+          format: date
+        phone:
+          type: string
+      required:
+        - username
+        - password
+        - email
+        - dob
+        - phone
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Error message
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

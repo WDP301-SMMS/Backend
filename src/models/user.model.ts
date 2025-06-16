@@ -1,42 +1,85 @@
-import mongoose, { Schema } from "mongoose";
-import { IUser } from "@/interfaces/user.interface";
-import { RoleEnum } from "../enums/RoleEnum";
+import mongoose, { Schema, Document } from 'mongoose';
+import { RoleEnum } from '@/enums/RoleEnum';
+import { IUser } from '@/interfaces/user.interface';
+import bcrypt from 'bcrypt';
 
-
-const UserSchema: Schema = new Schema<IUser>({
+const UserSchema = new Schema<IUser>(
+  {
+    _id: {
+      type: String,
+      default: () => new mongoose.Types.ObjectId().toString(),
+    },
     username: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: [
+        function (this: IUser) {
+          return this.authProvider === 'local';
+        },
+        'Username is required for local authentication',
+      ],
+      trim: true,
+      unique: true,
     },
     password: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: [
+        function (this: IUser) {
+          return this.authProvider === 'local';
+        },
+        'Password is required for local authentication',
+      ],
+      trim: true,
     },
     email: {
-        type: String,
-        required: true,
-        trim: true
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
     },
     role: {
-        type: String,
-        enum: Object.values(RoleEnum),
-        default: RoleEnum.Parent,
-        required: true
+      type: String,
+      enum: Object.values(RoleEnum),
+      default: RoleEnum.Parent,
+      required: true,
     },
     dob: {
-        type: Date,
-        required: [true, "Date of Birth is required"],
+      type: Date,
+      required: [
+        function (this: mongoose.Document & { authProvider?: string }) {
+          return this.authProvider === 'local';
+        },
+        'Date of Birth is required for local authentication',
+      ],
     },
     phone: {
-        type: String,
-        required: [true, "Phone is required"],
+      type: String,
+      required: [
+        function (this: IUser) {
+          return this.authProvider === 'local';
+        },
+        'Phone is required for local authentication',
+      ],
     },
     isActive: {
-        type: Boolean,
-        required: true
+      type: Boolean,
+      required: true,
+      default: true,
     },
-});
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      default: null,
+    },
+    authProvider: {
+      type: String,
+      enum: ['local', 'google'],
+      required: true,
+      default: 'local',
+    },
+  },
+  { timestamps: true },
+);
 
-export const UserModel = mongoose.model<IUser>("User", UserSchema);
+const UserModel = mongoose.model<IUser>('User', UserSchema);
+export default UserModel;
