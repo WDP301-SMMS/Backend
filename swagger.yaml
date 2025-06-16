@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: School Medical Management System API
+  version: 1.0.0
+  description: API documentation for School Medical Management System
+servers:
+  - url: http://localhost:3000
+paths:
+  /users:
+    get:
+      summary: Get all users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
