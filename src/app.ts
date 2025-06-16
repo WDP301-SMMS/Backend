@@ -8,6 +8,9 @@ import YAML from 'yamljs';
 import cookieParser from 'cookie-parser';
 import apiRoutes from './routes/index';
 
+import dashboardRoute from '@routes/dashboard/dashboard';
+
+
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
@@ -25,5 +28,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use('/api', apiRoutes);
 
 app.use(errorHandler);
+
+app.use('/api/admin', dashboardRoute);
 
 export default app;
