@@ -1,5 +1,8 @@
 import { AdminClassController } from "@/controllers/dashboard/admin.classes.controller";
+import { AdminHealthTemplateController } from "@/controllers/dashboard/admin.health.template.controller";
+import { AdminPartnerController } from "@/controllers/dashboard/admin.partners.controller";
 import AdminUserStudentController from "@/controllers/dashboard/admin.users.controller";
+import { AdminVaccineSuggestionController } from "@/controllers/dashboard/admin.vaccine.suggestion.controller";
 import { DashboardController } from "@/controllers/dashboard/dashboard.controller";
 
 const express = require('express');
@@ -54,7 +57,6 @@ router.put(
 
 //ROUTES CHO QUẢN LÝ LỚP HỌC
 // GET /api/admin/classes
-// Lấy danh sách lớp, hỗ trợ lọc và phân trang
 // Ví dụ: /api/admin/classes?schoolYear=2024-2025&gradeLevel=1
 router.get(
     '/classes',
@@ -62,7 +64,6 @@ router.get(
 );
 
 // POST /api/admin/classes
-// Tạo một lớp học mới
 router.post(
     '/classes',
     AdminClassController.createClass
@@ -81,6 +82,58 @@ router.patch(
     '/classes/:classId/remove-students',
     AdminClassController.removeStudentsFromClass
 );
+
+
+// ROUTES CHO QUẢN LÝ MẪU KHÁM SỨC KHỎE
+// GET /api/admin/health-check-templates
+router.get(
+    '/health-check-templates',
+    AdminHealthTemplateController.getHealthCheckTemplates
+);
+
+// POST /api/admin/health-check-templates
+router.post(
+    '/health-check-templates',
+    AdminHealthTemplateController.createHealthCheckTemplate
+);
+
+// GET /api/admin/health-check-templates/:templateId
+router.get(
+    '/health-check-templates/:templateId',
+    AdminHealthTemplateController.getHealthCheckTemplateById
+);
+
+// PUT /api/admin/health-check-templates/:templateId
+router.put(
+    '/health-check-templates/:templateId',
+    AdminHealthTemplateController.updateHealthCheckTemplate
+);
+
+// DELETE /api/admin/health-check-templates/:templateId
+router.delete(
+    '/health-check-templates/:templateId',
+    AdminHealthTemplateController.deleteHealthCheckTemplate
+);
+
+
+
+// ROUTE CHO GỢI Ý TÊN VACCINE
+// GET /api/admin/vaccines/suggestions
+router.get(
+    '/vaccines/suggestions',
+    AdminVaccineSuggestionController.getVaccineSuggestions
+);
+
+
+
+//ROUTES CHO QUẢN LÝ ĐỐI TÁC Y TẾ
+
+router.get('/partners', AdminPartnerController.getPartners);
+router.post('/partners', AdminPartnerController.createPartner);
+router.get('/partners/:partnerId', AdminPartnerController.getPartnerById);
+router.put('/partners/:partnerId', AdminPartnerController.updatePartner);
+router.delete('/partners/:partnerId', AdminPartnerController.deletePartner);
+
 
 
 export default router;
