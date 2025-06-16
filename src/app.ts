@@ -12,6 +12,6 @@ connectDB();
 
 app.use(errorHandler);
 
-app.use('/api/dashboard', dashboardRoute);
+app.use('/api/admin', dashboardRoute);
 
 export default app;
