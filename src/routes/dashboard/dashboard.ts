@@ -1,5 +1,6 @@
 import { AdminClassController } from "@/controllers/dashboard/admin.classes.controller";
 import { AdminHealthTemplateController } from "@/controllers/dashboard/admin.health.template.controller";
+import { AdminInventoryViewerController } from "@/controllers/dashboard/admin.inventory.controller";
 import { AdminPartnerController } from "@/controllers/dashboard/admin.partners.controller";
 import AdminUserStudentController from "@/controllers/dashboard/admin.users.controller";
 import { AdminVaccineSuggestionController } from "@/controllers/dashboard/admin.vaccine.suggestion.controller";
@@ -135,5 +136,14 @@ router.put('/partners/:partnerId', AdminPartnerController.updatePartner);
 router.delete('/partners/:partnerId', AdminPartnerController.deletePartner);
 
 
+// ROUTE XEM KHO DÀNH CHO ADMIN
+
+
+// GET /api/admin/inventory
+// Lấy danh sách vật tư, hỗ trợ lọc và phân trang
+router.get(
+    '/inventory',
+    AdminInventoryViewerController.getInventoryForAdmin
+);
 
 export default router;
