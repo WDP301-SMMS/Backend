@@ -106,11 +106,14 @@ router.get(
 
 
 //ROUTES CHO QUẢN LÝ ĐỐI TÁC Y TẾ
-router.get('/partners', AdminPartnerController.getPartners);
 router.post('/partners', AdminPartnerController.createPartner);
+router.get('/partners', AdminPartnerController.getPartners);
 router.get('/partners/:partnerId', AdminPartnerController.getPartnerById);
-router.put('/partners/:partnerId', AdminPartnerController.updatePartner);
-router.delete('/partners/:partnerId', AdminPartnerController.deletePartner);
+router.patch('/partners/:partnerId', AdminPartnerController.updatePartner);
+router.patch('/partners/:partnerId/status', AdminPartnerController.updatePartnerStatus);
+router.post('/partners/:partnerId/staff', AdminPartnerController.addStaff);
+router.delete('/partners/:partnerId/staff/:staffId', AdminPartnerController.removeStaff);
+router.put('/partners/:partnerId/manager', AdminPartnerController.replaceManager);
 
 
 // ROUTE XEM KHO DÀNH CHO ADMIN

@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 
 export interface IPartnerStaff {
   fullName: string;
-  position?: string; 
+  position?: string;
   isActive: boolean;
   organizationId: Types.ObjectId
 }
@@ -19,9 +19,9 @@ export interface IHealthcareOrganization {
   name: string;
   address: string;
   phone: string;
-  email: string; 
+  email: string;
   type: OrganizationEnum;
   isActive: boolean;
-  managerInfo: IManagerInfo;
-  staffMembers: IPartnerStaff[];
+  managerInfo: Types.ObjectId | IManagerInfo;
+  staffMembers: (Types.ObjectId | IPartnerStaff)[];
 }
