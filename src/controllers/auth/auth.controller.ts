@@ -1,7 +1,7 @@
 import {
   generateGoogleAuthUrl,
   getGoogleUser,
-} from '@/services/authenticateWithGoogle';
+} from '@/services/google.service';
 import { NextFunction, Request, Response } from 'express';
 import User from '@models/user.model';
 import {

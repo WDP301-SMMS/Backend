@@ -29,6 +29,4 @@ app.use('/api', apiRoutes);
 
 app.use(errorHandler);
 
-app.use('/api/admin', dashboardRoute);
-
 export default app;

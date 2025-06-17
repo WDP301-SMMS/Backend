@@ -3,7 +3,7 @@ import { IUser } from '@/interfaces/user.interface';
 import { AppError } from '@/middlewares/globalErrorHandler';
 import { Class } from '@/models/class.model';
 import { StudentModel } from '@/models/student.model';
-import { UserModel } from '@/models/user.model';
+import UserModel from '@/models/user.model';
 import { FilterQuery } from 'mongoose';
 
 /**
@@ -39,7 +39,7 @@ class AdminUserStudentService {
     search?: string; 
     role?: string; 
     status?: string; 
-  }): Promise<{ users: IUser[]; total: number; pages: number; currentPage: number }> {
+  }): Promise<{ users: any[]; total: number; pages: number; currentPage: number }> {
     const page = parseInt(query.page || '1');
     const limit = parseInt(query.limit || '10');
     const skip = (page - 1) * limit;
