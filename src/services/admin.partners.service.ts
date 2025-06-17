@@ -14,10 +14,6 @@ class AdminPartnerService {
   private partners = HealthcareOrganization;
   private campaigns = HealthCheckCampaign;
 
-  /**
-   * @description Tạo một đối tác y tế mới.
-   * @route POST /api/admin/partners
-   */
   public async createPartner(partnerData: Omit<IHealthcareOrganization, '_id'>): Promise<IHealthcareOrganization> {
     const existingPartner = await this.partners.findOne({
       $or: [{ name: partnerData.name }, { email: partnerData.email }],
@@ -30,15 +26,11 @@ class AdminPartnerService {
     return newPartner;
   }
 
-  /**
-   * @description Lấy danh sách các đối tác y tế, hỗ trợ phân trang và tìm kiếm.
-   * @route GET /api/admin/partners
-   */
   public async getPartners(query: {
     page?: string;
     limit?: string;
-    search?: string; // Tìm theo tên hoặc email
-    status?: 'active' | 'inactive' | 'all'; // Lọc theo trạng thái
+    search?: string; 
+    status?: 'active' | 'inactive' | 'all'; 
   }): Promise<{ partners: IHealthcareOrganization[]; total: number; pages: number; currentPage: number }> {
     const page = parseInt(query.page || '1');
     const limit = parseInt(query.limit || '10');
@@ -67,10 +59,6 @@ class AdminPartnerService {
     };
   }
 
-  /**
-   * @description Lấy thông tin chi tiết của một đối tác bằng ID.
-   * @route GET /api/admin/partners/:partnerId
-   */
   public async getPartnerById(partnerId: string): Promise<IHealthcareOrganization> {
     const partner = await this.partners.findById(partnerId);
     if (!partner) {
@@ -79,10 +67,7 @@ class AdminPartnerService {
     return partner;
   }
 
-  /**
-   * @description Cập nhật thông tin của một đối tác.
-   * @route PUT /api/admin/partners/:partnerId
-   */
+
   public async updatePartner(partnerId: string, updateData: Partial<IHealthcareOrganization>): Promise<IHealthcareOrganization> {
     const partner = await this.partners.findById(partnerId);
     if (!partner) {
@@ -104,12 +89,7 @@ class AdminPartnerService {
     return partner;
   }
 
-  /**
-   * @description Xóa một đối tác y tế.
-   *              Thực tế, chúng ta nên vô hiệu hóa thay vì xóa cứng để bảo toàn lịch sử.
-   *              Tuy nhiên, nếu yêu cầu là xóa, cần kiểm tra ràng buộc.
-   * @route DELETE /api/admin/partners/:partnerId
-   */
+
   public async deletePartner(partnerId: string): Promise<void> {
     const campaignWithPartner = await this.campaigns.findOne({ partnerId: partnerId });
     if (campaignWithPartner) {

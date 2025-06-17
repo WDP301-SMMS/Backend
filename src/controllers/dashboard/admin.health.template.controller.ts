@@ -3,12 +3,8 @@ import AdminHealthTemplateService from '@/services/admin.health.template.service
 import { NextFunction, Request, Response } from 'express';
 
 
-// Khởi tạo service một lần và tái sử dụng
 const adminHealthTemplateService = new AdminHealthTemplateService();
 
-/**
- * @description Handler cho route POST /api/admin/health-check-templates
- */
 const createHealthCheckTemplate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const templateData: IHealthCheckTemplate = req.body;
@@ -26,9 +22,6 @@ const createHealthCheckTemplate = async (req: Request, res: Response, next: Next
   }
 };
 
-/**
- * @description Handler cho route GET /api/admin/health-check-templates
- */
 const getHealthCheckTemplates = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const query = req.query as {
@@ -44,9 +37,6 @@ const getHealthCheckTemplates = async (req: Request, res: Response, next: NextFu
   }
 };
 
-/**
- * @description Handler cho route GET /api/admin/health-check-templates/:templateId
- */
 const getHealthCheckTemplateById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { templateId } = req.params;
@@ -57,9 +47,6 @@ const getHealthCheckTemplateById = async (req: Request, res: Response, next: Nex
   }
 };
 
-/**
- * @description Handler cho route PUT /api/admin/health-check-templates/:templateId
- */
 const updateHealthCheckTemplate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { templateId } = req.params;
@@ -77,15 +64,11 @@ const updateHealthCheckTemplate = async (req: Request, res: Response, next: Next
   }
 };
 
-/**
- * @description Handler cho route DELETE /api/admin/health-check-templates/:templateId
- */
 const deleteHealthCheckTemplate = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { templateId } = req.params;
     await adminHealthTemplateService.deleteHealthCheckTemplate(templateId);
     res.status(200).json({ message: 'Health check template deleted successfully' });
-    // Hoặc res.status(204).send(); nếu bạn muốn trả về response không có body
   } catch (error) {
     next(error);
   }

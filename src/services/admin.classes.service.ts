@@ -4,12 +4,6 @@ import { Class } from '@/models/class.model';
 import { StudentModel } from '@/models/student.model';
 import mongoose, { FilterQuery } from 'mongoose';
 
-/**
- * Helper function để tạo một Error object tương thích với errorHandler middleware.
- * @param status HTTP status code
- * @param message Thông điệp lỗi
- * @returns Một Error object đã được thêm thuộc tính status.
- */
 const createAppError = (status: number, message: string): AppError => {
     const error: AppError = new Error(message);
     error.status = status;
@@ -20,10 +14,6 @@ class AdminClassService {
     private classes = Class;
     private students = StudentModel;
 
-    /**
-     * @description Lấy danh sách lớp học với phân trang và bộ lọc.
-     * @route GET /api/admin/classes
-     */
     public async getClasses(query: {
         page?: string;
         limit?: string;
@@ -66,10 +56,6 @@ class AdminClassService {
         };
     }
 
-    /**
-     * @description Tạo một lớp học mới.
-     * @route POST /api/admin/classes
-     */
     public async createClass(classData: { className: string; gradeLevel: number; schoolYear: string }): Promise<IClass> {
         const { className, gradeLevel, schoolYear } = classData;
 
@@ -87,10 +73,7 @@ class AdminClassService {
         return newClass;
     }
 
-    /**
-     * @description Thêm một hoặc nhiều học sinh vào một lớp học.
-     * @route PATCH /api/admin/classes/:classId/add-students
-     */
+
     public async addStudentsToClass(classId: string, studentIds: string[]): Promise<IClass> {
         if (!studentIds || studentIds.length === 0) {
             throw createAppError(400, 'Student IDs array cannot be empty.');
@@ -122,11 +105,7 @@ class AdminClassService {
         return targetClass;
     }
 
-    /**
-   * @description Xóa một hoặc nhiều học sinh khỏi một lớp học.
-   *              Hành động này sẽ đặt `classId` của học sinh về `null`.
-   * @route PATCH /api/admin/classes/:classId/remove-students
-   */
+
     public async removeStudentsFromClass(classId: string, studentIds: string[]): Promise<IClass> {
         if (!studentIds || studentIds.length === 0) {
             throw createAppError(400, 'Student IDs array cannot be empty.');

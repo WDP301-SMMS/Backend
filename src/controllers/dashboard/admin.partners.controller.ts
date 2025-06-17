@@ -2,12 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { IHealthcareOrganization } from '@/interfaces/healthcare.organizations.interface';
 import AdminPartnerService from '@/services/admin.partners.service';
 
-// Khởi tạo service
 const adminPartnerService = new AdminPartnerService();
 
-/**
- * @description Handler cho route POST /api/admin/partners
- */
 const createPartner = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const partnerData: IHealthcareOrganization = req.body;
@@ -25,9 +21,7 @@ const createPartner = async (req: Request, res: Response, next: NextFunction): P
   }
 };
 
-/**
- * @description Handler cho route GET /api/admin/partners
- */
+
 const getPartners = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const query = req.query as {
@@ -43,9 +37,7 @@ const getPartners = async (req: Request, res: Response, next: NextFunction): Pro
   }
 };
 
-/**
- * @description Handler cho route GET /api/admin/partners/:partnerId
- */
+
 const getPartnerById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { partnerId } = req.params;
@@ -56,9 +48,6 @@ const getPartnerById = async (req: Request, res: Response, next: NextFunction): 
   }
 };
 
-/**
- * @description Handler cho route PUT /api/admin/partners/:partnerId
- */
 const updatePartner = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { partnerId } = req.params;
@@ -76,9 +65,6 @@ const updatePartner = async (req: Request, res: Response, next: NextFunction): P
   }
 };
 
-/**
- * @description Handler cho route DELETE /api/admin/partners/:partnerId
- */
 const deletePartner = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { partnerId } = req.params;
