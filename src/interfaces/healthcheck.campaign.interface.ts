@@ -1,5 +1,4 @@
-import { CampaignStatus, ExecutionType } from '@/enums/HealthCheckCampaignEnum';
-import { ObjectId } from 'mongodb';
+import { CampaignStatus } from '@/enums/HealthCheckCampaignEnum';
 import { Types } from 'mongoose';
 
 export interface IHealthCheckCampaign {
@@ -9,8 +8,7 @@ export interface IHealthCheckCampaign {
   endDate: Date;
   templateId: Types.ObjectId;
   targetGradeLevels: number[];
-  executionType: ExecutionType;
-  partnerId?: Types.ObjectId;
+  nurseId?: Types.ObjectId;
   status: CampaignStatus;
   createdBy: Types.ObjectId;
 }
