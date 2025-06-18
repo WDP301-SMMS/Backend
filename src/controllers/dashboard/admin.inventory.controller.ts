@@ -2,13 +2,7 @@ import AdminInventoryViewerService from '@/services/admin.inventory.service';
 import { NextFunction, Request, Response } from 'express';
 
 
-// Khởi tạo service
 const adminInventoryViewerService = new AdminInventoryViewerService();
-
-/**
- * @description Handler cho route GET /api/admin/inventory
- *              Lấy danh sách vật tư trong kho với quyền xem của Admin.
- */
 const getInventoryForAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const query = req.query as {

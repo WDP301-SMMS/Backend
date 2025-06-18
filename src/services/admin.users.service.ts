@@ -6,12 +6,7 @@ import { StudentModel } from '@/models/student.model';
 import UserModel from '@/models/user.model';
 import { FilterQuery } from 'mongoose';
 
-/**
- * Helper function để tạo một Error object tương thích với errorHandler middleware.
- * @param status HTTP status code
- * @param message Thông điệp lỗi
- * @returns Một Error object đã được thêm thuộc tính status.
- */
+
 const createAppError = (status: number, message: string): AppError => {
   const error: AppError = new Error(message);
   error.status = status;
@@ -23,16 +18,6 @@ class AdminUserStudentService {
   private students = StudentModel;
   private classes = Class;
 
-  /**
-   * =================================================================
-   *                     API QUẢN LÝ NGƯỜI DÙNG
-   * =================================================================
-   */
-
-  /**
-   * @description Lấy danh sách người dùng với phân trang, tìm kiếm và bộ lọc.
-   * @route GET /api/admin/users
-   */
   public async getUsers(query: {
     page?: string;
     limit?: string;
@@ -46,17 +31,16 @@ class AdminUserStudentService {
 
     const findQuery: FilterQuery<IUser> = {};
 
-    // Xây dựng query tìm kiếm
+
     if (query.search) {
       findQuery.$or = [{ username: { $regex: query.search, $options: 'i' } }, { email: { $regex: query.search, $options: 'i' } }];
     }
 
-    // Lọc theo vai trò
+
     if (query.role) {
       findQuery.role = query.role;
     }
 
-    // Lọc theo trạng thái
     if (query.status) {
       findQuery.isActive = query.status === 'active';
     }
@@ -74,10 +58,6 @@ class AdminUserStudentService {
     };
   }
 
-  /**
-   * @description Cập nhật trạng thái (kích hoạt/vô hiệu hóa) của một người dùng.
-   * @route PATCH /api/admin/users/:userId/status
-   */
 public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser> {
     const user = await this.users.findById(userId);
     if (!user) {
@@ -91,16 +71,6 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
     return userToReturn;
   }
 
-  /**
-   * =================================================================
-   *                     API QUẢN LÝ HỌC SINH
-   * =================================================================
-   */
-
-  /**
-   * @description Lấy danh sách học sinh với phân trang, tìm kiếm và thông tin liên quan.
-   * @route GET /api/admin/students
-   */
   public async getStudents(query: {
     page?: string;
     limit?: string;
@@ -161,11 +131,8 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
       },
     ];
 
-    // Cần một pipeline khác để đếm tổng số document khớp điều kiện
     const totalCountPipeline = [{ $match: findQuery }, { $count: 'total' }];
-
     const [students, totalResult] = await Promise.all([this.students.aggregate(aggregationPipeline), this.students.aggregate(totalCountPipeline)]);
-
     const total = totalResult.length > 0 ? totalResult[0].total : 0;
 
     return {
@@ -176,26 +143,16 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
     };
   }
 
-  /**
-   * @description Tạo mới một học sinh và cập nhật sĩ số lớp.
-   * @route POST /api/admin/students
-   */
   public async createStudent(studentData: { fullName: string; dateOfBirth: Date; parentId: string; classId: string }): Promise<IStudent> {
-    // 1. Kiểm tra sự tồn tại của Phụ huynh và Lớp học
     const parent = await this.users.findOne({ _id: studentData.parentId, role: 'Parent' });
     if (!parent) {
       throw createAppError(404, 'Parent account not found or user is not a parent');
     }
-
     const targetClass = await this.classes.findById(studentData.classId);
     if (!targetClass) {
       throw createAppError(404, 'Class not found');
     }
-
-    // 2. Tạo mới học sinh
     const newStudent = await this.students.create(studentData);
-
-    // 3. Cập nhật danh sách học sinh và sĩ số trong lớp học
     targetClass.students.push(newStudent._id);
     targetClass.totalStudents = targetClass.students.length;
     await targetClass.save();
@@ -203,10 +160,7 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
     return newStudent;
   }
 
-  /**
-   * @description Cập nhật thông tin học sinh, xử lý logic chuyển lớp.
-   * @route PUT /api/admin/students/:studentId
-   */
+
 public async updateStudent(
     studentId: string,
     studentData: { fullName?: string; dateOfBirth?: Date; parentId?: string; classId?: string },

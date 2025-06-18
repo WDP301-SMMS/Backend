@@ -5,10 +5,7 @@ import { FilterQuery } from 'mongoose';
 class AdminInventoryViewerService {
   private inventories = MedicalInventoryModel;
 
-  /**
-   * @description Lấy danh sách vật tư y tế trong kho (quyền xem của Admin).
-   * @route GET /api/admin/inventory
-   */
+
   public async getInventoryItemsForAdmin(query: {
     page?: string;
     limit?: string;
@@ -28,8 +25,6 @@ class AdminInventoryViewerService {
       findQuery.status = query.status;
     }
 
-    // Logic này gần như giống hệt hàm getInventoryItems của Nurse,
-    // chỉ là nó được đặt trong một service riêng cho Admin.
     const aggregationPipeline: any[] = [
       { $match: findQuery },
       { $sort: { itemName: 1 } },

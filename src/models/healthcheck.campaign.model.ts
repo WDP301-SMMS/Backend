@@ -1,10 +1,10 @@
-import { CampaignStatus, ExecutionType } from '../enums/HealthCheckCampaignEnum';
+import { CampaignStatus } from '../enums/HealthCheckCampaignEnum';
 import { IHealthCheckCampaign } from '@/interfaces/healthcheck.campaign.interface';
-import mongoose, { Schema, model, Document } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 
 
-const HealthCheckCampaignSchema= new Schema(
+const HealthCheckCampaignSchema = new Schema(
   {
     name: {
       type: String,
@@ -44,17 +44,23 @@ const HealthCheckCampaignSchema= new Schema(
         message: 'Target grade levels must be positive integers',
       },
     },
-    executionType: {
-      type: String,
-      required: true,
-      enum: Object.values(ExecutionType),
-    },
-    partnerId: {
+    // executionType: {
+    //   type: String,
+    //   required: true,
+    //   enum: Object.values(ExecutionType),
+    // },
+    // partnerId: {
+    //   type: Schema.Types.ObjectId,
+    //   required: function (this: IHealthCheckCampaign) {
+    //     return this.executionType === ExecutionType.EXTERNAL;
+    //   },
+    //   ref: 'HealthcareOrganization',
+    // },
+    nurseId: {
       type: Schema.Types.ObjectId,
-      required: function (this: IHealthCheckCampaign) {
-        return this.executionType === ExecutionType.EXTERNAL;
-      },
-      ref: 'HealthcareOrganization',
+      ref: 'User',
+      required: true,
+      index: true
     },
     status: {
       type: String,

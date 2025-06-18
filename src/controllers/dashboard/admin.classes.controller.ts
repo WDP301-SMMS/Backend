@@ -3,9 +3,6 @@ import { NextFunction, Request, Response } from 'express';
 
 const adminClassService = new AdminClassService();
 
-/**
- * @description Handler cho route GET /api/admin/classes
- */
 const getClasses = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const query = req.query as {
@@ -22,9 +19,6 @@ const getClasses = async (req: Request, res: Response, next: NextFunction): Prom
   }
 };
 
-/**
- * @description Handler cho route POST /api/admin/classes
- */
 const createClass = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const classData = req.body; // Mong đợi { className, gradeLevel, schoolYear }
@@ -41,9 +35,6 @@ const createClass = async (req: Request, res: Response, next: NextFunction): Pro
   }
 };
 
-/**
- * @description Handler cho route PATCH /api/admin/classes/:classId/add-students
- */
 const addStudentsToClass = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { classId } = req.params;
@@ -61,9 +52,6 @@ const addStudentsToClass = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-/**
- * @description Handler cho route PATCH /api/admin/classes/:classId/remove-students
- */
 const removeStudentsFromClass = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { classId } = req.params;
