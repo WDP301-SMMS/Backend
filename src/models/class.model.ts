@@ -27,7 +27,8 @@ const ClassSchema: Schema = new Schema(
         validator: function (this: IClass) {
           return this.totalStudents === this.students.length;
         },
-        message: 'Total students must match the number of students in the students array',
+        message:
+          'Total students must match the number of students in the students array',
       },
     },
     students: {
@@ -38,10 +39,20 @@ const ClassSchema: Schema = new Schema(
   },
   {
     timestamps: true,
-  }
+    collection: 'Class',
+  },
 );
 
 // Ensure unique combination of className, gradeLevel, and schoolYear
-ClassSchema.index({ className: 1, gradeLevel: 1, schoolYear: 1 }, { unique: true, partialFilterExpression: { gradeLevel: { $exists: true }, schoolYear: { $exists: true } } });
+ClassSchema.index(
+  { className: 1, gradeLevel: 1, schoolYear: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      gradeLevel: { $exists: true },
+      schoolYear: { $exists: true },
+    },
+  },
+);
 
 export const Class = mongoose.model<IClass>('Class', ClassSchema);

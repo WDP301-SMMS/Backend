@@ -65,9 +65,9 @@ const VaccinationRecordSchema = new Schema<IVaccinationRecord>(
   },
   {
     timestamps: true,
+    collection: 'VaccinationRecord'
   }
 );
 
-
-export const VaccinationResultModel = mongoose.model<IVaccinationResult>("VaccinationResult", VaccinationResultSchema);
+// export const VaccinationResultModel = mongoose.model<IVaccinationResult>("VaccinationResult", VaccinationResultSchema);
 export const VaccinationRecordModel = mongoose.model<IVaccinationRecord>("VaccinationRecord", VaccinationRecordSchema);

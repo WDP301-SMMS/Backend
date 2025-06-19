@@ -2,7 +2,6 @@ import { DataSource, ResultStatus } from '../enums/HealthCheckResultEnum';
 import { IHealthCheckResult } from '@/interfaces/healthcheck.result.interface';
 import mongoose, { Schema, model, Document } from 'mongoose';
 
-
 const ResultDataSchema: Schema = new Schema({
   itemId: {
     type: Schema.Types.ObjectId,
@@ -86,12 +85,18 @@ const HealthCheckResultSchema: Schema = new Schema(
       default: ResultStatus.PENDING_REVIEW,
     },
   },
+  {
+    collection: 'HealthCheckResult',
+  },
 );
 
 // Ensure unique combination of campaignId and studentId
-HealthCheckResultSchema.index({ campaignId: 1, studentId: 1 }, { unique: true });
+HealthCheckResultSchema.index(
+  { campaignId: 1, studentId: 1 },
+  { unique: true },
+);
 
 export const HealthCheckResult = mongoose.model<IHealthCheckResult>(
   'HealthCheckResult',
-  HealthCheckResultSchema
+  HealthCheckResultSchema,
 );

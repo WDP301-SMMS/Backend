@@ -1,9 +1,14 @@
-import { CheckupItemDataType, HealthCheckTemplateType } from '@/enums/TemplateEnum';
-import { ICheckupItem, IHealthCheckTemplate } from '@/interfaces/healthcheck.templates.interface';
-import mongoose, { Schema, model} from 'mongoose';
+import {
+  CheckupItemDataType,
+  HealthCheckTemplateType,
+} from '@/enums/TemplateEnum';
+import {
+  ICheckupItem,
+  IHealthCheckTemplate,
+} from '@/interfaces/healthcheck.templates.interface';
+import mongoose, { Schema, model } from 'mongoose';
 
-
-const CheckupItemSchema= new Schema<ICheckupItem>({
+const CheckupItemSchema = new Schema<ICheckupItem>({
   itemName: {
     type: String,
     required: true,
@@ -62,9 +67,11 @@ const HealthCheckTemplateSchema = new Schema<IHealthCheckTemplate>(
       default: false,
     },
   },
-
+  { collection: 'HealthCheckTemplate' },
 );
 
-export const HealthCheckTemplate = mongoose.model<IHealthCheckTemplate>('HealthCheckTemplate', HealthCheckTemplateSchema);
-export const CheckupItem = model<ICheckupItem>('CheckupItem', CheckupItemSchema);
-
+export const HealthCheckTemplate = mongoose.model<IHealthCheckTemplate>(
+  'HealthCheckTemplate',
+  HealthCheckTemplateSchema,
+);
+// export const CheckupItem = model<ICheckupItem>('CheckupItem', CheckupItemSchema);

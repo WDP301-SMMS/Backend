@@ -74,6 +74,9 @@ const HealthCheckCampaignSchema = new Schema(
       ref: 'User',
     },
   },
+  {
+    collection: 'HealthCheckCampaign'
+  }
 );
 
 export const HealthCheckCampaign = mongoose.model<IHealthCheckCampaign>(
