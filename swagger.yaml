@@ -6,154 +6,103 @@ info:
 servers:
   - url: http://localhost:3000/api
 paths:
-    /auth/google:
-      get:
-        tags:
-          - Authentication
-        summary: Redirect to Google OAuth
-        description: Redirects the user to Google's OAuth consent screen
-        operationId: redirectToGoogleOAuth
-        responses:
-          '302':
-            description: Redirects to Google OAuth URL
-    /auth/google/callback:
-      get:
-        tags:
-          - Authentication
-        summary: Handle Google OAuth callback
-        description: Processes the Google OAuth callback and returns user information
-        operationId: handleGoogleCallback
-        parameters:
-          - name: code
-            in: query
-            required: true
-            schema:
-              type: string
-        responses:
-          '200':
-            description: Successful authentication with Google
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/LoginRequest'
-          '400':
-            description: Invalid code provided
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-          '500':
-            description: Internal server error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-    /auth/login:
-      post:
-        summary: Login with JWT
-        tags:
-          - Authentication
-        description: Authenticates a user with username and password, returns JWT tokens
-        operationId: loginWithJwt
-        requestBody:
+  /auth/google:
+    get:
+      tags:
+        - Authentication
+      summary: Redirect to Google OAuth
+      description: Redirects the user to Google's OAuth consent screen
+      operationId: redirectToGoogleOAuth
+      responses:
+        '302':
+          description: Redirects to Google OAuth URL
+  /auth/google/callback:
+    get:
+      tags:
+        - Authentication
+      summary: Handle Google OAuth callback
+      description: Processes the Google OAuth callback and returns user information
+      operationId: handleGoogleCallback
+      parameters:
+        - name: code
+          in: query
           required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful authentication with Google
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginRequest'
-        responses:
-          '200':
-            description: Successful login
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/TokenResponse'
-            headers:
-              Set-Cookie:
-                schema:
-                  type: string
-                  example: refreshToken=abc123; HttpOnly; SameSite=Strict; Expires=...
-                description: Sets refreshToken cookie
-          '401':
-            description: Invalid credentials
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-          '404':
-            description: User not found
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-          '500':
-            description: Internal server error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-    /auth/register:
-      post:
-        summary: Register a new user
-        tags:
-          - Authentication
-        description: Registers a new user with local authentication
-        operationId: registerWithJwt
-        requestBody:
-          required: true
+  /auth/login:
+    post:
+      summary: Login with JWT
+      tags:
+        - Authentication
+      description: Authenticates a user with username and password, returns JWT tokens
+      operationId: loginWithJwt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegisterRequest'
-        responses:
-          '200':
-            description: Successful registration
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      example: User registered successfully
-          '400':
-            description: Account already exists
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-          '500':
-            description: Internal server error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-    /auth/refresh-token:
-      post:
-        summary: Refresh JWT token
-        tags:
-          - Authentication
-        description: Generates a new access token using a refresh token
-        operationId: refreshToken
-        responses:
-          '200':
-            description: Successful token refresh
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/TokenResponse'
-          '401':
-            description: Invalid or expired refresh token
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
-          '500':
-            description: Internal server error
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/SuccessResponse'
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: refreshToken=abc123; HttpOnly; SameSite=Strict; Expires=...
+              description: Sets refreshToken cookie
+  /auth/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Authentication
+      description: Registers a new user with local authentication
+      operationId: registerWithJwt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User registered successfully
+  /auth/refresh-token:
+    post:
+      summary: Refresh JWT token
+      tags:
+        - Authentication
+      description: Generates a new access token using a refresh token
+      operationId: refreshToken
+      responses:
+        '200':
+          description: Successful token refresh
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
 components:
   schemas:
     User:
@@ -211,7 +160,7 @@ components:
     LoginRequest:
       type: object
       properties:
-        username:
+        email:
           type: string
         password:
           type: string
@@ -224,6 +173,8 @@ components:
         username:
           type: string
         password:
+          type: string
+        confirmPassword:
           type: string
         email:
           type: string
@@ -238,15 +189,26 @@ components:
         - email
         - dob
         - phone
-    TokenResponse:
+    SuccessResponse:
       type: object
       properties:
-        accessToken:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+          example: true
+        message:
           type: string
-          description: JWT access token
+          description: Success message
+        data:
+          type: object
+          description: Additional data returned by the operation
     ErrorResponse:
       type: object
       properties:
+        success:
+          type: boolean
+          description: Indicates if the operation was successful
+          example: false
         message:
           type: string
           description: Error message

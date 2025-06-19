@@ -18,7 +18,6 @@ const UserSchema = new Schema<IUser>(
         'Username is required for local authentication',
       ],
       trim: true,
-      unique: true,
     },
     password: {
       type: String,
@@ -67,9 +66,8 @@ const UserSchema = new Schema<IUser>(
     },
     googleId: {
       type: String,
-      unique: true,
-      sparse: true,
       default: null,
+      sparse: true,
     },
     authProvider: {
       type: String,

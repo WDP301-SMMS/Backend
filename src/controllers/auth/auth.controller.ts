@@ -5,11 +5,16 @@ import {
 import { NextFunction, Request, Response } from 'express';
 import User from '@models/user.model';
 import {
+  decryptToken,
   generateAccessToken,
   generateRefreshToken,
   verifyRefreshToken,
 } from '@/utils/jwt';
 import bcrypt from 'bcrypt';
+import { handleSuccessResponse } from '@/utils/responseHandler';
+import { validationResult } from 'express-validator';
+import { IUser } from '@/interfaces/user.interface';
+import sendEmail from '@/utils/email';
 
 // Login with Google OAuth
 const redirectToUri = (req: Request, res: Response) => {
@@ -53,7 +58,7 @@ const handleGoogleCallback = async (req: Request, res: Response) => {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    res.json({
+    handleSuccessResponse(res, 200, 'Login Successfully', {
       accessToken,
     });
   } catch (error) {
@@ -68,32 +73,45 @@ const loginWithJwt = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { username, password } = req.body;
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
+  const { email, password } = req.body;
+
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    const isActive = user?.isActive;
+    if (!isActive) {
+      return res.status(401).json({
+        success: false,
+        message: 'Please verify your email before logging in',
+      });
     }
 
-    const isMatch = bcrypt.compare(password, user.password as string);
+    const isMatch = bcrypt.compare(password, user?.password as string);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid credentials' });
     }
 
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+    const accessToken = generateAccessToken(user as IUser);
+    const refreshToken = generateRefreshToken(user as IUser);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       sameSite: 'strict',
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    res.json({
+    handleSuccessResponse(res, 200, 'Login Successfully', {
       accessToken,
     });
   } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Error logging in user:', error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
@@ -102,22 +120,45 @@ const registerWithJwt = async (
   res: Response,
   next: NextFunction,
 ) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
   const body = req.body;
   try {
     const existingUser = await User.findOne({ email: body.email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Account already exists' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Account already exists' });
     }
-    await User.create({
+
+    // Create user first
+    const newUser = await User.create({
       ...body,
-      password: body.password
-        ? await bcrypt.hash(body.password, 10)
-        : undefined,
+      password: body.password ? await bcrypt.hash(body.password, 10) : '',
+      isActive: false,
     });
 
-    res.json({
-      message: 'User registered successfully',
-    });
+    const verifyCode = generateAccessToken(newUser);
+    const verifyLink = `${process.env.BASE_URL}/api/auth/verify-email?code=${verifyCode}`;
+
+    try {
+      await sendEmail(
+        body.email,
+        'Verify your email',
+        `Click the link to verify your email: ${verifyLink}`,
+      );
+    } catch (emailError) {
+      console.warn('Failed to send verification email:', emailError);
+    }
+
+    handleSuccessResponse(
+      res,
+      201,
+      'User registered successfully, please verify your email',
+    );
   } catch (error) {
     console.error('Error registering user:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -136,14 +177,52 @@ const refreshToken = async (req: Request, res: Response) => {
     }
     const accessToken = generateAccessToken(payload);
 
-    res.json({
+    handleSuccessResponse(
+      res,
+      200,
+      'Generate access token successfully',
       accessToken,
-    });
+    );
   } catch (error) {
-    console.error('Error refreshing token:', error);
+    console.error('Error registering user:', error);
     return res.status(500).json({ message: 'Internal Server Error' });
   }
 };
+
+const VerifyRegisterEmail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { code } = req.query;
+  if (typeof code !== 'string') {
+    return res.status(400).json({ message: 'Invalid verification code' });
+  }
+
+  try {
+    const decodedToken = decryptToken(code);
+    if (!decodedToken || !decodedToken.email) {
+      return res.status(400).json({ message: 'Invalid verification code' });
+    }
+
+    const user = await User.findOne({ email: decodedToken.email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.isActive = true;
+    await user.save();
+
+    res.redirect(`${process.env.FRONTEND_URL}/login?verified=true`);
+  } catch (error) {
+    console.error('Error verifying email:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+const verifyOTP = async (): Promise<void> => {};
+
+const forgotPassword = async (): Promise<void> => {};
 
 export const authController = {
   redirectToUri,
@@ -151,4 +230,7 @@ export const authController = {
   loginWithJwt,
   registerWithJwt,
   refreshToken,
+  VerifyRegisterEmail,
+  verifyOTP,
+  forgotPassword,
 };

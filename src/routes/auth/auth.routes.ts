@@ -1,3 +1,4 @@
+import { loginValidator, registerValidator } from '@/validators/authValidator';
 import { authController } from '@controllers/auth/auth.controller';
 import { Router } from 'express';
 
@@ -14,8 +15,11 @@ authRouter.get('/google', asyncHandler(authController.redirectToUri));
 authRouter.get('/google/callback', asyncHandler(authController.handleGoogleCallback));
 
 // Define routes for JWT authentication
-authRouter.post('/login', asyncHandler(authController.loginWithJwt));
-authRouter.post('/register', asyncHandler(authController.registerWithJwt));
+authRouter.post('/login', loginValidator, asyncHandler(authController.loginWithJwt));
+authRouter.post('/register', registerValidator, asyncHandler(authController.registerWithJwt));
 
 // refresh token route
 authRouter.post('/refresh-token', asyncHandler(authController.refreshToken));
+
+// Verify email registration
+authRouter.get('/verify-email', asyncHandler(authController.VerifyRegisterEmail));
