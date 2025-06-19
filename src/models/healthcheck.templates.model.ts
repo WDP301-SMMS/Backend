@@ -71,4 +71,4 @@ export const HealthCheckTemplate = mongoose.model<IHealthCheckTemplate>(
   'HealthCheckTemplate',
   HealthCheckTemplateSchema,
 );
-export const CheckupItem = model<ICheckupItem>('CheckupItem', CheckupItemSchema);
+// export const CheckupItem = model<ICheckupItem>('CheckupItem', CheckupItemSchema);
