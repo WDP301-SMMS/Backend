@@ -89,7 +89,7 @@ class AdminPartnerService {
       return newStaff;
     } catch (error) {
       await session.abortTransaction();
-      throw createAppError(500, `Failed to add staff member: ${error.message}`);
+      throw createAppError(500, `Failed to add staff member: ${(error as Error).message}`);
     } finally {
       session.endSession();
     }
@@ -133,7 +133,7 @@ class AdminPartnerService {
       await session.commitTransaction();
     } catch (error) {
       if (!(error instanceof Error && 'status' in error)) {
-        throw createAppError(500, `Failed to remove staff member: ${error.message}`);
+        throw createAppError(500, `Failed to remove staff member: ${(error as Error).message}`);
       }
       throw error;
     } finally {
@@ -173,7 +173,7 @@ class AdminPartnerService {
       return newManager;
     } catch (error) {
       await session.abortTransaction();
-      throw createAppError(500, `Failed to replace manager: ${error.message}`);
+      throw createAppError(500, `Failed to replace manager: ${(error as Error).message}`);
     } finally {
       session.endSession();
     }
@@ -269,7 +269,7 @@ class AdminPartnerService {
 
     } catch (error) {
       await session.abortTransaction();
-      throw createAppError(500, `Failed to update partner status: ${error.message}`);
+      throw createAppError(500, `Failed to update partner status: ${(error as Error).message}`);
     } finally {
       session.endSession();
     }
