@@ -4,19 +4,9 @@ import { NextFunction, Request, Response } from 'express';
 
 class AdminUserStudentController {
   public adminUserStudentService = new AdminUserStudentService();
-
-  /**
-   * =================================================================
-   *                     CONTROLLER CHO NGƯỜI DÙNG
-   * =================================================================
-   */
-
-  /**
-   * @description Handler cho route GET /api/admin/users
-   */
+  
   public getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      // Query đã được chuẩn hóa kiểu string trong Express
       const query = req.query as {
         page?: string;
         limit?: string;
@@ -32,9 +22,6 @@ class AdminUserStudentController {
     }
   };
 
-  /**
-   * @description Handler cho route PATCH /api/admin/users/:userId/status
-   */
   public updateUserStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { userId } = req.params;
@@ -52,15 +39,6 @@ class AdminUserStudentController {
     }
   };
 
-  /**
-   * =================================================================
-   *                     CONTROLLER CHO HỌC SINH
-   * =================================================================
-   */
-
-  /**
-   * @description Handler cho route GET /api/admin/students
-   */
   public getStudents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const query = req.query as {
@@ -77,14 +55,9 @@ class AdminUserStudentController {
     }
   };
 
-  /**
-   * @description Handler cho route POST /api/admin/students
-   */
   public createStudent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const studentData = req.body; // Mong đợi { fullName, dateOfBirth, parentId, classId }
-
-      // (Tùy chọn) Thêm validation ở đây (ví dụ: dùng Joi, Zod, hoặc check thủ công)
       if (!studentData.fullName || !studentData.dateOfBirth || !studentData.parentId || !studentData.classId) {
         res.status(400).json({ message: 'Missing required fields: fullName, dateOfBirth, parentId, classId' });
         return;
@@ -97,9 +70,6 @@ class AdminUserStudentController {
     }
   };
 
-  /**
-   * @description Handler cho route PUT /api/admin/students/:studentId
-   */
   public updateStudent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { studentId } = req.params;

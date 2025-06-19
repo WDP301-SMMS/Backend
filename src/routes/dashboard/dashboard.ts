@@ -18,37 +18,30 @@ router.get('/dashboard', DashboardController.getAdminDashboard);
 
 
 // ROUTES CHO USER
-// GET /api/admin/users
 router.get(
     '/users',
     // authMiddleware, adminOnlyMiddleware,
     adminController.getUsers
 );
-
-// PATCH /api/admin/users/:userId/status
 router.patch(
     '/users/:userId/status',
     // authMiddleware, adminOnlyMiddleware,
     adminController.updateUserStatus
 );
 
-
 // ROUTE CHO STUDENTS
-// GET /api/admin/students
 router.get(
     '/students',
     // authMiddleware, adminOnlyMiddleware,
     adminController.getStudents
 );
 
-// POST /api/admin/students
 router.post(
     '/students',
     // authMiddleware, adminOnlyMiddleware,
     adminController.createStudent
 );
 
-// PUT /api/admin/students/:studentId
 router.put(
     '/students/:studentId',
     // authMiddleware, adminOnlyMiddleware,
@@ -57,28 +50,21 @@ router.put(
 
 
 //ROUTES CHO QUẢN LÝ LỚP HỌC
-// GET /api/admin/classes
-// Ví dụ: /api/admin/classes?schoolYear=2024-2025&gradeLevel=1
 router.get(
     '/classes',
     AdminClassController.getClasses
 );
 
-// POST /api/admin/classes
 router.post(
     '/classes',
     AdminClassController.createClass
 );
 
-// PATCH /api/admin/classes/:classId/add-students
-// Thêm học sinh vào một lớp
 router.patch(
     '/classes/:classId/add-students',
     AdminClassController.addStudentsToClass
 );
 
-// PATCH /api/admin/classes/:classId/remove-students
-// Xóa học sinh khỏi một lớp
 router.patch(
     '/classes/:classId/remove-students',
     AdminClassController.removeStudentsFromClass
@@ -86,40 +72,32 @@ router.patch(
 
 
 // ROUTES CHO QUẢN LÝ MẪU KHÁM SỨC KHỎE
-// GET /api/admin/health-check-templates
 router.get(
     '/health-check-templates',
     AdminHealthTemplateController.getHealthCheckTemplates
 );
 
-// POST /api/admin/health-check-templates
 router.post(
     '/health-check-templates',
     AdminHealthTemplateController.createHealthCheckTemplate
 );
 
-// GET /api/admin/health-check-templates/:templateId
 router.get(
     '/health-check-templates/:templateId',
     AdminHealthTemplateController.getHealthCheckTemplateById
 );
 
-// PUT /api/admin/health-check-templates/:templateId
 router.put(
     '/health-check-templates/:templateId',
     AdminHealthTemplateController.updateHealthCheckTemplate
 );
 
-// DELETE /api/admin/health-check-templates/:templateId
 router.delete(
     '/health-check-templates/:templateId',
     AdminHealthTemplateController.deleteHealthCheckTemplate
 );
 
-
-
 // ROUTE CHO GỢI Ý TÊN VACCINE
-// GET /api/admin/vaccines/suggestions
 router.get(
     '/vaccines/suggestions',
     AdminVaccineSuggestionController.getVaccineSuggestions
@@ -128,19 +106,17 @@ router.get(
 
 
 //ROUTES CHO QUẢN LÝ ĐỐI TÁC Y TẾ
-
-router.get('/partners', AdminPartnerController.getPartners);
 router.post('/partners', AdminPartnerController.createPartner);
+router.get('/partners', AdminPartnerController.getPartners);
 router.get('/partners/:partnerId', AdminPartnerController.getPartnerById);
-router.put('/partners/:partnerId', AdminPartnerController.updatePartner);
-router.delete('/partners/:partnerId', AdminPartnerController.deletePartner);
+router.patch('/partners/:partnerId', AdminPartnerController.updatePartner);
+router.patch('/partners/:partnerId/status', AdminPartnerController.updatePartnerStatus);
+router.post('/partners/:partnerId/staff', AdminPartnerController.addStaff);
+router.delete('/partners/:partnerId/staff/:staffId', AdminPartnerController.removeStaff);
+router.put('/partners/:partnerId/manager', AdminPartnerController.replaceManager);
 
 
 // ROUTE XEM KHO DÀNH CHO ADMIN
-
-
-// GET /api/admin/inventory
-// Lấy danh sách vật tư, hỗ trợ lọc và phân trang
 router.get(
     '/inventory',
     AdminInventoryViewerController.getInventoryForAdmin

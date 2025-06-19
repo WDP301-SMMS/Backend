@@ -5,9 +5,7 @@ import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
 import { HealthCheckTemplate } from '@/models/healthcheck.templates.model';
 import { FilterQuery } from 'mongoose';
 
-/**
- * Helper function để tạo một Error object tương thích với errorHandler middleware.
- */
+
 const createAppError = (status: number, message: string): AppError => {
   const error: AppError = new Error(message);
   error.status = status;
@@ -18,10 +16,6 @@ class AdminHealthTemplateService {
   private templates = HealthCheckTemplate;
   private campaigns = HealthCheckCampaign;
 
-  /**
-   * @description Tạo một mẫu khám sức khỏe mới.
-   * @route POST /api/admin/health-check-templates
-   */
   public async createHealthCheckTemplate(templateData: Omit<IHealthCheckTemplate, '_id'>): Promise<IHealthCheckTemplate> {
     const existingTemplate = await this.templates.findOne({ name: templateData.name });
     if (existingTemplate) {
@@ -32,10 +26,6 @@ class AdminHealthTemplateService {
     return newTemplate;
   }
 
-  /**
-   * @description Lấy danh sách các mẫu khám sức khỏe, hỗ trợ phân trang và tìm kiếm.
-   * @route GET /api/admin/health-check-templates
-   */
   public async getHealthCheckTemplates(query: {
     page?: string;
     limit?: string;
@@ -68,10 +58,7 @@ class AdminHealthTemplateService {
     };
   }
 
-  /**
-   * @description Lấy thông tin chi tiết của một mẫu khám sức khỏe bằng ID.
-   * @route GET /api/admin/health-check-templates/:templateId
-   */
+
   public async getHealthCheckTemplateById(templateId: string): Promise<IHealthCheckTemplate> {
     const template = await this.templates.findById(templateId);
     if (!template) {
@@ -80,10 +67,7 @@ class AdminHealthTemplateService {
     return template;
   }
 
-  /**
-   * @description Cập nhật thông tin của một mẫu khám sức khỏe.
-   * @route PUT /api/admin/health-check-templates/:templateId
-   */
+
   public async updateHealthCheckTemplate(templateId: string, updateData: Partial<IHealthCheckTemplate>): Promise<IHealthCheckTemplate> {
     const template = await this.templates.findById(templateId);
     if (!template) {
@@ -103,10 +87,7 @@ class AdminHealthTemplateService {
     return template;
   }
 
-  /**
-   * @description Xóa một mẫu khám sức khỏe.
-   * @route DELETE /api/admin/health-check-templates/:templateId
-   */
+
   public async deleteHealthCheckTemplate(templateId: string): Promise<void> {
     // Kiểm tra xem mẫu này có đang được sử dụng bởi bất kỳ chiến dịch nào không
     const campaignUsingTemplate = await this.campaigns.findOne({ templateId: templateId });

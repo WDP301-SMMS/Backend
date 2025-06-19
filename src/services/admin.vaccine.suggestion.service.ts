@@ -6,10 +6,7 @@ class AdminVaccineSuggestionService {
   private campaigns = VaccinationCampaignModel;
   private healthProfiles = HealthProfileModel;
 
-  /**
-   * @description Lấy danh sách gợi ý các tên vaccine đã từng được sử dụng trong hệ thống.
-   * @route GET /api/admin/vaccines/suggestions
-   */
+
   public async getVaccineSuggestions(): Promise<string[]> {
     const campaignVaccineNames = await this.campaigns.distinct('vaccineName');
 
