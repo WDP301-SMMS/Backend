@@ -4,55 +4,49 @@ import {
 } from '@/interfaces/medication.request.interface';
 import mongoose, { Schema } from 'mongoose';
 
-const MedicationRequestSchema = new Schema<IMedicationRequest>(
-  {
-    parentId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    startDate: {
-      type: Date,
-      required: true,
-    },
-    endDate: {
-      type: Date,
-      required: true,
-    },
-    prescriptionFile: {
-      type: String,
-      required: true,
-    },
-    status: {
-      type: String,
-      required: true,
-    },
+const MedicationRequestSchema = new Schema<IMedicationRequest>({
+  parentId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
   },
-  { collection: 'MedicationRequest' },
-);
+  startDate: {
+    type: Date,
+    required: true,
+  },
+  endDate: {
+    type: Date,
+    required: true,
+  },
+  prescriptionFile: {
+    type: String,
+    required: true,
+  },
+  status: {
+    type: String,
+    required: true,
+  },
+});
 
-const RequestItemSchema = new Schema<IRequestItem>(
-  {
-    medicationRequestId: {
-      type: Schema.Types.ObjectId,
-      ref: 'MedicationRequest',
-      required: true,
-    },
-    medicationName: {
-      type: String,
-      required: true,
-    },
-    dosage: {
-      type: String,
-      required: true,
-    },
-    instruction: {
-      type: String,
-      required: true,
-    },
+const RequestItemSchema = new Schema<IRequestItem>({
+  medicationRequestId: {
+    type: Schema.Types.ObjectId,
+    ref: 'MedicationRequest',
+    required: true,
   },
-  { collection: 'RequestItem' },
-);
+  medicationName: {
+    type: String,
+    required: true,
+  },
+  dosage: {
+    type: String,
+    required: true,
+  },
+  instruction: {
+    type: String,
+    required: true,
+  },
+});
 
 export const MedicationRequestModel = mongoose.model<IMedicationRequest>(
   'MedicationRequest',

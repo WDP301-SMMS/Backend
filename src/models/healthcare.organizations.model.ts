@@ -31,7 +31,7 @@ const PartnerStaffSchema = new Schema<IPartnerStaff>(
       index: true,
     },
   },
-  { timestamps: true, collection: 'OrganizationStaff' },
+  { timestamps: true },
 );
 
 const ManagerInfoSchema = new Schema<IManagerInfo>(
@@ -59,7 +59,7 @@ const ManagerInfoSchema = new Schema<IManagerInfo>(
       index: true,
     },
   },
-  { timestamps: true, collection: 'OrganizationManager' },
+  { timestamps: true },
 );
 
 const HealthcareOrganizationSchema = new Schema<IHealthcareOrganization>(
@@ -108,7 +108,6 @@ const HealthcareOrganizationSchema = new Schema<IHealthcareOrganization>(
   },
   {
     timestamps: true,
-    collection: 'HealthcareOrganization',
   },
 );
 

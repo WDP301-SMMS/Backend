@@ -103,7 +103,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
-    /admin/dashboard:
+  /admin/dashboard:
       get:
         tags:
           - Admin - Dashboard
@@ -124,7 +124,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/users:
+  /admin/users:
       get:
         tags:
           - Admin - Quản lý Người dùng & Học sinh
@@ -166,7 +166,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/users/{userId}/status:
+  /admin/users/{userId}/status:
       patch:
         tags:
           - Admin - Quản lý Người dùng & Học sinh
@@ -213,7 +213,7 @@ paths:
           '404':
             description: Không tìm thấy người dùng với ID cung cấp.
 
-    /admin/students:
+  /admin/students:
       get:
         tags:
           - Admin - Quản lý Người dùng & Học sinh
@@ -280,7 +280,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/students/{studentId}:
+  /admin/students/{studentId}:
       put:
         tags:
           - Admin - Quản lý Người dùng & Học sinh
@@ -316,7 +316,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/classes:
+  /admin/classes:
       get:
         tags:
           - Admin - Quản lý Lớp học
@@ -383,7 +383,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/classes/{classId}/add-students:
+  /admin/classes/{classId}/add-students:
       patch:
         tags:
           - Admin - Quản lý Lớp học
@@ -421,7 +421,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/classes/{classId}/remove-students:
+  /admin/classes/{classId}/remove-students:
       patch:
         tags:
           - Admin - Quản lý Lớp học
@@ -457,7 +457,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/health-check-templates:
+  /admin/health-check-templates:
       get:
         tags:
           - Admin - Quản lý Mẫu Khám
@@ -520,7 +520,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/health-check-templates/{templateId}:
+  /admin/health-check-templates/{templateId}:
       get:
         tags:
           - Admin - Quản lý Mẫu Khám
@@ -614,7 +614,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/vaccines/suggestions:
+  /admin/vaccines/suggestions:
       get:
         tags:
           - Admin - Tiện ích
@@ -642,7 +642,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/partners:
+  /admin/partners:
       get:
         tags:
           - Admin - Quản lý Đối tác
@@ -705,7 +705,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/partners/{partnerId}:
+  /admin/partners/{partnerId}:
       get:
         tags:
           - Admin - Quản lý Đối tác
@@ -767,7 +767,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/partners/{partnerId}/status:
+  /admin/partners/{partnerId}/status:
       patch:
         tags:
           - Admin - Quản lý Đối tác
@@ -808,7 +808,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/partners/{partnerId}/staff:
+  /admin/partners/{partnerId}/staff:
       post:
         tags:
           - Admin - Quản lý Đối tác
@@ -842,7 +842,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/partners/{partnerId}/staff/{staffId}:
+  /admin/partners/{partnerId}/staff/{staffId}:
       delete:
         tags:
           - Admin - Quản lý Đối tác
@@ -878,7 +878,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/partners/{partnerId}/manager:
+  /admin/partners/{partnerId}/manager:
       put:
         tags:
           - Admin - Quản lý Đối tác
@@ -912,7 +912,7 @@ paths:
           '403':
             $ref: '#/components/responses/ForbiddenError'
 
-    /admin/inventory:
+  /admin/inventory:
       get:
         tags:
           - Admin - Quản lý Kho
