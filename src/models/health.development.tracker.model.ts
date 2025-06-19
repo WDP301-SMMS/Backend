@@ -1,7 +1,6 @@
 import { IHealthDevelopmentTracker } from '@/interfaces/health.development.tracker.interface';
 import mongoose, { Schema } from 'mongoose';
 
-
 const HistoryEntrySchema: Schema = new Schema({
   date: {
     type: Date,
@@ -67,14 +66,14 @@ const HealthDevelopmentTrackerSchema: Schema = new Schema(
   },
   {
     timestamps: false, // No createdAt/updatedAt, as lastUpdatedAt is managed manually
-    collection: 'HealthDevelopmentTracker',
-  }
+  },
 );
 
 // Ensure unique studentId
 HealthDevelopmentTrackerSchema.index({ studentId: 1 }, { unique: true });
 
-export const HealthDevelopmentTracker = mongoose.model<IHealthDevelopmentTracker>(
-  'HealthDevelopmentTracker',
-  HealthDevelopmentTrackerSchema
-);
+export const HealthDevelopmentTracker =
+  mongoose.model<IHealthDevelopmentTracker>(
+    'HealthDevelopmentTracker',
+    HealthDevelopmentTrackerSchema,
+  );
