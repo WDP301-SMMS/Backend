@@ -108,6 +108,9 @@ const loginWithJwt = async (
 
     handleSuccessResponse(res, 200, 'Login Successfully', {
       accessToken,
+      user: {
+        role: user?.role,
+      },
     });
   } catch (error) {
     console.error('Error logging in user:', error);

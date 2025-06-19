@@ -10,14 +10,29 @@ import apiRoutes from './routes/index';
 
 import dashboardRoute from '@routes/dashboard/dashboard';
 
-
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
+const allowedOrigins = [
+  'http://localhost:3000',
+  /^https:\/\/.*\.ngrok-free\.app$/,
+];
+
 app.use(
   cors({
-    origin: 'http://localhost:3000',
-    credentials: true, 
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        allowedOrigins.some((o) =>
+          typeof o === 'string' ? o === origin : o.test(origin),
+        )
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
   }),
 );
 connectDB();
