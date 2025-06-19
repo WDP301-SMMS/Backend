@@ -1,5 +1,5 @@
 import express from 'express';
-import { errorHandler } from './middlewares/globalErrorHandler';
+import { errorHandler } from './utils/globalErrorHandler';
 import connectDB from './config/database';
 import 'dotenv/config';
 import cors from 'cors';

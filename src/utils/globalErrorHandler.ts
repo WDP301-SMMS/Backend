@@ -23,16 +23,15 @@ export const errorHandler = (
   );
 
   if (process.env.NODE_ENV === 'production') {
-    // Môi trường PRODUCTION: Chỉ gửi thông báo công khai, ngắn gọn.
-    // Tuyệt đối không gửi stack trace.
     res.status(statusCode).json({
+      success: false,
       message: publicMessage,
     });
   } else {
-    // Môi trường DEVELOPMENT: Gửi thông tin chi tiết hơn để dễ debug.
     res.status(statusCode).json({
-      message: err.message, 
-      stack: err.stack,    
+      success: false,
+      message: err.message,
+      stack: err.stack,
     });
   }
 };

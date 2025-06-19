@@ -2,7 +2,7 @@ import { IHealthcareOrganization, IManagerInfo, IPartnerStaff } from '@/interfac
 import { HealthcareOrganization, OrganizationManager, OrganizationStaffs } from '@/models/healthcare.organizations.model';
 
 import mongoose, { FilterQuery } from 'mongoose';
-import { AppError } from '@/middlewares/globalErrorHandler';
+import { AppError } from '@/utils/globalErrorHandler';
 import { VaccinationRecordModel } from '@/models/vacination.record.model';
 
 

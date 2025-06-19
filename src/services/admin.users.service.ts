@@ -1,6 +1,6 @@
 import { IStudent } from '@/interfaces/student.interface';
 import { IUser } from '@/interfaces/user.interface';
-import { AppError } from '@/middlewares/globalErrorHandler';
+import { AppError } from '@/utils/globalErrorHandler';
 import { Class } from '@/models/class.model';
 import { StudentModel } from '@/models/student.model';
 import UserModel from '@/models/user.model';
