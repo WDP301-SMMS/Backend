@@ -21,10 +21,15 @@ class AdminUserStudentService {
   public async getUsers(query: {
     page?: string;
     limit?: string;
-    search?: string; 
-    role?: string; 
-    status?: string; 
-  }): Promise<{ users: any[]; total: number; pages: number; currentPage: number }> {
+    search?: string;
+    role?: string;
+    status?: string;
+  }): Promise<{
+    users: any[];
+    total: number;
+    pages: number;
+    currentPage: number;
+  }> {
     const page = parseInt(query.page || '1');
     const limit = parseInt(query.limit || '10');
     const skip = (page - 1) * limit;
@@ -33,7 +38,10 @@ class AdminUserStudentService {
 
 
     if (query.search) {
-      findQuery.$or = [{ username: { $regex: query.search, $options: 'i' } }, { email: { $regex: query.search, $options: 'i' } }];
+      findQuery.$or = [
+        { username: { $regex: query.search, $options: 'i' } },
+        { email: { $regex: query.search, $options: 'i' } },
+      ];
     }
 
 
@@ -46,7 +54,13 @@ class AdminUserStudentService {
     }
 
     const [users, total] = await Promise.all([
-      this.users.find(findQuery).select('-password').skip(skip).limit(limit).sort({ createdAt: -1 }).lean(),
+      this.users
+        .find(findQuery)
+        .select('-password')
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean(),
       this.users.countDocuments(findQuery),
     ]);
 
@@ -58,7 +72,15 @@ class AdminUserStudentService {
     };
   }
 
-public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser> {
+  /**
+   * @description Cập nhật trạng thái (kích hoạt/vô hiệu hóa) của một người dùng.
+   * @route PATCH /api/admin/users/:userId/status
+   */
+  public async updateUserStatus(
+    userId: string,
+    isActive: boolean,
+  ): Promise<IUser> {
+
     const user = await this.users.findById(userId);
     if (!user) {
       throw createAppError(404, 'User not found');
@@ -74,9 +96,14 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
   public async getStudents(query: {
     page?: string;
     limit?: string;
-    search?: string; 
-    classId?: string; 
-  }): Promise<{ students: any[]; total: number; pages: number; currentPage: number }> {
+    search?: string;
+    classId?: string;
+  }): Promise<{
+    students: any[];
+    total: number;
+    pages: number;
+    currentPage: number;
+  }> {
     const page = parseInt(query.page || '1');
     const limit = parseInt(query.limit || '10');
     const skip = (page - 1) * limit;
@@ -91,15 +118,14 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
       findQuery.classId = query.classId;
     }
 
-
     const aggregationPipeline: any[] = [
       { $match: findQuery },
-      { $sort: { createdAt: -1 } }, 
+      { $sort: { createdAt: -1 } },
       { $skip: skip },
       { $limit: limit },
       {
         $lookup: {
-          from: 'users', 
+          from: 'users',
           localField: 'parentId',
           foreignField: '_id',
           as: 'parentInfo',
@@ -107,7 +133,7 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
       },
       {
         $lookup: {
-          from: 'classes', 
+          from: 'classes',
           localField: 'classId',
           foreignField: '_id',
           as: 'classInfo',
@@ -124,15 +150,24 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
           _id: 1,
           fullName: 1,
           dateOfBirth: 1,
-          createdAt: 1, 
-          parent: { _id: '$parentInfo._id', username: '$parentInfo.username', email: '$parentInfo.email' },
+          createdAt: 1,
+          parent: {
+            _id: '$parentInfo._id',
+            username: '$parentInfo.username',
+            email: '$parentInfo.email',
+          },
           class: { _id: '$classInfo._id', className: '$classInfo.className' },
         },
       },
     ];
 
     const totalCountPipeline = [{ $match: findQuery }, { $count: 'total' }];
-    const [students, totalResult] = await Promise.all([this.students.aggregate(aggregationPipeline), this.students.aggregate(totalCountPipeline)]);
+
+    const [students, totalResult] = await Promise.all([
+      this.students.aggregate(aggregationPipeline),
+      this.students.aggregate(totalCountPipeline),
+    ]);
+
     const total = totalResult.length > 0 ? totalResult[0].total : 0;
 
     return {
@@ -143,10 +178,30 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
     };
   }
 
+  /**
+   * @description Tạo mới một học sinh và cập nhật sĩ số lớp.
+   * @route POST /api/admin/students
+   */
+  public async createStudent(studentData: {
+    fullName: string;
+    dateOfBirth: Date;
+    parentId: string;
+    classId: string;
+  }): Promise<IStudent> {
+    // 1. Kiểm tra sự tồn tại của Phụ huynh và Lớp học
+    const parent = await this.users.findOne({
+      _id: studentData.parentId,
+      role: 'Parent',
+    });
+
   public async createStudent(studentData: { fullName: string; dateOfBirth: Date; parentId: string; classId: string }): Promise<IStudent> {
     const parent = await this.users.findOne({ _id: studentData.parentId, role: 'Parent' });
+
     if (!parent) {
-      throw createAppError(404, 'Parent account not found or user is not a parent');
+      throw createAppError(
+        404,
+        'Parent account not found or user is not a parent',
+      );
     }
     const targetClass = await this.classes.findById(studentData.classId);
     if (!targetClass) {
@@ -160,10 +215,18 @@ public async updateUserStatus(userId: string, isActive: boolean): Promise<IUser>
     return newStudent;
   }
 
-
-public async updateStudent(
+  /**
+   * @description Cập nhật thông tin học sinh, xử lý logic chuyển lớp.
+   * @route PUT /api/admin/students/:studentId
+   */
+ public async updateStudent(
     studentId: string,
-    studentData: { fullName?: string; dateOfBirth?: Date; parentId?: string; classId?: string },
+    studentData: {
+      fullName?: string;
+      dateOfBirth?: Date;
+      parentId?: string;
+      classId?: string;
+    },
   ): Promise<IStudent> {
     const student = await this.students.findById(studentId);
     if (!student) {
@@ -172,12 +235,14 @@ public async updateStudent(
 
     const oldClassId = student.classId;
 
-  
     Object.assign(student, studentData);
-    if (studentData.classId && studentData.classId.toString() !== oldClassId.toString()) {
+    if (
+      studentData.classId &&
+      studentData.classId.toString() !== oldClassId.toString()
+    ) {
       const oldClass = await this.classes.findById(oldClassId);
       if (oldClass) {
-        oldClass.students.pull(student._id); 
+        oldClass.students.pull(student._id);
         oldClass.totalStudents = oldClass.students.length;
         await oldClass.save();
       }
@@ -190,7 +255,7 @@ public async updateStudent(
       newClass.students.push(student._id);
       newClass.totalStudents = newClass.students.length;
       await newClass.save();
-      }
+    }
 
     const updatedStudent = await student.save();
     return updatedStudent;
