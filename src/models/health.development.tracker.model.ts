@@ -67,6 +67,7 @@ const HealthDevelopmentTrackerSchema: Schema = new Schema(
   },
   {
     timestamps: false, // No createdAt/updatedAt, as lastUpdatedAt is managed manually
+    collection: 'HealthDevelopmentTracker',
   }
 );
 

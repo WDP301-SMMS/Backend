@@ -1,7 +1,6 @@
 import { HealthProfileModel } from '@/models/health.profile.model';
 import { VaccinationCampaignModel } from '@/models/vaccination.campaign.model';
 
-
 class AdminVaccineSuggestionService {
   private campaigns = VaccinationCampaignModel;
   private healthProfiles = HealthProfileModel;

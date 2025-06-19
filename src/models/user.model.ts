@@ -76,7 +76,7 @@ const UserSchema = new Schema<IUser>(
       default: 'local',
     },
   },
-  { timestamps: true },
+  { timestamps: true, collection: 'User' },
 );
 
 const UserModel = mongoose.model<IUser>('User', UserSchema);

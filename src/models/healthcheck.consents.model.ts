@@ -2,7 +2,6 @@ import { ConsentStatus } from '../enums/ConsentsEnum';
 import { IHealthCheckConsent } from '@/interfaces/healthcheck.consents.interface';
 import mongoose, { Schema, model, Document } from 'mongoose';
 
-
 const HealthCheckConsentSchema = new Schema(
   {
     campaignId: {
@@ -37,17 +36,24 @@ const HealthCheckConsentSchema = new Schema(
     confirmedAt: {
       type: Date,
       required: function (this: IHealthCheckConsent) {
-        return this.status === ConsentStatus.APPROVED || this.status === ConsentStatus.DECLINED;
+        return (
+          this.status === ConsentStatus.APPROVED ||
+          this.status === ConsentStatus.DECLINED
+        );
       },
       default: null,
     },
   },
+  { collection: 'HealthCheckConsent' },
 );
 
 // Ensure unique combination of campaignId and studentId
-HealthCheckConsentSchema.index({ campaignId: 1, studentId: 1 }, { unique: true });
+HealthCheckConsentSchema.index(
+  { campaignId: 1, studentId: 1 },
+  { unique: true },
+);
 
 export const HealthCheckConsent = mongoose.model<IHealthCheckConsent>(
   'HealthCheckConsent',
-  HealthCheckConsentSchema
+  HealthCheckConsentSchema,
 );
