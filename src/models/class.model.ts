@@ -39,7 +39,6 @@ const ClassSchema: Schema = new Schema(
   },
   {
     timestamps: true,
-    collection: 'Class',
   },
 );
 

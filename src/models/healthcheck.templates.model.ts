@@ -39,39 +39,36 @@ const CheckupItemSchema = new Schema<ICheckupItem>({
   },
 });
 
-const HealthCheckTemplateSchema = new Schema<IHealthCheckTemplate>(
-  {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    description: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    type: {
-      type: String,
-      required: true,
-      enum: Object.values(HealthCheckTemplateType),
-    },
-    checkupItems: {
-      type: [CheckupItemSchema],
-      required: true,
-      default: [],
-    },
-    isDefault: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
+const HealthCheckTemplateSchema = new Schema<IHealthCheckTemplate>({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
   },
-  { collection: 'HealthCheckTemplate' },
-);
+  description: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  type: {
+    type: String,
+    required: true,
+    enum: Object.values(HealthCheckTemplateType),
+  },
+  checkupItems: {
+    type: [CheckupItemSchema],
+    required: true,
+    default: [],
+  },
+  isDefault: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+});
 
 export const HealthCheckTemplate = mongoose.model<IHealthCheckTemplate>(
   'HealthCheckTemplate',
   HealthCheckTemplateSchema,
 );
-// export const CheckupItem = model<ICheckupItem>('CheckupItem', CheckupItemSchema);
+export const CheckupItem = model<ICheckupItem>('CheckupItem', CheckupItemSchema);

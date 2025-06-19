@@ -9,24 +9,19 @@ const InjectedVaccineSchema = new Schema<IInjectedVaccine>({
   doseNumber: { type: Number, required: true },
 });
 
-const HealthProfileSchema = new Schema<IHealthProfile>(
-  {
-    studentId: {
-      type: Schema.Types.ObjectId,
-      ref: 'Student',
-      required: true,
-      index: true,
-    },
-    allergies: { type: String, required: true },
-    chronicConditions: { type: String, required: true },
-    visionStatus: { type: String, required: true },
-    hearingStatus: { type: String, required: true },
-    vaccines: [InjectedVaccineSchema],
+const HealthProfileSchema = new Schema<IHealthProfile>({
+  studentId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Student',
+    required: true,
+    index: true,
   },
-  {
-    collection: 'HealthProfile',
-  },
-);
+  allergies: { type: String, required: true },
+  chronicConditions: { type: String, required: true },
+  visionStatus: { type: String, required: true },
+  hearingStatus: { type: String, required: true },
+  vaccines: [InjectedVaccineSchema],
+});
 
 export const HealthProfileModel = mongoose.model<IHealthProfile>(
   'HealthProfile',
