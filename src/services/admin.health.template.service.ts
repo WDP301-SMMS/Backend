@@ -1,5 +1,5 @@
 import { IHealthCheckTemplate } from '@/interfaces/healthcheck.templates.interface';
-import { AppError } from '@/middlewares/globalErrorHandler';
+import { AppError } from '@/utils/globalErrorHandler';
 
 import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
 import { HealthCheckTemplate } from '@/models/healthcheck.templates.model';

@@ -1,5 +1,5 @@
 import { IClass } from '@/interfaces/class.interface';
-import { AppError } from '@/middlewares/globalErrorHandler';
+import { AppError } from '@/utils/globalErrorHandler';
 import { Class } from '@/models/class.model';
 import { StudentModel } from '@/models/student.model';
 import mongoose, { FilterQuery } from 'mongoose';
