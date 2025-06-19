@@ -182,18 +182,6 @@ class AdminUserStudentService {
    * @description Tạo mới một học sinh và cập nhật sĩ số lớp.
    * @route POST /api/admin/students
    */
-  public async createStudent(studentData: {
-    fullName: string;
-    dateOfBirth: Date;
-    parentId: string;
-    classId: string;
-  }): Promise<IStudent> {
-    // 1. Kiểm tra sự tồn tại của Phụ huynh và Lớp học
-    const parent = await this.users.findOne({
-      _id: studentData.parentId,
-      role: 'Parent',
-    });
-
   public async createStudent(studentData: { fullName: string; dateOfBirth: Date; parentId: string; classId: string }): Promise<IStudent> {
     const parent = await this.users.findOne({ _id: studentData.parentId, role: 'Parent' });
 
