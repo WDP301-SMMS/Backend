@@ -15,6 +15,10 @@ import { handleSuccessResponse } from '@/utils/responseHandler';
 import { validationResult } from 'express-validator';
 import { IUser } from '@/interfaces/user.interface';
 import sendEmail from '@/utils/email';
+import NodeCache from 'node-cache';
+import generateOtp from '@/utils/otp';
+
+const otpCache = new NodeCache({ stdTTL: 300 });
 
 // Login with Google OAuth
 const redirectToUri = (req: Request, res: Response) => {
@@ -223,10 +227,128 @@ const VerifyRegisterEmail = async (
   }
 };
 
-const verifyOTP = async (): Promise<void> => {};
+const forgotPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found' });
+    }
+    if (!user.isActive) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Please verify your email first' });
+    }
 
-const forgotPassword = async (): Promise<void> => {};
+    const otp = generateOtp();
+    await sendEmail(email, 'Reset your password', `Your OTP is: ${otp}`);
+    otpCache.set(email, otp, 300);
 
+    handleSuccessResponse(res, 200, 'OTP sent to your email successfully');
+  } catch (error) {
+    console.error('Error sending OTP:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+const verifyOTP = async (req: Request, res: Response, next: NextFunction) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
+  try {
+    const { email, token } = req.body;
+
+    const cachedOtp = otpCache.get(email);
+    if (!cachedOtp) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'OTP expired or invalid' });
+    }
+    if (cachedOtp !== token) {
+      return res.status(400).json({ success: false, message: 'Invalid OTP' });
+    }
+
+    const resetToken = generateOtp();
+    otpCache.set(`reset_${email}`, resetToken, 300);
+    otpCache.del(email);
+
+    handleSuccessResponse(res, 200, 'OTP verified successfully', {
+      resetToken,
+    });
+  } catch (error) {
+    console.error('Error verifying OTP:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+const resetPassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
+
+  try {
+    const { email, resetToken, newPassword } = req.body;
+
+    const cachedToken = otpCache.get(`reset_${email}`);
+    if (!cachedToken || cachedToken !== resetToken) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid or expired reset token' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found' });
+    }
+    if (!user.isActive) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'Please verify your email first' });
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    otpCache.del(`reset_${email}`);
+
+    handleSuccessResponse(res, 200, 'Password reset successfully');
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+const logout = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'strict',
+    });
+    handleSuccessResponse(res, 200, 'Logout successfully');
+  } catch (error) {
+    console.error('Error logging out:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
 export const authController = {
   redirectToUri,
   handleGoogleCallback,
@@ -236,4 +358,6 @@ export const authController = {
   VerifyRegisterEmail,
   verifyOTP,
   forgotPassword,
+  resetPassword,
+  logout,
 };
