@@ -2,6 +2,7 @@ import express from 'express';
 import { authRouter } from './auth/auth.routes';
 import dashboardRouter from './dashboard/dashboard';
 import vaccinationCampaigns from './vaccine/vaccine';
+import reportsRouter from './reports/reports'
 import {
   handleToken,
   roleBaseAccess,
@@ -17,5 +18,6 @@ router.use(
   dashboardRouter,
 );
 router.use('/vaccinationCampaigns', vaccinationCampaigns);
+router.use('reports', reportsRouter)
 
 export default router;
