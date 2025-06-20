@@ -1570,17 +1570,17 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT\
-    responses:
-      UnauthorizedError:
-        description: Token truy cập thiếu hoặc không hợp lệ.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ErrorResponse'
-      ForbiddenError:
-        description: Người dùng không có quyền truy cập vào tài nguyên này.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ErrorResponse'
+      bearerFormat: JWT
+  responses:
+    UnauthorizedError:
+      description: Token truy cập thiếu hoặc không hợp lệ.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ForbiddenError:
+      description: Người dùng không có quyền truy cập vào tài nguyên này.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
