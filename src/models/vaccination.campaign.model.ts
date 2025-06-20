@@ -32,8 +32,6 @@ const VaccinationCampaignSchema = new Schema<IVaccinationCampaign>(
       match: [/^\d{4}-\d{4}$/, 'School year must be in format YYYY-YYYY'],
       index: true,
     },
-
-
     partnerId: { 
       type: Schema.Types.ObjectId,
       ref: 'HealthcareOrganization', 
@@ -102,6 +100,7 @@ const VaccinationCampaignSchema = new Schema<IVaccinationCampaign>(
       approved: { type: Number, default: 0 },
       declined: { type: Number, default: 0 },
       administered: { type: Number, default: 0 }, 
+      absent: { type: Number, default: 0 },
     },
   },
   {

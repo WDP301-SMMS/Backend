@@ -1,4 +1,5 @@
 import { VaccinationCampaignController } from '@/controllers/vaccine/vaccination.campaigns.controller';
+import { createCampaignValidator, updateCampaignValidator } from '@/validators/vaccine/vaccination.campaign.validator';
 const express = require('express');
 
 
@@ -14,6 +15,7 @@ router.get(
 
 router.post(
     '/',
+    createCampaignValidator,
     CampaignController.createCampaign
 );
 
@@ -25,6 +27,7 @@ router.get(
 
 router.patch(
     '/:campaignId',
+    updateCampaignValidator,
     CampaignController.updateCampaign
 );
 

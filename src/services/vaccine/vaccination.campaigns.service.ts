@@ -7,6 +7,7 @@ import { StudentModel } from '@/models/student.model';
 import { VaccinationCampaignModel } from '@/models/vaccination.campaign.model';
 import { VaccinationConsentModel } from '@/models/vaccination.consent.model';
 import { AppError } from '@/utils/globalErrorHandler'; 
+import { ConsentStatus } from '@/enums/ConsentsEnum';
 
 
 type CreateCampaignInput = Pick<
@@ -96,28 +97,35 @@ export class VaccinationCampaignService {
 
     if (newStatus && newStatus !== currentStatus) {
       this.validateStateTransition(currentStatus, newStatus);
-      
       if (newStatus === CampaignStatus.CANCELED) {
         if (!updateData.cancellationReason) {
           const error: AppError = new Error('Cancellation reason is required.');
           error.status = 400;
           throw error;
         }
+        
         campaign.cancellationReason = updateData.cancellationReason;
         campaign.canceledBy = new mongoose.Types.ObjectId(userId);
         campaign.cancellationDate = new Date();
+
+        if (currentStatus === CampaignStatus.ANNOUNCED || currentStatus === CampaignStatus.IN_PROGRESS) {
+          await VaccinationConsentModel.updateMany(
+            { campaignId: campaign._id },
+            { $set: { status: ConsentStatus.DECLINED } } 
+          );
+        }
       }
       
       if (newStatus === CampaignStatus.COMPLETED) {
         campaign.completedAt = new Date();
       }
       
+
       campaign.status = newStatus;
     }
-    
     if (currentStatus === CampaignStatus.DRAFT) {
-      if(updateData.name) campaign.name = updateData.name;
-      if(updateData.description) campaign.description = updateData.description;
+      if (updateData.name) campaign.name = updateData.name;
+      if (updateData.description) campaign.description = updateData.description;
     } else if (updateData.name || updateData.description) {
       const error: AppError = new Error(`Cannot update campaign details with status ${currentStatus}.`);
       error.status = 409;

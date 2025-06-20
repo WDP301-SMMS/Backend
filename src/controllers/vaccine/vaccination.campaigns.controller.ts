@@ -1,5 +1,14 @@
+import { IUser } from '@/interfaces/user.interface';
 import { VaccinationCampaignService } from '@/services/vaccine/vaccination.campaigns.service';
 import { Request, Response, NextFunction } from 'express';
+
+declare global {
+  namespace Express {
+    export interface Request {
+      user?: IUser;
+    }
+  }
+}
 
 const campaignService = new VaccinationCampaignService();
 
@@ -7,7 +16,7 @@ export class VaccinationCampaignController {
 
     public createCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const createdByUserId = req.user._id;
+            const createdByUserId = req.user?._id;
             if (!createdByUserId) {
                 throw new Error('User ID is required');
             }
@@ -43,7 +52,7 @@ export class VaccinationCampaignController {
     public updateCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { campaignId } = req.params;
-            const userId = req.user._id;
+            const userId = req.user?._id;
              if (!userId) {
                 throw new Error('User ID is required');
             }

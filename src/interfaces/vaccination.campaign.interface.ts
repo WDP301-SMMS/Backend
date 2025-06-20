@@ -7,6 +7,7 @@ interface ISummary {
   approved: number;
   declined: number;
   administered: number;
+  absent: number;
 }
 
 export interface IVaccinationCampaign extends Document {
