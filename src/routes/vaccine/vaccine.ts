@@ -1,6 +1,6 @@
 import { VaccinationCampaignController } from '@/controllers/vaccine/vaccination.campaigns.controller';
 import { VaccinationConsentController } from '@/controllers/vaccine/vaccination.consents.controller';
-import { createCampaignValidator, updateCampaignValidator } from '@/validators/vaccine/vaccination.campaign.validator';
+import { createCampaignValidator, updateCampaignValidator } from '@/validators/vaccine/vaccination.validator';
 const express = require('express');
 
 

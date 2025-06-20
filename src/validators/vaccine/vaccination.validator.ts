@@ -1,4 +1,5 @@
 import { CampaignStatus } from '@/enums/CampaignEnum';
+import { ConsentStatus } from '@/enums/ConsentsEnum';
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
 
@@ -68,6 +69,33 @@ const validate = (schema: Joi.ObjectSchema) => (req: Request, res: Response, nex
   next();
 };
 
+
+const respondToConsentSchema = Joi.object({
+  status: Joi.string()
+    .required()
+    .valid(ConsentStatus.APPROVED, ConsentStatus.DECLINED) 
+    .messages({
+      'string.empty': 'Status is required.',
+      'any.only': `Status must be either '${ConsentStatus.APPROVED}' or '${ConsentStatus.DECLINED}'.`,
+    }),
+
+  reasonForDeclining: Joi.string()
+    .when('status', {
+      is: ConsentStatus.DECLINED,
+      then: Joi.string().min(10).required().messages({
+        'string.empty': 'Reason for declining is required when status is DECLINED.',
+        'string.min': 'Reason for declining must be at least 10 characters long.',
+      }),
+      otherwise: Joi.forbidden().messages({ 
+        'any.unknown': 'Reason for declining is not allowed when status is APPROVED.',
+      }),
+    }),
+});
+
+
+
+
 // Export các middleware đã được tạo sẵn
 export const createCampaignValidator = validate(createCampaignSchema);
 export const updateCampaignValidator = validate(updateCampaignSchema);
+export const respondToConsentValidator = validate(respondToConsentSchema);
