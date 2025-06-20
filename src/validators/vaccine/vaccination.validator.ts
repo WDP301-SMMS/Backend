@@ -9,6 +9,28 @@ const objectIdValidator = Joi.string().hex().length(24).messages({
   'string.pattern.base': `"{#label}" must be a valid MongoDB ObjectId.`,
 });
 
+const validate = (schema: Joi.ObjectSchema) => (req: Request, res: Response, next: NextFunction) => {
+  const { error, value } = schema.validate(req.body, {
+    abortEarly: false, 
+    stripUnknown: true,
+  });
+  
+  if (error) {
+    const errorDetails = error.details.map(d => ({
+      message: d.message,
+      field: d.path.join('.'),
+    }));
+    return res.status(400).json({ 
+      success: false,
+      message: 'Validation Error', 
+      errors: errorDetails 
+    });
+  }
+
+  req.body = value;
+  next();
+};
+
 
 const createCampaignSchema = Joi.object({
   name: Joi.string().min(5).max(200).required().messages({
@@ -47,28 +69,6 @@ const updateCampaignSchema = Joi.object({
 }).min(1); 
 
 
-const validate = (schema: Joi.ObjectSchema) => (req: Request, res: Response, next: NextFunction) => {
-  const { error, value } = schema.validate(req.body, {
-    abortEarly: false, 
-    stripUnknown: true,
-  });
-  
-  if (error) {
-    const errorDetails = error.details.map(d => ({
-      message: d.message,
-      field: d.path.join('.'),
-    }));
-    return res.status(400).json({ 
-      success: false,
-      message: 'Validation Error', 
-      errors: errorDetails 
-    });
-  }
-
-  req.body = value;
-  next();
-};
-
 
 const respondToConsentSchema = Joi.object({
   status: Joi.string()
@@ -94,8 +94,48 @@ const respondToConsentSchema = Joi.object({
 
 
 
+const createRecordSchema = Joi.object({
+  consentId: objectIdValidator.label('Consent ID'),
+  administeredAt: Joi.date().iso().required().messages({
+    'date.base': 'Administered At must be a valid ISO date.',
+    'any.required': 'Administered At is required.',
+  }),
+  administeredByStaffId: objectIdValidator.label('Administered By Staff ID'),
+});
+
+
+const addObservationSchema = Joi.object({
+  observedAt: Joi.date().iso().required().messages({
+    'date.base': 'Observed At must be a valid ISO date.',
+    'any.required': 'Observed At is required.',
+  }),
+  temperatureLevel: Joi.number().required().min(35).max(43).messages({
+    'number.base': 'Temperature Level must be a number.',
+    'any.required': 'Temperature Level is required.',
+    'number.min': 'Temperature seems too low, please re-check.',
+    'number.max': 'Temperature seems too high, please re-check.',
+  }),
+  notes: Joi.string().allow('').max(500).optional(),
+  isAbnormal: Joi.boolean().required().messages({
+    'boolean.base': 'isAbnormal must be a boolean (true/false).',
+    'any.required': 'isAbnormal is required.',
+  }),
+  actionsTaken: Joi.string()
+    .when('isAbnormal', {
+      is: true,
+      then: Joi.string().min(10).required().messages({
+        'string.empty': 'Actions Taken is required when the observation is abnormal.',
+        'string.min': 'Actions Taken must be at least 10 characters long.',
+      }),
+      otherwise: Joi.optional().allow(''),
+    }),
+});
+
+
 
 // Export các middleware đã được tạo sẵn
 export const createCampaignValidator = validate(createCampaignSchema);
 export const updateCampaignValidator = validate(updateCampaignSchema);
 export const respondToConsentValidator = validate(respondToConsentSchema);
+export const createRecordValidator = validate(createRecordSchema);
+export const addObservationValidator = validate(addObservationSchema);
