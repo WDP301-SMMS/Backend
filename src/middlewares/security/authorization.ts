@@ -20,28 +20,30 @@ const roleBaseAccess = (role: string[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const token = req.token || req.headers['authorization']?.split(' ')[1];
     if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: 'No token provided' });
+      res.status(401).json({ success: false, message: 'No token provided' });
+      return;
     }
 
     const decodedToken = decryptToken(token);
     if (!decodedToken) {
-      return res.status(403).json({ success: false, message: 'Invalid token' });
+      res.status(403).json({ success: false, message: 'Invalid token' });
+      return;
     }
 
     const userRole = decodedToken.role;
     if (!userRole) {
-      return res
+      res
         .status(403)
         .json({ success: false, message: 'Access denied, no role found' });
+      return;
     }
 
     if (!role.includes(userRole)) {
-      return res.status(403).json({
+      res.status(403).json({
         success: false,
         message: 'Access denied, insufficient permissions',
       });
+      return;
     }
 
     next();
@@ -52,20 +54,19 @@ const handleToken = (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
-      return res
-        .status(401)
-        .json({ success: false, message: 'No token provided' });
+      res.status(401).json({ success: false, message: 'No token provided' });
+      return;
     }
 
     const verifiedToken = verifyAccessToken(token);
     if (verifiedToken) {
       req.token = token;
-      return next();
+      next();
     } else {
-      return handleRefreshToken(req, res, next);
+      handleRefreshToken(req, res, next);
     }
   } catch (error) {
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: 'Authentication error',
       error: (error as Error).message,
@@ -81,16 +82,18 @@ const handleRefreshToken = (
   try {
     const refreshToken = req.cookies['refreshToken'];
     if (!refreshToken) {
-      return res
+      res
         .status(401)
         .json({ success: false, message: 'No refresh token provided' });
+      return;
     }
 
     const verifiedRefreshToken = verifyRefreshToken(refreshToken);
     if (!verifiedRefreshToken) {
-      return res
+      res
         .status(403)
         .json({ success: false, message: 'Invalid refresh token' });
+      return;
     }
 
     const newAccessToken = generateAccessToken(verifiedRefreshToken);
@@ -99,10 +102,8 @@ const handleRefreshToken = (
     handleSuccessResponse(res, 200, 'New access token generated', {
       accessToken: newAccessToken,
     });
-
-    next();
   } catch (error) {
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
       message: 'Token refresh error',
       error: (error as Error).message,
