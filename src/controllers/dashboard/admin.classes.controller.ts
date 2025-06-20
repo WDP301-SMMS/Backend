@@ -1,4 +1,4 @@
-import AdminClassService from '@/services/admin.classes.service';
+import AdminClassService from '@/services/admin/admin.classes.service';
 import { NextFunction, Request, Response } from 'express';
 
 const adminClassService = new AdminClassService();

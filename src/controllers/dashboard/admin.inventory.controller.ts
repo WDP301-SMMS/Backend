@@ -1,4 +1,4 @@
-import AdminInventoryViewerService from '@/services/admin.inventory.service';
+import AdminInventoryViewerService from '@/services/admin/admin.inventory.service';
 import { NextFunction, Request, Response } from 'express';
 
 
