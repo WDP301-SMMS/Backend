@@ -16,7 +16,8 @@
       "@middlewares/*": ["middlewares/*"],
       "@models/*": ["models/*"],
       "@config/*": ["config/*"]
-    }
+    },
+     "typeRoots": ["./node_modules/@types", "./types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
