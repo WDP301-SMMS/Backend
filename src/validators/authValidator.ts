@@ -80,3 +80,48 @@ export const resetPasswordValidator = [
     })
     .trim(),
 ];
+
+export const forgotPasswordValidator = [
+  body('email')
+    .notEmpty()
+    .isEmail()
+    .withMessage('Invalid email format')
+    .normalizeEmail(),
+];
+
+export const verifyOTPValidator = [
+  body('email')
+    .notEmpty()
+    .isEmail()
+    .withMessage('Invalid email format')
+    .normalizeEmail(),
+  body('token')
+    .notEmpty()
+    .isNumeric()
+    .isLength({ min: 6, max: 6 })
+    .withMessage('OTP must be a 6-digit numeric value'),
+];
+
+export const resetPasswordOtpValidator = [
+  body('email')
+    .notEmpty()
+    .isEmail()
+    .withMessage('Invalid email format')
+    .normalizeEmail(),
+  body('resetToken')
+    .notEmpty()
+    .withMessage('Reset token is required'),
+  body('newPassword')
+    .notEmpty()
+    .isLength({ min: 6 })
+    .withMessage('New password must be at least 6 characters long'),
+  body('confirmNewPassword')
+    .notEmpty()
+    .withMessage('Confirm new password is required')
+    .custom((value, { req }) => {
+      if (value !== req.body.newPassword) {
+        throw new Error('New passwords do not match');
+      }
+      return true;
+    }),
+];
