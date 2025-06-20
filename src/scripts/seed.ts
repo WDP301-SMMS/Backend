@@ -34,7 +34,7 @@ import { ConsentStatus } from '../enums/ConsentsEnum';
 import {
   CampaignStatus,
   ExecutionType,
-} from '../enums/HealthCheckCampaignEnum';
+} from '../enums/CampaignEnum';
 import { ICheckupItem } from '@/interfaces/healthcheck.templates.interface';
 // ... import các enum khác nếu cần
 
