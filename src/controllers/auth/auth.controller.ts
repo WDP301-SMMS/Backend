@@ -50,7 +50,9 @@ const handleGoogleCallback = async (req: Request, res: Response) => {
       finalUser = newUser;
     }
     if (!finalUser) {
-      res.status(500).send('Failed to create or find user');
+      res
+        .status(500)
+        .send({ success: false, message: 'Failed to create or find user' });
       return;
     }
     const accessToken = generateAccessToken(finalUser);
@@ -112,9 +114,6 @@ const loginWithJwt = async (
 
     handleSuccessResponse(res, 200, 'Login Successfully', {
       accessToken,
-      user: {
-        role: user?.role,
-      },
     });
   } catch (error) {
     console.error('Error logging in user:', error);
@@ -141,7 +140,6 @@ const registerWithJwt = async (
         .json({ success: false, message: 'Account already exists' });
     }
 
-    // Create user first
     const newUser = await User.create({
       ...body,
       password: body.password ? await bcrypt.hash(body.password, 10) : '',
@@ -168,19 +166,23 @@ const registerWithJwt = async (
     );
   } catch (error) {
     console.error('Error registering user:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
 const refreshToken = async (req: Request, res: Response) => {
   const { refreshToken } = req.cookies;
   if (!refreshToken) {
-    return res.status(401).json({ message: 'Refresh token has expired' });
+    return res
+      .status(401)
+      .json({ success: false, message: 'Refresh token has expired' });
   }
   try {
     const payload = verifyRefreshToken(refreshToken);
     if (!payload) {
-      return res.status(401).json({ message: 'Invalid refresh token' });
+      return res
+        .status(401)
+        .json({ success: false, message: 'Invalid refresh token' });
     }
     const accessToken = generateAccessToken(payload);
 
@@ -192,7 +194,9 @@ const refreshToken = async (req: Request, res: Response) => {
     );
   } catch (error) {
     console.error('Error registering user:', error);
-    return res.status(500).json({ message: 'Internal Server Error' });
+    return res
+      .status(500)
+      .json({ success: false, message: 'Internal Server Error' });
   }
 };
 
@@ -203,18 +207,24 @@ const VerifyRegisterEmail = async (
 ) => {
   const { code } = req.query;
   if (typeof code !== 'string') {
-    return res.status(400).json({ message: 'Invalid verification code' });
+    return res
+      .status(400)
+      .json({ success: false, message: 'Invalid verification code' });
   }
 
   try {
     const decodedToken = decryptToken(code);
     if (!decodedToken || !decodedToken.email) {
-      return res.status(400).json({ message: 'Invalid verification code' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid verification code' });
     }
 
     const user = await User.findOne({ email: decodedToken.email });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found' });
     }
 
     user.isActive = true;
@@ -223,7 +233,7 @@ const VerifyRegisterEmail = async (
     res.redirect(`${process.env.FRONTEND_URL}/login?verified=true`);
   } catch (error) {
     console.error('Error verifying email:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
@@ -257,7 +267,7 @@ const forgotPassword = async (
     handleSuccessResponse(res, 200, 'OTP sent to your email successfully');
   } catch (error) {
     console.error('Error sending OTP:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
@@ -289,7 +299,7 @@ const verifyOTP = async (req: Request, res: Response, next: NextFunction) => {
     });
   } catch (error) {
     console.error('Error verifying OTP:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
@@ -333,7 +343,7 @@ const resetPassword = async (
     handleSuccessResponse(res, 200, 'Password reset successfully');
   } catch (error) {
     console.error('Error resetting password:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
@@ -346,7 +356,7 @@ const logout = async (req: Request, res: Response) => {
     handleSuccessResponse(res, 200, 'Logout successfully');
   } catch (error) {
     console.error('Error logging out:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 export const authController = {
