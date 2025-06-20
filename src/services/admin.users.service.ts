@@ -3,9 +3,8 @@ import { IUser } from '@/interfaces/user.interface';
 import { AppError } from '@/utils/globalErrorHandler';
 import { Class } from '@/models/class.model';
 import { StudentModel } from '@/models/student.model';
-import UserModel from '@/models/user.model';
+import { UserModel } from '@/models/user.model';
 import { FilterQuery } from 'mongoose';
-
 
 const createAppError = (status: number, message: string): AppError => {
   const error: AppError = new Error(message);
@@ -36,14 +35,12 @@ class AdminUserStudentService {
 
     const findQuery: FilterQuery<IUser> = {};
 
-
     if (query.search) {
       findQuery.$or = [
         { username: { $regex: query.search, $options: 'i' } },
         { email: { $regex: query.search, $options: 'i' } },
       ];
     }
-
 
     if (query.role) {
       findQuery.role = query.role;
@@ -80,7 +77,6 @@ class AdminUserStudentService {
     userId: string,
     isActive: boolean,
   ): Promise<IUser> {
-
     const user = await this.users.findById(userId);
     if (!user) {
       throw createAppError(404, 'User not found');
@@ -182,8 +178,16 @@ class AdminUserStudentService {
    * @description Tạo mới một học sinh và cập nhật sĩ số lớp.
    * @route POST /api/admin/students
    */
-  public async createStudent(studentData: { fullName: string; dateOfBirth: Date; parentId: string; classId: string }): Promise<IStudent> {
-    const parent = await this.users.findOne({ _id: studentData.parentId, role: 'Parent' });
+  public async createStudent(studentData: {
+    fullName: string;
+    dateOfBirth: Date;
+    parentId: string;
+    classId: string;
+  }): Promise<IStudent> {
+    const parent = await this.users.findOne({
+      _id: studentData.parentId,
+      role: 'Parent',
+    });
 
     if (!parent) {
       throw createAppError(
@@ -207,7 +211,7 @@ class AdminUserStudentService {
    * @description Cập nhật thông tin học sinh, xử lý logic chuyển lớp.
    * @route PUT /api/admin/students/:studentId
    */
- public async updateStudent(
+  public async updateStudent(
     studentId: string,
     studentData: {
       fullName?: string;

@@ -3,7 +3,7 @@ import {
   getGoogleUser,
 } from '@/services/google.service';
 import { NextFunction, Request, Response } from 'express';
-import User from '@models/user.model';
+import { UserModel } from '@models/user.model';
 import {
   decryptToken,
   generateAccessToken,
@@ -32,10 +32,10 @@ const handleGoogleCallback = async (req: Request, res: Response) => {
   try {
     const user = await getGoogleUser(code);
 
-    const existingUser = await User.findOne({ googleId: user?.sub });
+    const existingUser = await UserModel.findOne({ googleId: user?.sub });
     let finalUser = existingUser;
     if (!existingUser) {
-      const newUser = new User({
+      const newUser = new UserModel({
         email: user?.email,
         username: user?.name,
         authProvider: 'google',
@@ -81,7 +81,7 @@ const loginWithJwt = async (
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await UserModel.findOne({ email });
 
     const isActive = user?.isActive;
     if (!isActive) {
@@ -130,7 +130,7 @@ const registerWithJwt = async (
 
   const body = req.body;
   try {
-    const existingUser = await User.findOne({ email: body.email });
+    const existingUser = await UserModel.findOne({ email: body.email });
     if (existingUser) {
       return res
         .status(400)
@@ -138,7 +138,7 @@ const registerWithJwt = async (
     }
 
     // Create user first
-    const newUser = await User.create({
+    const newUser = await UserModel.create({
       ...body,
       password: body.password ? await bcrypt.hash(body.password, 10) : '',
       isActive: false,
@@ -208,7 +208,7 @@ const VerifyRegisterEmail = async (
       return res.status(400).json({ message: 'Invalid verification code' });
     }
 
-    const user = await User.findOne({ email: decodedToken.email });
+    const user = await UserModel.findOne({ email: decodedToken.email });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
