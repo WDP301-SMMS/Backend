@@ -4,7 +4,7 @@ import dashboardRouter from './dashboard/dashboard';
 import {
   handleToken,
   roleBaseAccess,
-} from '@/middlewares/authentication/authorization';
+} from '@/middlewares/security/authorization';
 import { RoleEnum } from '@/enums/RoleEnum';
 const router = express.Router();
 
