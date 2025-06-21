@@ -20,7 +20,7 @@ const MeetingScheduleSchema = new Schema<IMeetingSchedule>({
   status: { type: String, required: true },
   reasons: { type: String, required: true },
   notes: { type: String, required: true },
-  afterMeetingNotes: { type: String, required: true },
+  afterMeetingNotes: { type: String, required: false },
 });
 
 export const MeetingScheduleModel = mongoose.model<IMeetingSchedule>(

@@ -4,11 +4,6 @@ import mongoose from 'mongoose';
 import { faker } from '@faker-js/faker';
 
 // Import tất cả các model
-import { IUser } from '@/interfaces/user.interface';
-import { IClass } from '@/interfaces/class.interface';
-import { IHealthcareOrganization } from '@/interfaces/healthcare.organizations.interface';
-import { IHealthCheckTemplate } from '@/interfaces/healthcheck.templates.interface';
-
 import { UserModel } from '../models/user.model';
 import { StudentModel } from '../models/student.model';
 import { Class } from '../models/class.model';
@@ -161,124 +156,157 @@ const seedDatabase = async () => {
 
     // Tạo dữ liệu Class
     console.log('Seeding Class data...');
-    const classes = [
-      {
-        className: 'Class 6A',
-        gradeLevel: 6,
-        schoolYear: '2024-2025',
-        totalStudents: 3,
-        students: [],
-        createdAt: new Date('2024-08-01T00:00:00Z'),
-        updatedAt: new Date('2024-08-01T00:00:00Z'),
-      },
-      {
-        className: 'Class 7B',
-        gradeLevel: 7,
-        schoolYear: '2024-2025',
-        totalStudents: 2,
-        students: [],
-        createdAt: new Date('2024-08-01T00:00:00Z'),
-        updatedAt: new Date('2024-08-01T00:00:00Z'),
-      },
-      {
-        className: 'Class 8C',
-        gradeLevel: 8,
-        schoolYear: '2024-2025',
-        totalStudents: 2,
-        students: [],
-        createdAt: new Date('2024-08-01T00:00:00Z'),
-        updatedAt: new Date('2024-08-01T00:00:00Z'),
-      },
-      {
-        className: 'Class 9A',
-        gradeLevel: 9,
-        schoolYear: '2024-2025',
-        totalStudents: 1,
-        students: [],
-        createdAt: new Date('2024-08-01T00:00:00Z'),
-        updatedAt: new Date('2024-08-01T00:00:00Z'),
-      },
-      {
-        className: 'Class 6B',
-        gradeLevel: 6,
-        schoolYear: '2024-2025',
-        totalStudents: 1,
-        students: [],
-        createdAt: new Date('2024-08-01T00:00:00Z'),
-        updatedAt: new Date('2024-08-01T00:00:00Z'),
-      },
+    const classInfos = [
+      { className: 'Class 6A', gradeLevel: 6 },
+      { className: 'Class 7B', gradeLevel: 7 },
+      { className: 'Class 8C', gradeLevel: 8 },
+      { className: 'Class 9A', gradeLevel: 9 },
+      { className: 'Class 6B', gradeLevel: 6 },
     ];
+
+    const classes = classInfos.map((c) => ({
+      ...c,
+      schoolYear: '2024-2025',
+      students: [],
+      totalStudents: 0,
+      createdAt: new Date('2024-08-01T00:00:00Z'),
+      updatedAt: new Date('2024-08-01T00:00:00Z'),
+    }));
     const createdClasses = await Class.insertMany(classes);
 
     // Tạo dữ liệu Student
     console.log('Seeding Student data...');
     const studentsData = [
       {
-        parentId: createdUsers.find((u) => u.username === 'parent1')!._id,
-        classId: createdClasses.find((c) => c.className === 'Class 6A')!._id,
         fullName: 'Nguyen Van A',
-        dateOfBirth: new Date('2015-05-10T00:00:00Z'),
+        dob: '2015-05-10',
+        username: 'parent1',
+        className: 'Class 6A',
       },
       {
-        parentId: createdUsers.find((u) => u.username === 'parent2')!._id,
-        classId: createdClasses.find((c) => c.className === 'Class 6A')!._id,
         fullName: 'Tran Thi B',
-        dateOfBirth: new Date('2015-06-15T00:00:00Z'),
+        dob: '2015-06-15',
+        username: 'parent2',
+        className: 'Class 6A',
       },
       {
-        parentId: createdUsers.find((u) => u.username === 'nurse1')!._id,
-        classId: createdClasses.find((c) => c.className === 'Class 6A')!._id,
         fullName: 'Le Van C',
-        dateOfBirth: new Date('2015-07-20T00:00:00Z'),
+        dob: '2015-07-20',
+        username: 'nurse1',
+        className: 'Class 6A',
       },
       {
-        parentId: createdUsers.find((u) => u.username === 'parent1')!._id,
-        classId: createdClasses.find((c) => c.className === 'Class 7B')!._id,
         fullName: 'Pham Thi D',
-        dateOfBirth: new Date('2014-08-25T00:00:00Z'),
+        dob: '2014-08-25',
+        username: 'parent1',
+        className: 'Class 7B',
       },
       {
-        parentId: createdUsers.find((u) => u.username === 'parent2')!._id,
-        classId: createdClasses.find((c) => c.className === 'Class 7B')!._id,
         fullName: 'Hoang Van E',
-        dateOfBirth: new Date('2014-09-30T00:00:00Z'),
+        dob: '2014-09-30',
+        username: 'parent2',
+        className: 'Class 7B',
       },
       {
-        parentId: createdUsers.find((u) => u.username === 'nurse1')!._id,
-        classId: createdClasses.find((c) => c.className === 'Class 8C')!._id,
         fullName: 'Nguyen Thi F',
-        dateOfBirth: new Date('2013-10-05T00:00:00Z'),
+        dob: '2013-10-05',
+        username: 'nurse1',
+        className: 'Class 8C',
       },
       {
-        parentId: createdUsers.find((u) => u.username === 'parent1')!._id,
-        classId: createdClasses.find((c) => c.className === 'Class 8C')!._id,
         fullName: 'Tran Van G',
-        dateOfBirth: new Date('2013-11-10T00:00:00Z'),
+        dob: '2013-11-10',
+        username: 'parent1',
+        className: 'Class 8C',
       },
       {
-        parentId: createdUsers.find((u) => u.username === 'parent2')!._id,
-        classId: createdClasses.find((c) => c.className === 'Class 9A')!._id,
         fullName: 'Le Thi H',
-        dateOfBirth: new Date('2012-12-15T00:00:00Z'),
+        dob: '2012-12-15',
+        username: 'parent2',
+        className: 'Class 9A',
       },
       {
-        parentId: createdUsers.find((u) => u.username === 'nurse1')!._id,
-        classId: createdClasses.find((c) => c.className === 'Class 6B')!._id,
         fullName: 'Pham Van I',
-        dateOfBirth: new Date('2015-01-20T00:00:00Z'),
+        dob: '2015-01-20',
+        username: 'nurse1',
+        className: 'Class 6B',
       },
     ];
-    const createdStudents = await StudentModel.insertMany(studentsData);
 
-    // Cập nhật students trong Class
+    const studentsToInsert = studentsData.map((s) => ({
+      parentId: createdUsers.find((u) => u.username === s.username)!._id,
+      classId: createdClasses.find((c) => c.className === s.className)!._id,
+      fullName: s.fullName,
+      dateOfBirth: new Date(`${s.dob}T00:00:00Z`),
+    }));
+    const createdStudents = await StudentModel.insertMany(studentsToInsert);
+
+    // 3. Cập nhật lại Class với danh sách student tương ứng
+    const classStudentMap = new Map<string, mongoose.Types.ObjectId[]>();
+
     for (const student of createdStudents) {
-      const classObj = createdClasses.find((c: IClass) =>
-        c._id.equals(student.classId),
-      )!;
-      classObj.students.push(student._id);
-      classObj.totalStudents = classObj.students.length;
-      await classObj.save();
+      const key = student.classId.toString();
+      if (!classStudentMap.has(key)) {
+        classStudentMap.set(key, []);
+      }
+      classStudentMap.get(key)!.push(student._id);
     }
+
+    for (const [classId, studentIds] of classStudentMap) {
+      await Class.findByIdAndUpdate(classId, {
+        students: studentIds,
+        totalStudents: studentIds.length,
+      });
+    }
+
+    // Tạo dữ liệu OrganizationManager
+    console.log('Seeding OrganizationManager data...');
+    const organizationManagers = [
+      {
+        fullName: 'Dr. John Doe',
+        email: 'john.doe@cityhealth.com',
+        phone: '0123456789',
+        createdAt: new Date('2024-01-01T00:00:00Z'),
+        updatedAt: new Date('2024-01-01T00:00:00Z'),
+      },
+      {
+        fullName: 'Dr. Jane Smith',
+        email: 'jane.smith@schoolhealth.com',
+        phone: '0987654321',
+        createdAt: new Date('2024-01-01T00:00:00Z'),
+        updatedAt: new Date('2024-01-01T00:00:00Z'),
+      },
+    ];
+    const createdOrganizationManagers =
+      await OrganizationManager.insertMany(organizationManagers);
+
+    // Tạo dữ liệu OrganizationStaff
+    console.log('Seeding OrganizationStaff data...');
+    const organizationStaff = [
+      {
+        fullName: 'Nurse Alice Brown',
+        position: 'Nurse',
+        isActive: true,
+        createdAt: new Date('2024-01-01T00:00:00Z'),
+        updatedAt: new Date('2024-01-01T00:00:00Z'),
+      },
+      {
+        fullName: 'Technician Bob White',
+        position: 'Technician',
+        isActive: true,
+        createdAt: new Date('2024-01-01T00:00:00Z'),
+        updatedAt: new Date('2024-01-01T00:00:00Z'),
+      },
+      {
+        fullName: 'Nurse Carol Green',
+        position: 'Nurse',
+        isActive: true,
+        createdAt: new Date('2024-01-01T00:00:00Z'),
+        updatedAt: new Date('2024-01-01T00:00:00Z'),
+      },
+    ];
+    const createdOrganizationStaff =
+      await OrganizationStaffs.insertMany(organizationStaff);
 
     // Tạo dữ liệu HealthcareOrganization
     console.log('Seeding HealthcareOrganization data...');
@@ -290,8 +318,14 @@ const seedDatabase = async () => {
         email: 'contact@cityhealth.com',
         type: 'CLINIC',
         isActive: true,
-        managerInfo: null,
-        staffMembers: [],
+        managerInfo: createdOrganizationManagers.find(
+          (m) => m.email === 'john.doe@cityhealth.com',
+        )!._id,
+        staffMembers: [
+          createdOrganizationStaff.find(
+            (s) => s.fullName === 'Nurse Carol Green',
+          )!._id,
+        ],
         createdAt: new Date('2024-01-01T00:00:00Z'),
         updatedAt: new Date('2024-01-01T00:00:00Z'),
       },
@@ -302,94 +336,23 @@ const seedDatabase = async () => {
         email: 'info@schoolhealth.com',
         type: 'HEALTH_CENTER',
         isActive: true,
-        managerInfo: null,
-        staffMembers: [],
+        managerInfo: createdOrganizationManagers.find(
+          (m) => m.email === 'jane.smith@schoolhealth.com',
+        )!._id,
+        staffMembers: [
+          createdOrganizationStaff.find(
+            (s) => s.fullName === 'Nurse Alice Brown',
+          )!._id,
+          createdOrganizationStaff.find(
+            (s) => s.fullName === 'Technician Bob White',
+          )!._id,
+        ],
         createdAt: new Date('2024-01-01T00:00:00Z'),
         updatedAt: new Date('2024-01-01T00:00:00Z'),
       },
     ];
     const createdHealthcareOrganizations =
       await HealthcareOrganization.insertMany(healthcareOrganizations);
-
-    // Tạo dữ liệu OrganizationManager
-    console.log('Seeding OrganizationManager data...');
-    const organizationManagers = [
-      {
-        fullName: 'Dr. John Doe',
-        email: 'john.doe@cityhealth.com',
-        phone: '0123456789',
-        organizationId: createdHealthcareOrganizations.find(
-          (o) => o.name === 'City Health Clinic',
-        )!._id,
-        createdAt: new Date('2024-01-01T00:00:00Z'),
-        updatedAt: new Date('2024-01-01T00:00:00Z'),
-      },
-      {
-        fullName: 'Dr. Jane Smith',
-        email: 'jane.smith@schoolhealth.com',
-        phone: '0987654321',
-        organizationId: createdHealthcareOrganizations.find(
-          (o) => o.name === 'School Health Center',
-        )!._id,
-        createdAt: new Date('2024-01-01T00:00:00Z'),
-        updatedAt: new Date('2024-01-01T00:00:00Z'),
-      },
-    ];
-    const createdOrganizationManagers =
-      await OrganizationManager.insertMany(organizationManagers);
-
-    // Cập nhật managerInfo trong HealthcareOrganization
-    for (const org of createdHealthcareOrganizations) {
-      const manager = createdOrganizationManagers.find((m: any) => m.organizationId.equals(org._id))!;
-      org.managerInfo = manager._id;
-      await org.save();
-    }
-
-    // Tạo dữ liệu OrganizationStaff
-    console.log('Seeding OrganizationStaff data...');
-    const organizationStaff = [
-      {
-        fullName: 'Nurse Alice Brown',
-        position: 'Nurse',
-        isActive: true,
-        organizationId: createdHealthcareOrganizations.find(
-          (o) => o.name === 'City Health Clinic',
-        )!._id,
-        createdAt: new Date('2024-01-01T00:00:00Z'),
-        updatedAt: new Date('2024-01-01T00:00:00Z'),
-      },
-      {
-        fullName: 'Technician Bob White',
-        position: 'Technician',
-        isActive: true,
-        organizationId: createdHealthcareOrganizations.find(
-          (o) => o.name === 'City Health Clinic',
-        )!._id,
-        createdAt: new Date('2024-01-01T00:00:00Z'),
-        updatedAt: new Date('2024-01-01T00:00:00Z'),
-      },
-      {
-        fullName: 'Nurse Carol Green',
-        position: 'Nurse',
-        isActive: true,
-        organizationId: createdHealthcareOrganizations.find(
-          (o) => o.name === 'School Health Center',
-        )!._id,
-        createdAt: new Date('2024-01-01T00:00:00Z'),
-        updatedAt: new Date('2024-01-01T00:00:00Z'),
-      },
-    ];
-    const createdOrganizationStaff =
-      await OrganizationStaffs.insertMany(organizationStaff);
-
-    // Cập nhật staffMembers trong HealthcareOrganization
-    for (const staff of createdOrganizationStaff) {
-      const org = createdHealthcareOrganizations.find((o) =>
-        o._id.equals(staff.organizationId),
-      )!;
-      org.staffMembers.push(staff._id);
-      await org.save();
-    }
 
     // Tạo dữ liệu HealthCheckTemplate
     console.log('Seeding HealthCheckTemplate data...');
@@ -511,9 +474,7 @@ const seedDatabase = async () => {
         checkupDate: new Date('2024-10-05T00:00:00Z'),
         resultsData: [
           {
-            itemId: createdHealthCheckTemplates
-              .find((t) => t.name === 'General Health Check')!
-              .checkupItems.find((i: any) => i.itemName === 'Height')!._id,
+            itemId: new mongoose.Types.ObjectId(),
             itemName: 'Height',
             value: 145,
             unit: 'cm',
@@ -521,9 +482,7 @@ const seedDatabase = async () => {
             notes: 'Normal growth',
           },
           {
-            itemId: createdHealthCheckTemplates
-              .find((t) => t.name === 'General Health Check')!
-              .checkupItems.find((i: any) => i.itemName === 'Vision')!._id,
+            itemId: new mongoose.Types.ObjectId(),
             itemName: 'Vision',
             value: '20/20',
             isAbnormal: false,
@@ -545,9 +504,7 @@ const seedDatabase = async () => {
         checkupDate: new Date('2025-02-05T00:00:00Z'),
         resultsData: [
           {
-            itemId: createdHealthCheckTemplates
-              .find((t) => t.name === 'Vision Screening')!
-              .checkupItems.find((i: any) => i.itemName === 'Vision')!._id,
+            itemId: new mongoose.Types.ObjectId(),
             itemName: 'Vision',
             value: '20/25',
             isAbnormal: true,
@@ -761,7 +718,7 @@ const seedDatabase = async () => {
       await MedicalIncidentModel.insertMany(medicalIncidents);
 
     // Cập nhật incidentId trong InventoryLog
-    createdInventoryLogs[0].incidentId = createdMedicalIncidents.find(
+    (createdInventoryLogs[0] as any).incidentId = createdMedicalIncidents.find(
       (i) => i.description === 'Minor cut on hand',
     )!._id;
     await createdInventoryLogs[0].save();
