@@ -1,5 +1,5 @@
 import { IHealthCheckTemplate } from '@/interfaces/healthcheck.templates.interface';
-import AdminHealthTemplateService from '@/services/admin.health.template.service';
+import AdminHealthTemplateService from '@/services/admin/admin.health.template.service';
 import { NextFunction, Request, Response } from 'express';
 
 

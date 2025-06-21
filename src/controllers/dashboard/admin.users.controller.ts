@@ -1,4 +1,4 @@
-import AdminUserStudentService from '@/services/admin.users.service';
+import AdminUserStudentService from '@/services/admin/admin.users.service';
 import { NextFunction, Request, Response } from 'express';
 
 

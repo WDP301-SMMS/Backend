@@ -1,19 +1,32 @@
 import { Types } from "mongoose";
+import { Document } from "mongoose"; 
 
-export interface IVaccinationResult {
+
+export interface IObservation {
   observedAt: Date;
   temperatureLevel: number;
-  notes: string;
+  notes?: string; 
+  isAbnormal: boolean;
+  actionsTaken?: string; 
 }
 
-export interface IVaccinationRecord {
+
+export interface IVaccinationRecord extends Document {
     consentId: Types.ObjectId; 
     partnerId: Types.ObjectId; 
-    administeredByStaffId: Types.ObjectId;
+    administeredByStaffId: Types.ObjectId; 
     studentId: Types.ObjectId; 
-    postVaccinationChecks: IVaccinationResult[];
+    postVaccinationChecks: IObservation[]; 
     administeredAt: Date;
     vaccineName: string;
     doseNumber: number;
     boosterInjectionDate?: Date; 
+}
+
+
+export interface IPopulatedVaccinationRecord extends IVaccinationRecord {
+  consentId: any; 
+  partnerId: any; 
+  administeredByStaffId: any; 
+  studentId: any; 
 }
