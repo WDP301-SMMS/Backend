@@ -250,6 +250,122 @@ paths:
                   message:
                     type: string
                     example: User logged out successfully
+  /user/me:
+    get:
+      tags:
+        - User Controller
+      summary: Get user profile
+      description: Retrieves a user's profile information
+      operationId: getUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User retrieved successfully
+                  data:
+                    $ref: '#/components/schemas/User'
+    put:
+      tags:
+        - User Controller
+      summary: Update user profile
+      description: Updates the profile information of a user
+      operationId: editProfile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "johndoe"
+                dob:
+                  type: string
+                  example: "31/12/1990"
+                  description: Date of birth in DD/MM/YYYY format
+                phone:
+                  type: string
+                  example: "+1234567890"
+              required:
+                - username
+                - dob
+                - phone
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User profile updated successfully
+                  data:
+                    $ref: '#/components/schemas/User'
+  /user/me/change-password:
+    patch:
+      tags:
+        - User Controller
+      summary: Change user password
+      description: Updates the password of a user
+      operationId: updatePassword
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                  description: User's current password
+                newPassword:
+                  type: string
+                  format: password
+                  description: New password (minimum 6 characters)
+                confirmNewPassword:
+                  type: string
+                  format: password
+                  description: Confirmation of the new password
+              required:
+                - currentPassword
+                - newPassword
+                - confirmNewPassword
+      responses:
+        '200':
+          description: Password updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password updated successfully
   /admin/dashboard:
       get:
         tags:
