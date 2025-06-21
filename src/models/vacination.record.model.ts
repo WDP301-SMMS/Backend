@@ -1,10 +1,7 @@
-import {
-  IVaccinationRecord,
-  IVaccinationResult,
-} from '@/interfaces/vacination.record.interface';
+import { IObservation, IVaccinationRecord } from '@/interfaces/vacination.record.interface';
 import mongoose, { Schema } from 'mongoose';
 
-const VaccinationResultSchema = new Schema<IVaccinationResult>(
+const ObservationSchema = new Schema<IObservation>(
   {
     observedAt: {
       type: Date,
@@ -16,7 +13,16 @@ const VaccinationResultSchema = new Schema<IVaccinationResult>(
     },
     notes: {
       type: String,
+      required: false, 
+      trim: true,
+    },
+    isAbnormal: {
+      type: Boolean,
       required: true,
+      default: false,
+    },
+    actionsTaken: {
+      type: String,
       trim: true,
     },
   },
@@ -29,6 +35,7 @@ const VaccinationRecordSchema = new Schema<IVaccinationRecord>(
       type: Schema.Types.ObjectId,
       ref: 'VaccinationConsent',
       required: true,
+      unique: true, 
       index: true,
     },
     partnerId: {
@@ -39,6 +46,7 @@ const VaccinationRecordSchema = new Schema<IVaccinationRecord>(
     },
     administeredByStaffId: {
       type: Schema.Types.ObjectId,
+      ref: 'OrganizationStaff', 
       required: true,
     },
     studentId: {
@@ -48,7 +56,7 @@ const VaccinationRecordSchema = new Schema<IVaccinationRecord>(
       index: true,
     },
     postVaccinationChecks: {
-      type: [VaccinationResultSchema],
+      type: [ObservationSchema],
       default: [],
     },
     administeredAt: {
@@ -74,7 +82,6 @@ const VaccinationRecordSchema = new Schema<IVaccinationRecord>(
   },
 );
 
-// export const VaccinationResultModel = mongoose.model<IVaccinationResult>("VaccinationResult", VaccinationResultSchema);
 export const VaccinationRecordModel = mongoose.model<IVaccinationRecord>(
   'VaccinationRecord',
   VaccinationRecordSchema,

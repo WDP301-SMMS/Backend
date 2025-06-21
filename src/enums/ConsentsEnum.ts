@@ -2,4 +2,6 @@ export enum ConsentStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
   DECLINED = 'DECLINED',
+  COMPLETED = 'COMPLETED',
+  REVOKED = 'REVOKED',
 }

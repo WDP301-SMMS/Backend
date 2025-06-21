@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import AdminPartnerService from '@/services/admin.partners.service';
+import AdminPartnerService from '@/services/admin/admin.partners.service';
 import { IHealthcareOrganization, IManagerInfo } from '@/interfaces/healthcare.organizations.interface';
 
 const adminPartnerService = new AdminPartnerService();

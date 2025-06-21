@@ -1,4 +1,4 @@
-import { CampaignStatus } from '../enums/HealthCheckCampaignEnum';
+import { CampaignStatus } from '../enums/CampaignEnum';
 import { IHealthCheckCampaign } from '@/interfaces/healthcheck.campaign.interface';
 import mongoose, { Schema } from 'mongoose';
 
