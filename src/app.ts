@@ -16,6 +16,7 @@ app.use(cookieParser());
 const allowedOrigins = [
   'http://localhost:3000',
   /^https:\/\/.*\.ngrok-free\.app$/,
+  'http://localhost:5173',
 ];
 
 app.use(
