@@ -18,6 +18,7 @@ const InventoryLogSchema = new Schema<IInventoryLog>({
     type: Schema.Types.ObjectId,
     ref: 'MedicalIncident',
     required: false,
+    default: null,
     index: true,
   },
   typeLog: { type: String, required: true },

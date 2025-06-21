@@ -8,7 +8,7 @@
     "start": "node dist/server.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node -r tsconfig-paths/register src/server.ts",
     "lint": "eslint 'src/**/*.ts'",
-    "db:seed": "ts-node src/scripts/seed.ts",
+    "db:seed": "ts-node -r tsconfig-paths/register src/scripts/seed.ts",
     "tunnel": "ngrok http 3000",
     "tunnel:delayed": "npx wait-on tcp:3000 && npx ngrok http 3000",
     "dev:tunnel": "concurrently --names \"NODE,NGROK\" --prefix \"[{name}]\" --prefix-colors \"cyan,green\" --raw \"npm run dev\" \"npm run tunnel:delayed\""

@@ -5,14 +5,12 @@ export interface IPartnerStaff {
   fullName: string;
   position?: string;
   isActive: boolean;
-  organizationId: Types.ObjectId
 }
 
 export interface IManagerInfo {
   fullName: string;
   email: string;
   phone: string;
-  organizationId: Types.ObjectId; // Mỗi tổ chức chỉ nên có 1 manager
 }
 
 export interface IHealthcareOrganization {

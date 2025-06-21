@@ -1,5 +1,5 @@
 import { handleSuccessResponse } from '@/utils/responseHandler';
-import User from '@models/user.model';
+import { UserModel } from '@models/user.model';
 import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
@@ -9,7 +9,7 @@ const getUser = async (req: Request, res: Response) => {
   const token = req.token as string;
   const decodedToken = decryptToken(token);
   try {
-    const user = await User.findById(decodedToken?._id).select('-password');
+    const user = await UserModel.findById(decodedToken?._id).select('-password');
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
       return;
@@ -37,7 +37,7 @@ const editProfile = async (req: Request, res: Response) => {
   }
   const body = req.body;
   try {
-    const user = await User.findOneAndUpdate(
+    const user = await UserModel.findOneAndUpdate(
       { _id: decodedToken?._id },
       { ...body },
       { new: true, runValidators: true },
@@ -70,7 +70,7 @@ const updatePassword = async (req: Request, res: Response) => {
   const { currentPassword, newPassword } = req.body;
 
   try {
-    const user = await User.findById(decodedToken._id);
+    const user = await UserModel.findById(decodedToken._id);
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
       return;

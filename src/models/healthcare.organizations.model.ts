@@ -23,13 +23,6 @@ const PartnerStaffSchema = new Schema<IPartnerStaff>(
       default: true,
       required: true,
     },
-
-    organizationId: {
-      type: Schema.Types.ObjectId,
-      ref: 'HealthcareOrganization',
-      required: true,
-      index: true,
-    },
   },
   { timestamps: true },
 );
@@ -50,13 +43,6 @@ const ManagerInfoSchema = new Schema<IManagerInfo>(
       type: String,
       required: true,
       trim: true,
-    },
-    organizationId: {
-      type: Schema.Types.ObjectId,
-      ref: 'HealthcareOrganization',
-      required: true,
-      unique: true, // Mỗi tổ chức chỉ nên có 1 manager -> đảm bảo không có 2 manager cùng trỏ về 1 organization
-      index: true,
     },
   },
   { timestamps: true },
