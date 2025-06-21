@@ -4,10 +4,6 @@ import { IUser } from '@/interfaces/user.interface';
 import bcrypt from 'bcrypt';
 
 const UserSchema = new Schema<IUser>({
-  _id: {
-    type: String,
-    default: () => new mongoose.Types.ObjectId().toString(),
-  },
   username: {
     type: String,
     required: [
