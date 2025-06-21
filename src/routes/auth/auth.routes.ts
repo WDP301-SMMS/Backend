@@ -1,3 +1,4 @@
+import { handleToken } from '@/middlewares/security/authorization';
 import {
   forgotPasswordValidator,
   loginValidator,
@@ -62,4 +63,4 @@ authRouter.post(
 );
 
 // logout route
-authRouter.post('/logout', asyncHandler(authController.logout));
+authRouter.post('/logout', handleToken, asyncHandler(authController.logout));
