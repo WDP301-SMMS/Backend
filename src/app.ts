@@ -8,8 +8,6 @@ import YAML from 'yamljs';
 import cookieParser from 'cookie-parser';
 import apiRoutes from './routes/index';
 
-import dashboardRoute from '@routes/dashboard/dashboard';
-
 const app = express();
 app.use(express.json());
 app.use(cookieParser());

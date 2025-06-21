@@ -29,34 +29,38 @@ const redirectToUri = (req: Request, res: Response) => {
 const handleGoogleCallback = async (req: Request, res: Response) => {
   const { code } = req.query;
   if (typeof code !== 'string') {
-    res.status(400).send('Invalid code');
-    return;
+    return res.status(400).send('Invalid code');
   }
 
   try {
     const user = await getGoogleUser(code);
+    if (!user?.email) {
+      return res.status(400).send('Email không tồn tại từ Google');
+    }
 
-    const existingUser = await UserModel.findOne({ googleId: user?.sub });
-    let finalUser = existingUser;
-    if (!existingUser) {
-      const newUser = new UserModel({
-        email: user?.email,
-        username: user?.name,
+    let userInfo = await UserModel.findOne({ googleId: user.sub });
+
+    if (!userInfo) {
+      userInfo = await UserModel.findOne({ email: user.email });
+
+      if (userInfo) {
+        userInfo.googleId = user.sub;
+        await userInfo.save();
+      }
+    }
+
+    if (!userInfo) {
+      userInfo = new UserModel({
+        email: user.email,
+        username: user.name,
         authProvider: 'google',
-        googleId: user?.sub,
+        googleId: user.sub,
       });
+      await userInfo.save();
+    }
 
-      await newUser.save();
-      finalUser = newUser;
-    }
-    if (!finalUser) {
-      res
-        .status(500)
-        .send({ success: false, message: 'Failed to create or find user' });
-      return;
-    }
-    const accessToken = generateAccessToken(finalUser);
-    const refreshToken = generateRefreshToken(finalUser);
+    const accessToken = generateAccessToken(userInfo);
+    const refreshToken = generateRefreshToken(userInfo);
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
@@ -64,11 +68,15 @@ const handleGoogleCallback = async (req: Request, res: Response) => {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
-    handleSuccessResponse(res, 200, 'Login Successfully', {
-      accessToken,
-    });
-
-    // res.redirect(`${process.env.FRONTEND_URL}/login?accessToken=${accessToken}`);
+    res.send(`
+      <script>
+        window.opener.postMessage(
+          { accessToken: "${accessToken}" },
+          "${process.env.FRONTEND_URL}"
+        );
+        window.close();
+      </script>
+    `);
   } catch (error) {
     console.error('Error retrieving Google user:', error);
     res.status(500).send('Internal Server Error');
