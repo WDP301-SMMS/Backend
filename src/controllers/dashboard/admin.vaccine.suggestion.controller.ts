@@ -1,4 +1,4 @@
-import AdminVaccineSuggestionService from '@/services/admin.vaccine.suggestion.service';
+import AdminVaccineSuggestionService from '@/services/admin/admin.vaccine.suggestion.service';
 import { NextFunction, Request, Response } from 'express';
 
 
