@@ -1,4 +1,4 @@
-import { CampaignStatus } from '@/enums/HealthCheckCampaignEnum';
+import { CampaignStatus } from '@/enums/CampaignEnum';
 import { Types } from 'mongoose';
 
 export interface IHealthCheckCampaign {

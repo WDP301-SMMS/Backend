@@ -1,5 +1,5 @@
 
-import { DashboardService } from '@/services/dashboard.service';
+import { DashboardService } from '@/services/admin/dashboard.service';
 import { Request, Response, NextFunction } from 'express';
 
 

@@ -103,6 +103,269 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+  /auth/forgot-password:
+    post:
+      summary: Forgot password
+      tags:
+        - Authentication
+      description: Sends an OTP to the user's email for password reset
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+              required:
+                - email
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: OTP sent to your email successfully
+  /auth/verify-otp:
+    post:
+      summary: Verify OTP
+      tags:
+        - Authentication
+      description: Verifies the OTP sent to the user's email
+      operationId: verifyOTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                token:
+                  type: string
+                  example: "123456"
+              required:
+                - email
+                - token
+      responses:
+        '200':
+          description: OTP verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: OTP verified successfully
+                  data:
+                    type: object
+                    properties:
+                      resetToken:
+                        type: string
+                        example: "a1b2c3d4e5"
+  /auth/reset-password:
+    post:
+      summary: Reset password
+      tags:
+        - Authentication
+      description: Resets the user's password using the reset token
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                resetToken:
+                  type: string
+                  example: "a1b2c3d4e5"
+                newPassword:
+                  type: string
+                  format: password
+                  example: "NewPassword123!"
+                confirmNewPassword:
+                  type: string
+                  format: password
+                  example: "NewPassword123!"
+              required:
+                - email
+                - resetToken
+                - newPassword
+                - confirmNewPassword
+      responses:
+        '200':
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password reset successfully
+  /auth/logout:
+    post:
+      summary: Logout user
+      tags:
+        - Authentication
+      description: Logs out the user by clearing the refresh token cookie
+      operationId: logoutUser
+      responses:
+        '200':
+          description: Successful logout
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User logged out successfully
+  /user/me:
+    get:
+      tags:
+        - User Controller
+      summary: Get user profile
+      description: Retrieves a user's profile information
+      operationId: getUser
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User retrieved successfully
+                  data:
+                    $ref: '#/components/schemas/User'
+    put:
+      tags:
+        - User Controller
+      summary: Update user profile
+      description: Updates the profile information of a user
+      operationId: editProfile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "johndoe"
+                dob:
+                  type: string
+                  example: "31/12/1990"
+                  description: Date of birth in DD/MM/YYYY format
+                phone:
+                  type: string
+                  example: "+1234567890"
+              required:
+                - username
+                - dob
+                - phone
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User profile updated successfully
+                  data:
+                    $ref: '#/components/schemas/User'
+  /user/me/change-password:
+    patch:
+      tags:
+        - User Controller
+      summary: Change user password
+      description: Updates the password of a user
+      operationId: updatePassword
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                currentPassword:
+                  type: string
+                  format: password
+                  description: User's current password
+                newPassword:
+                  type: string
+                  format: password
+                  description: New password (minimum 6 characters)
+                confirmNewPassword:
+                  type: string
+                  format: password
+                  description: Confirmation of the new password
+              required:
+                - currentPassword
+                - newPassword
+                - confirmNewPassword
+      responses:
+        '200':
+          description: Password updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password updated successfully
   /admin/dashboard:
       get:
         tags:
@@ -1423,17 +1686,17 @@ components:
     BearerAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT\
-    responses:
-      UnauthorizedError:
-        description: Token truy cập thiếu hoặc không hợp lệ.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ErrorResponse'
-      ForbiddenError:
-        description: Người dùng không có quyền truy cập vào tài nguyên này.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ErrorResponse'
+      bearerFormat: JWT
+  responses:
+    UnauthorizedError:
+      description: Token truy cập thiếu hoặc không hợp lệ.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ForbiddenError:
+      description: Người dùng không có quyền truy cập vào tài nguyên này.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'

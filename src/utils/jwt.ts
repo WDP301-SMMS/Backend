@@ -5,7 +5,7 @@ export const generateAccessToken = (user: IUser): string => {
   return jwt.sign(
     {
       email: user.email,
-      id: user._id,
+      _id: user._id,
       role: user.role,
       username: user.username,
     },
@@ -18,7 +18,7 @@ export const generateRefreshToken = (user: IUser): string => {
   return jwt.sign(
     {
       email: user.email,
-      id: user._id,
+      _id: user._id,
       role: user.role,
       username: user.username,
     },

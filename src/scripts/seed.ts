@@ -36,10 +36,7 @@ import { BlogPostModel } from '../models/blog.post.model';
 // Import enums
 import { RoleEnum } from '../enums/RoleEnum';
 import { ConsentStatus } from '../enums/ConsentsEnum';
-import {
-  CampaignStatus,
-  ExecutionType,
-} from '../enums/HealthCheckCampaignEnum';
+import { CampaignStatus, ExecutionType } from '../enums/CampaignEnum';
 
 // Hàm helper để lấy một phần tử ngẫu nhiên từ mảng
 const getRandomItem = <T>(arr: T[]): T =>
@@ -157,11 +154,11 @@ const seedDatabase = async () => {
     // Tạo dữ liệu Class
     console.log('Seeding Class data...');
     const classInfos = [
-      { className: 'Class 6A', gradeLevel: 6 },
-      { className: 'Class 7B', gradeLevel: 7 },
-      { className: 'Class 8C', gradeLevel: 8 },
-      { className: 'Class 9A', gradeLevel: 9 },
-      { className: 'Class 6B', gradeLevel: 6 },
+      { className: 'Class 1A', gradeLevel: 6 },
+      { className: 'Class 2B', gradeLevel: 7 },
+      { className: 'Class 3C', gradeLevel: 8 },
+      { className: 'Class 4A', gradeLevel: 9 },
+      { className: 'Class 5B', gradeLevel: 6 },
     ];
 
     const classes = classInfos.map((c) => ({
@@ -181,55 +178,55 @@ const seedDatabase = async () => {
         fullName: 'Nguyen Van A',
         dob: '2015-05-10',
         username: 'parent1',
-        className: 'Class 6A',
+        className: 'Class 1A',
       },
       {
         fullName: 'Tran Thi B',
         dob: '2015-06-15',
         username: 'parent2',
-        className: 'Class 6A',
+        className: 'Class 1A',
       },
       {
         fullName: 'Le Van C',
         dob: '2015-07-20',
         username: 'nurse1',
-        className: 'Class 6A',
+        className: 'Class 1A',
       },
       {
         fullName: 'Pham Thi D',
         dob: '2014-08-25',
         username: 'parent1',
-        className: 'Class 7B',
+        className: 'Class 2B',
       },
       {
         fullName: 'Hoang Van E',
         dob: '2014-09-30',
         username: 'parent2',
-        className: 'Class 7B',
+        className: 'Class 2B',
       },
       {
         fullName: 'Nguyen Thi F',
         dob: '2013-10-05',
         username: 'nurse1',
-        className: 'Class 8C',
+        className: 'Class 3C',
       },
       {
         fullName: 'Tran Van G',
         dob: '2013-11-10',
         username: 'parent1',
-        className: 'Class 8C',
+        className: 'Class 3C',
       },
       {
         fullName: 'Le Thi H',
         dob: '2012-12-15',
         username: 'parent2',
-        className: 'Class 9A',
+        className: 'Class 4A',
       },
       {
         fullName: 'Pham Van I',
         dob: '2015-01-20',
         username: 'nurse1',
-        className: 'Class 6B',
+        className: 'Class 5B',
       },
     ];
 
@@ -796,20 +793,35 @@ const seedDatabase = async () => {
     console.log('Seeding VaccinationCampaign data...');
     const vaccinationCampaigns = [
       {
+        name: 'MMR Campaign 2024',
         vaccineName: 'MMR',
         doseNumber: 1,
+        description: 'MMR vaccination for students',
+        schoolYear: '2024-2025',
+        partnerId: createdHealthcareOrganizations.find((n) => n.name === 'City Health Clinic')!
+          ._id,
+        targetGradeLevels: [1, 2, 3],
+        status: CampaignStatus.DRAFT,
         startDate: new Date('2024-11-01T00:00:00Z'),
         endDate: new Date('2024-11-15T00:00:00Z'),
-        description: 'MMR vaccination for students',
+        createdBy: createdUsers.find((u) => u.username === 'manager1')!._id,
       },
       {
+        name: 'Hepatitis B Booster 2025',
         vaccineName: 'Hepatitis B',
         doseNumber: 2,
+        description: 'Hepatitis B booster dose',
+        schoolYear: '2024-2025',
+        partnerId: createdHealthcareOrganizations.find((n) => n.name === 'School Health Center')!
+          ._id,
+        targetGradeLevels: [1, 2, 3, 4, 5],
+        status: CampaignStatus.DRAFT,
         startDate: new Date('2025-01-01T00:00:00Z'),
         endDate: new Date('2025-01-15T00:00:00Z'),
-        description: 'Hepatitis B booster dose',
+        createdBy: createdUsers.find((u) => u.username === 'manager1')!._id,
       },
     ];
+
     const createdVaccinationCampaigns =
       await VaccinationCampaignModel.insertMany(vaccinationCampaigns);
 
@@ -824,6 +836,7 @@ const seedDatabase = async () => {
           ._id,
         parentId: createdUsers.find((u) => u.username === 'parent1')!._id,
         status: ConsentStatus.APPROVED,
+        confirmedAt: new Date('2024-10-22T00:00:00Z'),
         createdAt: new Date('2024-10-20T00:00:00Z'),
       },
       {
