@@ -57,11 +57,11 @@ router.get(
     ConsentController.getMyConsents
 );
 
-router.put(
-    '/consents/:consentId/respond',
+router.patch(
+     '/consent/:campaignId/students/:studentId/respond',
     // roleMiddleware([RoleEnum.Parent]),
     respondToConsentValidator, 
-    ConsentController.respondToConsent
+    ConsentController.respondByStudentAndCampaign
 );
 
 

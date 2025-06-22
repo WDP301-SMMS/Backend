@@ -32,15 +32,15 @@ export class VaccinationConsentController {
     }
   };
 
-  public respondToConsent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+public respondByStudentAndCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { consentId } = req.params;
+      const { campaignId, studentId } = req.params; 
       const parentId = req.user?._id;
       if (!parentId) {
         throw new Error('User authentication error: User ID not found.');
       }
 
-      const updatedConsent = await consentService.respondToConsent(consentId, parentId, req.body);
+      const updatedConsent = await consentService.respondByStudentAndCampaign(campaignId, studentId, parentId, req.body);
 
       res.status(200).json({
         success: true,
@@ -50,7 +50,7 @@ export class VaccinationConsentController {
     } catch (error) {
       next(error);
     }
-  };
+};
 
   public getCampaignSummary = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

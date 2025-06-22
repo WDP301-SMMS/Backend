@@ -6,17 +6,17 @@ import { HealthcareOrganization } from '@/models/healthcare.organizations.model'
 import { StudentModel } from '@/models/student.model';
 import { VaccinationCampaignModel } from '@/models/vaccination.campaign.model';
 import { VaccinationConsentModel } from '@/models/vaccination.consent.model';
-import { AppError } from '@/utils/globalErrorHandler'; 
+import { AppError } from '@/utils/globalErrorHandler';
 import { ConsentStatus } from '@/enums/ConsentsEnum';
 
 
 type CreateCampaignInput = Pick<
   IVaccinationCampaign,
-  'name'|'vaccineName'|'doseNumber'|'partnerId'|'targetGradeLevels'|'startDate'|'endDate'|'description'|'schoolYear'
+  'name' | 'vaccineName' | 'doseNumber' | 'partnerId' | 'targetGradeLevels' | 'startDate' | 'endDate' | 'description' | 'schoolYear'
 >;
 
 type UpdateCampaignInput = Partial<
-  Pick<IVaccinationCampaign, 'name'|'description'|'status'|'cancellationReason'>
+  Pick<IVaccinationCampaign, 'name' | 'description' | 'status' | 'cancellationReason'>
 >;
 
 export class VaccinationCampaignService {
@@ -39,10 +39,11 @@ export class VaccinationCampaignService {
   }
 
   public async dispatchCampaign(campaignId: string): Promise<{ message: string }> {
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    // const session = await mongoose.startSession();
+    // session.startTransaction();
     try {
-      const campaign = await VaccinationCampaignModel.findById(campaignId).session(session);
+      const campaign = await VaccinationCampaignModel.findById(campaignId)
+      // .session(session);
       if (!campaign) {
         const error: AppError = new Error('Campaign not found.');
         error.status = 404;
@@ -54,16 +55,30 @@ export class VaccinationCampaignService {
         throw error;
       }
 
-      const targetClasses = await Class.find({ gradeLevel: { $in: campaign.targetGradeLevels } }).select('_id').session(session);
+      const targetClasses = await Class.find({ gradeLevel: { $in: campaign.targetGradeLevels } }).select('_id')
+      // .session(session);
+      if (targetClasses.length === 0) {
+        const error: AppError = new Error(`No classes found for the target grade levels [${campaign.targetGradeLevels.join(', ')}]. Please check campaign settings or class data.`);
+        error.status = 404; // Not Found
+        throw error;
+      }
       const targetClassIds = targetClasses.map(c => c._id);
-      const students = await StudentModel.find({ classId: { $in: targetClassIds } }).select('parentId').session(session);
+      const students = await StudentModel.find({ classId: { $in: targetClassIds } }).select('parentId')
+      // .session(session);
+
+       if (students.length === 0) {
+        const error: AppError = new Error('No students found for the target classes. Consent forms were not created.');
+        error.status = 404; // Not Found
+        throw error;
+      }
       
       let createdCount = 0;
       if (students.length > 0) {
         const consentsToCreate = students.map(student => ({
           campaignId: campaign._id, studentId: student._id, parentId: student.parentId, status: 'PENDING',
         }));
-        const result = await VaccinationConsentModel.insertMany(consentsToCreate, { session });
+        // const result = await VaccinationConsentModel.insertMany(consentsToCreate, { session });
+        const result = await VaccinationConsentModel.insertMany(consentsToCreate);
         createdCount = result.length;
       }
 
@@ -71,19 +86,21 @@ export class VaccinationCampaignService {
       campaign.dispatchedAt = new Date();
       campaign.summary.totalStudents = students.length;
       campaign.summary.totalConsents = createdCount;
-      
-      await campaign.save({ session });
-      await session.commitTransaction();
-      
+
+      await campaign.save();
+      // await campaign.save({ session });
+      // await session.commitTransaction();
+
       return { message: `Campaign dispatched successfully. ${createdCount} consent forms created.` };
     } catch (error) {
-      await session.abortTransaction();
+      // await session.abortTransaction();
       throw error;
-    } finally {
-      session.endSession();
     }
+    // } finally {
+    //   session.endSession();
+    // }
   }
- 
+
   public async updateCampaign(campaignId: string, updateData: UpdateCampaignInput, userId: string): Promise<IVaccinationCampaign> {
     const campaign = await VaccinationCampaignModel.findById(campaignId);
     if (!campaign) {
@@ -103,7 +120,7 @@ export class VaccinationCampaignService {
           error.status = 400;
           throw error;
         }
-        
+
         campaign.cancellationReason = updateData.cancellationReason;
         campaign.canceledBy = new mongoose.Types.ObjectId(userId);
         campaign.cancellationDate = new Date();
@@ -111,15 +128,15 @@ export class VaccinationCampaignService {
         if (currentStatus === CampaignStatus.ANNOUNCED || currentStatus === CampaignStatus.IN_PROGRESS) {
           await VaccinationConsentModel.updateMany(
             { campaignId: campaign._id },
-            { $set: { status: ConsentStatus.DECLINED } } 
+            { $set: { status: ConsentStatus.DECLINED } }
           );
         }
       }
-      
+
       if (newStatus === CampaignStatus.COMPLETED) {
         campaign.completedAt = new Date();
       }
-      
+
 
       campaign.status = newStatus;
     }
@@ -135,20 +152,20 @@ export class VaccinationCampaignService {
     await campaign.save();
     return campaign;
   }
-  
+
   private validateStateTransition(current: CampaignStatus, next: CampaignStatus): void {
-      const allowedInPatch: Record<CampaignStatus, CampaignStatus[]> = {
-          [CampaignStatus.DRAFT]: [CampaignStatus.CANCELED],
-          [CampaignStatus.ANNOUNCED]: [CampaignStatus.CANCELED],
-          [CampaignStatus.IN_PROGRESS]: [CampaignStatus.COMPLETED, CampaignStatus.CANCELED],
-          [CampaignStatus.COMPLETED]: [],
-          [CampaignStatus.CANCELED]: [],
-      };
-      if (!allowedInPatch[current] || !allowedInPatch[current].includes(next)) {
-          const error: AppError = new Error(`Action invalid: Cannot transition campaign from ${current} to ${next}.`);
-          error.status = 409;
-          throw error;
-      }
+    const allowedInPatch: Record<CampaignStatus, CampaignStatus[]> = {
+      [CampaignStatus.DRAFT]: [CampaignStatus.CANCELED],
+      [CampaignStatus.ANNOUNCED]: [CampaignStatus.CANCELED],
+      [CampaignStatus.IN_PROGRESS]: [CampaignStatus.COMPLETED, CampaignStatus.CANCELED],
+      [CampaignStatus.COMPLETED]: [],
+      [CampaignStatus.CANCELED]: [],
+    };
+    if (!allowedInPatch[current] || !allowedInPatch[current].includes(next)) {
+      const error: AppError = new Error(`Action invalid: Cannot transition campaign from ${current} to ${next}.`);
+      error.status = 409;
+      throw error;
+    }
   }
 
   public async getAllCampaigns(queryParams: any): Promise<any> {
@@ -167,7 +184,7 @@ export class VaccinationCampaignService {
       .exec();
 
     const count = await VaccinationCampaignModel.countDocuments(filter);
-    
+
     return {
       data: campaigns,
       pagination: { totalPages: Math.ceil(count / limit), currentPage: parseInt(page, 10), totalItems: count },
@@ -175,14 +192,14 @@ export class VaccinationCampaignService {
   }
 
   public async getCampaignById(campaignId: string): Promise<IVaccinationCampaign> {
-      const campaign = await VaccinationCampaignModel.findById(campaignId)
-          .populate('partnerId', 'name address phone')
-          .populate({ path: 'createdBy', model: 'User', select: 'username email' });
-      if (!campaign) {
-          const error: AppError = new Error('Campaign not found.');
-          error.status = 404;
-          throw error;
-      }
-      return campaign;
+    const campaign = await VaccinationCampaignModel.findById(campaignId)
+      .populate('partnerId', 'name address phone')
+      .populate({ path: 'createdBy', model: 'User', select: 'username email' });
+    if (!campaign) {
+      const error: AppError = new Error('Campaign not found.');
+      error.status = 404;
+      throw error;
+    }
+    return campaign;
   }
 }
