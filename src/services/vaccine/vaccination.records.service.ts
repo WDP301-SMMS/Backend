@@ -72,13 +72,11 @@ export class VaccinationRecordService {
     public async createVaccinationRecord(payload: ICreateRecordPayload): Promise<IVaccinationRecord> {
         const { consentId, administeredAt, administeredByStaffId } = payload;
 
-        const session = await mongoose.startSession();
-        session.startTransaction();
 
         try {
             const consent = await VaccinationConsentModel.findById(consentId)
                 .populate<{ campaignId: IVaccinationCampaign }>('campaignId')
-                .session(session);
+                // .session(session);
 
             if (!consent) {
                 const error: AppError = new Error('Consent form not found.');
@@ -103,29 +101,31 @@ export class VaccinationRecordService {
                 doseNumber: campaign.doseNumber,
             });
 
-            await newRecord.save({ session });
+            await newRecord.save();
 
             consent.status = ConsentStatus.COMPLETED;
-            await consent.save({ session });
+            await consent.save();
 
             await VaccinationCampaignModel.updateOne(
                 { _id: campaign._id },
                 { $inc: { 'summary.administered': 1 } }
-            ).session(session);
+            )
+            // .session(session);
 
-            await session.commitTransaction();
+            // await session.commitTransaction();
             return newRecord;
         } catch (error) {
-            await session.abortTransaction();
+            // await session.abortTransaction();
             if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
                 const appError: AppError = new Error('A vaccination record for this consent form already exists.');
                 appError.status = 409;
                 throw appError;
             }
             throw error ;
-        } finally {
-            session.endSession();
         }
+        //  finally {
+        //     session.endSession();
+        // }
     }
 
     public async addObservation(recordId: string, observationData: IObservation): Promise<IVaccinationRecord> {

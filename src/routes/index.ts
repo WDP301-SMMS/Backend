@@ -19,7 +19,7 @@ router.use(
   dashboardRouter,
 );
 router.use('/user', handleToken, userRouter);
-router.use('/vaccinationCampaigns', vaccinationCampaigns);
-router.use('reports', reportsRouter)
+router.use('/vaccinationCampaigns', handleToken, vaccinationCampaigns);
+router.use('/reports', reportsRouter)
 
 export default router;
