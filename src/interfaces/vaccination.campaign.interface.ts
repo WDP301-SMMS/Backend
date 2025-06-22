@@ -15,6 +15,7 @@ export interface IVaccinationCampaign extends Document {
   vaccineName: string;
   doseNumber: number;
   description?: string; 
+  destination?: string;
   schoolYear: string;
   partnerId: Types.ObjectId; 
   targetGradeLevels: number[];

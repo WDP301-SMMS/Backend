@@ -25,6 +25,11 @@ const VaccinationCampaignSchema = new Schema<IVaccinationCampaign>(
       type: String,
       trim: true,
     },
+    destination: {
+      type: String,
+      trim: true,
+      default: 'School',
+    },
     schoolYear: { 
       type: String,
       required: true,

@@ -12,11 +12,11 @@ import { ConsentStatus } from '@/enums/ConsentsEnum';
 
 type CreateCampaignInput = Pick<
   IVaccinationCampaign,
-  'name' | 'vaccineName' | 'doseNumber' | 'partnerId' | 'targetGradeLevels' | 'startDate' | 'endDate' | 'description' | 'schoolYear'
+  'name' | 'vaccineName' | 'doseNumber' | 'partnerId' | 'targetGradeLevels' | 'startDate' | 'endDate' | 'description' | 'actualStartDate'| 'destination'| 'schoolYear'
 >;
 
 type UpdateCampaignInput = Partial<
-  Pick<IVaccinationCampaign, 'name' | 'description' | 'status' | 'cancellationReason'>
+  Pick<IVaccinationCampaign, 'name' | 'description' | 'actualStartDate'| 'destination' |'status' | 'cancellationReason'>
 >;
 
 export class VaccinationCampaignService {
@@ -143,7 +143,9 @@ export class VaccinationCampaignService {
     if (currentStatus === CampaignStatus.DRAFT) {
       if (updateData.name) campaign.name = updateData.name;
       if (updateData.description) campaign.description = updateData.description;
-    } else if (updateData.name || updateData.description) {
+      if (updateData.actualStartDate) campaign.actualStartDate = updateData.actualStartDate;
+      if (updateData.destination) campaign.destination = updateData.destination;
+    } else if (updateData.name || updateData.description || updateData.actualStartDate) {
       const error: AppError = new Error(`Cannot update campaign details with status ${currentStatus}.`);
       error.status = 409;
       throw error;
