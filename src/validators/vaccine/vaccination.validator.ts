@@ -51,6 +51,8 @@ const createCampaignSchema = Joi.object({
   schoolYear: Joi.string().pattern(/^\d{4}-\d{4}$/).required().messages({
     'string.pattern.base': 'School year must be in format YYYY-YYYY (e.g., 2023-2024).',
   }),
+   destination: Joi.string().allow('').optional(),
+  actualStartDate: Joi.date().iso().optional(),
 });
 
 
@@ -66,6 +68,8 @@ const updateCampaignSchema = Joi.object({
     }),
     otherwise: Joi.optional(),
   }),
+   destination: Joi.string().allow('').optional(),
+  actualStartDate: Joi.date().iso().optional(),
 }).min(1); 
 
 
