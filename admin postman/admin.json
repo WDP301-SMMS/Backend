@@ -1,0 +1,694 @@
+{
+	"info": {
+		"_postman_id": "c1a2b3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+		"name": "Health Check - Admin API",
+		"description": "Collection for testing the Admin APIs of the School Health Check system.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Dashboard",
+			"item": [
+				{
+					"name": "Get Main Dashboard Data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/dashboard",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"dashboard"
+							]
+						},
+						"description": "Lấy toàn bộ dữ liệu tổng quan cho trang dashboard của admin."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users Management",
+			"item": [
+				{
+					"name": "Get All Users (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/users?page=1&limit=10&role=Parent&status=active&search=test",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "role",
+									"value": "Parent"
+								},
+								{
+									"key": "status",
+									"value": "active"
+								},
+								{
+									"key": "search",
+									"value": "test"
+								}
+							]
+						},
+						"description": "Lấy danh sách người dùng với các bộ lọc và phân trang."
+					},
+					"response": []
+				},
+				{
+					"name": "Update User Status",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isActive\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/users/60c72b2f5f1b2c001f8e4b1a/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"users",
+								"60c72b2f5f1b2c001f8e4b1a",
+								"status"
+							]
+						},
+						"description": "Kích hoạt hoặc vô hiệu hóa một tài khoản người dùng."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Students Management",
+			"item": [
+				{
+					"name": "Get All Students (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/students?page=1&limit=10&classId=60c72b2f5f1b2c001f8e4b1c&search=Nguyen",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "classId",
+									"value": "60c72b2f5f1b2c001f8e4b1c"
+								},
+								{
+									"key": "search",
+									"value": "Nguyen"
+								}
+							]
+						},
+						"description": "Lấy danh sách học sinh với các bộ lọc."
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Student",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"Trần Văn B\",\n    \"dateOfBirth\": \"2015-08-20T00:00:00.000Z\",\n    \"gender\": \"MALE\",\n    \"status\": \"ACTIVE\",\n    \"parentId\": \"60c72b2f5f1b2c001f8e4b1a\",\n    \"classId\": \"60c72b2f5f1b2c001f8e4b1c\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students"
+							]
+						},
+						"description": "Tạo một hồ sơ học sinh mới."
+					},
+					"response": []
+				},
+				{
+					"name": "Update Student Information",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"Trần Văn B (Updated)\",\n    \"classId\": \"60c72b2f5f1b2c001f8e4b1d\" \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/students/60c72b2f5f1b2c001f8e4b1e",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"students",
+								"60c72b2f5f1b2c001f8e4b1e"
+							]
+						},
+						"description": "Cập nhật thông tin học sinh, có thể dùng để chuyển lớp."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Classes Management",
+			"item": [
+				{
+					"name": "Get All Classes (Paginated)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/classes?gradeLevel=1&schoolYear=2023-2024",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"classes"
+							],
+							"query": [
+								{
+									"key": "gradeLevel",
+									"value": "1"
+								},
+								{
+									"key": "schoolYear",
+									"value": "2023-2024"
+								}
+							]
+						},
+						"description": "Lấy danh sách các lớp học."
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Class",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"className\": \"Lớp 1A1\",\n    \"gradeLevel\": 1,\n    \"schoolYear\": \"2024-2025\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/classes",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"classes"
+							]
+						},
+						"description": "Tạo một lớp học mới."
+					},
+					"response": []
+				},
+				{
+					"name": "Add Students to Class",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"studentIds\": [\"60c72b2f5f1b2c001f8e4b1e\", \"60c72b2f5f1b2c001f8e4b1f\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/classes/60c72b2f5f1b2c001f8e4b1c/add-students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"classes",
+								"60c72b2f5f1b2c001f8e4b1c",
+								"add-students"
+							]
+						},
+						"description": "Thêm một hoặc nhiều học sinh vào một lớp."
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Students from Class",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"studentIds\": [\"60c72b2f5f1b2c001f8e4b1e\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/classes/60c72b2f5f1b2c001f8e4b1c/remove-students",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"classes",
+								"60c72b2f5f1b2c001f8e4b1c",
+								"remove-students"
+							]
+						},
+						"description": "Xóa một hoặc nhiều học sinh khỏi lớp."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Health Check Templates",
+			"item": [
+				{
+					"name": "Get All Templates",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health-check-templates?search=tổng quát",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health-check-templates"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "tổng quát"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Template",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Mẫu khám sức khỏe tổng quát đầu năm\",\n    \"description\": \"Mẫu khám theo thông tư 13 của Bộ Y Tế và Bộ Giáo Dục\",\n    \"isDefault\": true,\n    \"checkupItems\": [\n        {\n            \"itemId\": \"60c72b2f5f1b2c001f8e4b20\",\n            \"itemName\": \"Chiều cao\",\n            \"unit\": \"cm\",\n            \"dataType\": \"NUMBER\",\n            \"guideline\": \"Đo không mang giày dép\"\n        },\n        {\n            \"itemId\": \"60c72b2f5f1b2c001f8e4b21\",\n            \"itemName\": \"Cân nặng\",\n            \"unit\": \"kg\",\n            \"dataType\": \"NUMBER\",\n            \"guideline\": \"\"\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/health-check-templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health-check-templates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Template By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health-check-templates/60c72b2f5f1b2c001f8e4b22",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health-check-templates",
+								"60c72b2f5f1b2c001f8e4b22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Template",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Mẫu khám theo thông tư 13, cập nhật 2024\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/health-check-templates/60c72b2f5f1b2c001f8e4b22",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health-check-templates",
+								"60c72b2f5f1b2c001f8e4b22"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Template",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health-check-templates/60c72b2f5f1b2c001f8e4b22",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health-check-templates",
+								"60c72b2f5f1b2c001f8e4b22"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Partners Management",
+			"item": [
+				{
+					"name": "Create New Partner",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"organization\": {\n        \"name\": \"Bệnh viện Nhi Đồng 2\",\n        \"address\": \"14 Lý Tự Trọng, Bến Nghé, Quận 1, TPHCM\",\n        \"phone\": \"02838295723\",\n        \"email\": \"bvnhi@nd2.com.vn\",\n        \"type\": \"HOSPITAL\",\n        \"isActive\": true\n    },\n    \"managerInfo\": {\n        \"fullName\": \"GS.TS. Trần Thành Đạo\",\n        \"email\": \"daott@nd2.com.vn\",\n        \"phone\": \"0903123456\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/partners",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Partners",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/partners?status=active",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "active"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Partner By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/partners/60c72b2f5f1b2c001f8e4b23",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners",
+								"60c72b2f5f1b2c001f8e4b23"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Partner Info",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"02838295724\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/partners/60c72b2f5f1b2c001f8e4b23",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners",
+								"60c72b2f5f1b2c001f8e4b23"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Partner Status",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"isActive\": false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/partners/60c72b2f5f1b2c001f8e4b23/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners",
+								"60c72b2f5f1b2c001f8e4b23",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Staff to Partner",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"Y tá Nguyễn Thị C\",\n    \"position\": \"Điều dưỡng trưởng\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/partners/60c72b2f5f1b2c001f8e4b23/staff",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners",
+								"60c72b2f5f1b2c001f8e4b23",
+								"staff"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Remove Staff from Partner",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/partners/60c72b2f5f1b2c001f8e4b23/staff/60c72b2f5f1b2c001f8e4b24",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners",
+								"60c72b2f5f1b2c001f8e4b23",
+								"staff",
+								"60c72b2f5f1b2c001f8e4b24"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Replace Manager",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fullName\": \"BS.CKII. Lê Thị Minh Hồng\",\n    \"email\": \"hongltm@nd2.com.vn\",\n    \"phone\": \"0918123123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/partners/60c72b2f5f1b2c001f8e4b23/manager",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"partners",
+								"60c72b2f5f1b2c001f8e4b23",
+								"manager"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Vaccine & Inventory",
+			"item": [
+				{
+					"name": "Get Vaccine Name Suggestions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/vaccines/suggestions",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"vaccines",
+								"suggestions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Inventory Overview",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/inventory?status=LOW_STOCK",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"inventory"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "LOW_STOCK"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/admin",
+			"type": "string"
+		}
+	]
+}
