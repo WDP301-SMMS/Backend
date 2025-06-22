@@ -256,6 +256,8 @@ const seedDatabase = async () => {
       });
     }
 
+    const dummyOrgId1 = new mongoose.Types.ObjectId();
+    const dummyOrgId2 = new mongoose.Types.ObjectId();
     // Tạo dữ liệu OrganizationManager
     console.log('Seeding OrganizationManager data...');
     const organizationManagers = [
@@ -263,6 +265,7 @@ const seedDatabase = async () => {
         fullName: 'Dr. John Doe',
         email: 'john.doe@cityhealth.com',
         phone: '0123456789',
+        organizationId: dummyOrgId1,
         createdAt: new Date('2024-01-01T00:00:00Z'),
         updatedAt: new Date('2024-01-01T00:00:00Z'),
       },
@@ -270,6 +273,7 @@ const seedDatabase = async () => {
         fullName: 'Dr. Jane Smith',
         email: 'jane.smith@schoolhealth.com',
         phone: '0987654321',
+        organizationId: dummyOrgId2,
         createdAt: new Date('2024-01-01T00:00:00Z'),
         updatedAt: new Date('2024-01-01T00:00:00Z'),
       },
@@ -284,6 +288,7 @@ const seedDatabase = async () => {
         fullName: 'Nurse Alice Brown',
         position: 'Nurse',
         isActive: true,
+        organizationId: dummyOrgId2,
         createdAt: new Date('2024-01-01T00:00:00Z'),
         updatedAt: new Date('2024-01-01T00:00:00Z'),
       },
@@ -291,6 +296,7 @@ const seedDatabase = async () => {
         fullName: 'Technician Bob White',
         position: 'Technician',
         isActive: true,
+        organizationId: dummyOrgId2,
         createdAt: new Date('2024-01-01T00:00:00Z'),
         updatedAt: new Date('2024-01-01T00:00:00Z'),
       },
@@ -298,6 +304,7 @@ const seedDatabase = async () => {
         fullName: 'Nurse Carol Green',
         position: 'Nurse',
         isActive: true,
+        organizationId: dummyOrgId1,
         createdAt: new Date('2024-01-01T00:00:00Z'),
         updatedAt: new Date('2024-01-01T00:00:00Z'),
       },
@@ -309,6 +316,7 @@ const seedDatabase = async () => {
     console.log('Seeding HealthcareOrganization data...');
     const healthcareOrganizations = [
       {
+        _id: dummyOrgId1, // gán lại đúng dummy ID
         name: 'City Health Clinic',
         address: '123 Health St, City',
         phone: '0123456789',
@@ -327,6 +335,7 @@ const seedDatabase = async () => {
         updatedAt: new Date('2024-01-01T00:00:00Z'),
       },
       {
+        _id: dummyOrgId2,
         name: 'School Health Center',
         address: '456 School Rd, City',
         phone: '0987654321',
@@ -798,8 +807,9 @@ const seedDatabase = async () => {
         doseNumber: 1,
         description: 'MMR vaccination for students',
         schoolYear: '2024-2025',
-        partnerId: createdHealthcareOrganizations.find((n) => n.name === 'City Health Clinic')!
-          ._id,
+        partnerId: createdHealthcareOrganizations.find(
+          (n) => n.name === 'City Health Clinic',
+        )!._id,
         targetGradeLevels: [1, 2, 3],
         status: CampaignStatus.DRAFT,
         startDate: new Date('2024-11-01T00:00:00Z'),
@@ -812,8 +822,9 @@ const seedDatabase = async () => {
         doseNumber: 2,
         description: 'Hepatitis B booster dose',
         schoolYear: '2024-2025',
-        partnerId: createdHealthcareOrganizations.find((n) => n.name === 'School Health Center')!
-          ._id,
+        partnerId: createdHealthcareOrganizations.find(
+          (n) => n.name === 'School Health Center',
+        )!._id,
         targetGradeLevels: [1, 2, 3, 4, 5],
         status: CampaignStatus.DRAFT,
         startDate: new Date('2025-01-01T00:00:00Z'),
