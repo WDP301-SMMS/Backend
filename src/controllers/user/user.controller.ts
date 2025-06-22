@@ -9,7 +9,9 @@ const getUser = async (req: Request, res: Response) => {
   const token = req.token as string;
   const decodedToken = decryptToken(token);
   try {
-    const user = await UserModel.findById(decodedToken?._id).select('-password');
+    const user = await UserModel.findById(decodedToken?._id).select(
+      '-password',
+    );
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
       return;
@@ -98,4 +100,48 @@ const updatePassword = async (req: Request, res: Response) => {
   }
 };
 
-export { getUser, editProfile, updatePassword };
+const updateCompleteProfile = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ success: false, errors: errors.array() });
+    return;
+  }
+
+  const token = req.token as string;
+  const decodedToken = decryptToken(token);
+  if (!token || !decodedToken) {
+    res.status(401).json({ message: 'Unauthorized' });
+    return;
+  }
+
+  const { password, dob, phone } = req.body;
+
+  try {
+    const user = await UserModel.findById(decodedToken._id);
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      user.password = hashedPassword;
+    }
+
+    user.dob = dob;
+    user.phone = phone;
+    await user.save();
+
+    res
+      .status(200)
+      .json({ success: true, message: 'Profile completed successfully', user });
+  } catch (error) {
+    console.error('Error completing profile:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+export { getUser, editProfile, updatePassword, updateCompleteProfile };
