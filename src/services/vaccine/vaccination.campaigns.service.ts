@@ -12,11 +12,12 @@ import { ConsentStatus } from '@/enums/ConsentsEnum';
 
 type CreateCampaignInput = Pick<
   IVaccinationCampaign,
-  'name' | 'vaccineName' | 'doseNumber' | 'partnerId' | 'targetGradeLevels' | 'startDate' | 'endDate' | 'description' | 'actualStartDate'| 'destination'| 'schoolYear'
+  'name' | 'vaccineName' | 'doseNumber' | 'partnerId' | 'targetGradeLevels' | 'startDate' | 'endDate' | 'description' | 'schoolYear' | 'actualStartDate' | 'destination'
 >;
 
+// FIX 2: Thêm 'actualStartDate' và 'destination' vào đây
 type UpdateCampaignInput = Partial<
-  Pick<IVaccinationCampaign, 'name' | 'description' | 'actualStartDate'| 'destination' |'status' | 'cancellationReason'>
+  Pick<IVaccinationCampaign, 'name' | 'description' | 'status' | 'cancellationReason' | 'actualStartDate' | 'destination'>
 >;
 
 export class VaccinationCampaignService {
