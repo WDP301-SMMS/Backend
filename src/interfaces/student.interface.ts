@@ -2,7 +2,7 @@ import { StudentGender } from '@/enums/StudentEnum';
 import { Types } from 'mongoose';
 
 export interface IStudent {
-  parentId: Types.ObjectId;
+  parentId?: Types.ObjectId;
   classId: Types.ObjectId;
   invitedCode?: IInvitedCode;
   fullName: string;

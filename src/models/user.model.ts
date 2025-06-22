@@ -2,6 +2,7 @@ import mongoose, { Schema, Document } from 'mongoose';
 import { RoleEnum } from '@/enums/RoleEnum';
 import { IUser } from '@/interfaces/user.interface';
 import bcrypt from 'bcrypt';
+import { StudentGender } from '@/enums/StudentEnum';
 
 const UserSchema = new Schema<IUser>({
   username: {
@@ -23,6 +24,10 @@ const UserSchema = new Schema<IUser>({
       'Password is required for local authentication',
     ],
     trim: true,
+  },
+  gender: {
+    type: String,
+    enum: Object.values(StudentGender),
   },
   email: {
     type: String,
