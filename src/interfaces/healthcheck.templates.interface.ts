@@ -1,7 +1,7 @@
 import { CheckupItemDataType, CheckupItemUnit } from '@/enums/TemplateEnum';
 
 export interface ICheckupItem {
-  itemId: string;
+  itemId: Number;
   itemName: string;
   unit?: CheckupItemUnit;
   dataType: CheckupItemDataType;

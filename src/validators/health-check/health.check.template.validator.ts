@@ -1,9 +1,12 @@
 import { body } from 'express-validator';
-import { CheckupItemDataType } from '@/enums/TemplateEnum';
+import { CheckupItemDataType, CheckupItemUnit } from '@/enums/TemplateEnum';
 
 export const templateValidator = [
   body('name').notEmpty().withMessage('Name is required'),
-  body('description').notEmpty().withMessage('Description is required'),
+  body('description')
+    .optional()
+    .isString()
+    .withMessage('Description is required'),
   body('checkupItems')
     .notEmpty()
     .isArray()
@@ -14,11 +17,13 @@ export const templateValidator = [
   body('checkupItems.*.dataType')
     .notEmpty()
     .isIn(Object.values(CheckupItemDataType))
-    .withMessage('Data type is required and must be a valid type'),
+    .withMessage('Data type is required and must be a valid type')
+    .toUpperCase(),
   body('checkupItems.*.unit')
-    .optional()
-    .isString()
-    .withMessage('Unit must be a string if provided'),
+    .notEmpty()
+    .isIn(Object.values(CheckupItemUnit))
+    .withMessage('Unit must be a string if provided')
+    .toUpperCase(),
   body('checkupItems.*.guideline')
     .optional()
     .isString()

@@ -23,7 +23,7 @@ const HealthCheckTemplateSchema = new Schema<IHealthCheckTemplate>({
     type: [
       {
         itemId: {
-          type: Types.UUID,
+          type: Number,
           required: true,
         },
         itemName: {
