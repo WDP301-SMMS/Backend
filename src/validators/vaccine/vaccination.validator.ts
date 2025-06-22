@@ -51,7 +51,6 @@ const createCampaignSchema = Joi.object({
   schoolYear: Joi.string().pattern(/^\d{4}-\d{4}$/).required().messages({
     'string.pattern.base': 'School year must be in format YYYY-YYYY (e.g., 2023-2024).',
   }),
-  createdBy: objectIdValidator.required().label('Created By User ID'),
 });
 
 
@@ -67,7 +66,6 @@ const updateCampaignSchema = Joi.object({
     }),
     otherwise: Joi.optional(),
   }),
-   createdBy: objectIdValidator.required().label('Created By User ID'),
 }).min(1); 
 
 
