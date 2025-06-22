@@ -27,6 +27,11 @@ const MedicationScheduleSchema: Schema = new Schema<IMedicationSchedule>({
     required: true,
   },
   status: { type: String, required: true },
+  date: {
+    type: Date,
+    required: true,
+    index: true,
+  },
 });
 
 export const MedicationScheduleModel = mongoose.model<IMedicationSchedule>(

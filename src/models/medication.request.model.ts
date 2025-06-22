@@ -10,6 +10,11 @@ const MedicationRequestSchema = new Schema<IMedicationRequest>({
     ref: 'User',
     required: true,
   },
+  studentId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Student',
+    required: true,
+  },
   startDate: {
     type: Date,
     required: true,

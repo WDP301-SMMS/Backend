@@ -1,4 +1,5 @@
 import { SlotEnum } from "@/enums/SlotEnum";
+import { MedicationScheduleEnum } from "@/enums/MedicationEnum";
 import { Types } from "mongoose";
 
 export interface IMedicationSchedule {
@@ -6,5 +7,7 @@ export interface IMedicationSchedule {
   studentId: Types.ObjectId;
   nurseId: Types.ObjectId;
   sessionSlots: SlotEnum;
-  status: string;
+  status: MedicationScheduleEnum;
+  date: Date;
+  reason?: string;
 }
