@@ -2,7 +2,7 @@ import { CampaignStatus } from '../enums/CampaignEnum';
 import { IHealthCheckCampaign } from '@/interfaces/healthcheck.campaign.interface';
 import mongoose, { Schema } from 'mongoose';
 
-const HealthCheckCampaignSchema = new Schema({
+const HealthCheckCampaignSchema = new Schema<IHealthCheckCampaign>({
   name: {
     type: String,
     required: true,
@@ -14,58 +14,43 @@ const HealthCheckCampaignSchema = new Schema({
     trim: true,
     match: [/^\d{4}-\d{4}$/, 'School year must be in format YYYY-YYYY'],
   },
-  startDate: {
-    type: Date,
-    required: true,
-  },
-  endDate: {
-    type: Date,
-    required: true,
-    validate: {
-      validator: function (this: IHealthCheckCampaign, endDate: Date) {
-        return endDate >= this.startDate;
-      },
-      message: 'End date must be after start date',
-    },
-  },
   templateId: {
     type: Schema.Types.ObjectId,
     required: true,
     ref: 'HealthCheckTemplate',
   },
-  targetGradeLevels: {
-    type: [Number],
+  scheduleDate: {
+    type: Date,
     required: true,
-    validate: {
-      validator: (grades: number[]) =>
-        grades.length > 0 &&
-        grades.every((grade) => Number.isInteger(grade) && grade > 0),
-      message: 'Target grade levels must be positive integers',
+  },
+  participatingStaffs: {
+    type: [String],
+    required: true,
+    default: [],
+  },
+  assignments: [
+    {
+      classId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'Class',
+      },
+      nurseId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: 'User',
+      },
     },
-  },
-  // executionType: {
-  //   type: String,
-  //   required: true,
-  //   enum: Object.values(ExecutionType),
-  // },
-  // partnerId: {
-  //   type: Schema.Types.ObjectId,
-  //   required: function (this: IHealthCheckCampaign) {
-  //     return this.executionType === ExecutionType.EXTERNAL;
-  //   },
-  //   ref: 'HealthcareOrganization',
-  // },
-  nurseId: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-    index: true,
-  },
+  ],
   status: {
     type: String,
     required: true,
     enum: Object.values(CampaignStatus),
     default: CampaignStatus.DRAFT,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
   createdBy: {
     type: Schema.Types.ObjectId,

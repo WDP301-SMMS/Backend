@@ -25,5 +25,7 @@ router.use('/medication', medicationRequestRouter);
 router.use('/upload', upload);
 router.use('/vaccinationCampaigns', vaccinationCampaigns);
 router.use('reports', reportsRouter);
+router.use('/vaccinationCampaigns', handleToken, vaccinationCampaigns);
+router.use('/reports', reportsRouter)
 
 export default router;
