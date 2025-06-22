@@ -10,7 +10,7 @@ const createHealthCheckTemplate = async (req: Request, res: Response, next: Next
     const templateData: IHealthCheckTemplate = req.body;
 
     // Validation cơ bản
-    if (!templateData.name || !templateData.description || !templateData.type || !Array.isArray(templateData.checkupItems)) {
+    if (!templateData.name || !templateData.description || !Array.isArray(templateData.checkupItems)) {
       res.status(400).json({ message: 'Missing required fields: name, description, type, checkupItems' });
       return;
     }
@@ -28,7 +28,6 @@ const getHealthCheckTemplates = async (req: Request, res: Response, next: NextFu
       page?: string;
       limit?: string;
       search?: string;
-      type?: string;
     };
     const result = await adminHealthTemplateService.getHealthCheckTemplates(query);
     res.status(200).json({ data: result, message: 'Health check templates retrieved successfully' });
