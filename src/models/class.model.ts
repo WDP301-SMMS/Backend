@@ -12,6 +12,7 @@ const ClassSchema: Schema = new Schema(
       type: Number,
       required: false,
       min: [1, 'Grade level must be a positive integer'],
+      max: [12, 'Grade level cannot exceed 12'],
     },
     schoolYear: {
       type: String,

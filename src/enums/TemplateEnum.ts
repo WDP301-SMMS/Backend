@@ -11,3 +11,14 @@ export enum CheckupItemDataType {
   BOOLEAN = 'BOOLEAN',
   SELECT = 'SELECT',
 }
+
+export enum CheckupItemUnit {
+  KG = 'KG',
+  CM = 'CM',
+  MM = 'MM',
+  PERCENT = 'PERCENT',
+  BPM = 'BPM',
+  MG_DL = 'MG/DL',
+  MM_HG = 'MM/HG',
+  LITER = 'LITER',
+}

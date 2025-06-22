@@ -1,10 +1,8 @@
-import { DataSource, ResultStatus } from "@/enums/HealthCheckResultEnum";
-import { Types } from "mongoose";
-
+import { Types } from 'mongoose';
 
 export interface IResultData {
   itemName: string;
-  value: any; // Flexible type to accommodate NUMBER, TEXT, BOOLEAN, or SELECT
+  value: any;
   unit?: string | null;
   isAbnormal: boolean;
   notes?: string;
@@ -12,12 +10,11 @@ export interface IResultData {
 
 export interface IHealthCheckResult {
   campaignId: Types.ObjectId;
+  nurseId: Types.ObjectId;
   studentId: Types.ObjectId;
   checkupDate: Date;
-  resultsData: IResultData[];
+  isAbnormal: boolean;
+  recommendations?: string;
   overallConclusion?: string;
-  recommendation?: string;
-  checkedBy: Types.ObjectId;
-  dataSource: DataSource;
-  status: ResultStatus;
+  resultsData: IResultData[];
 }
