@@ -99,6 +99,10 @@ const loginWithJwt = async (
 
   try {
     const user = await UserModel.findOne({ email });
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
+    }
 
     const isActive = user?.isActive;
     if (!isActive) {
@@ -153,7 +157,6 @@ const registerWithJwt = async (
       return;
     }
 
-    // Create user first
     const newUser = await UserModel.create({
       ...body,
       password: body.password ? await bcrypt.hash(body.password, 10) : '',
