@@ -2,9 +2,10 @@ import { differenceInYears, isValid, parse } from 'date-fns';
 import { body } from 'express-validator';
 
 const editProfileValidator = [
-  body('username').notEmpty().withMessage('Username is required'),
+  body('username').optional().isString().withMessage('Username must be a string'),
+  body('gender').optional().isString().withMessage('Gender must be a string').toUpperCase(),
   body('dob')
-    .notEmpty()
+    .optional()
     .custom((value) => {
       const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
       if (!isValid(parsedDate)) {
@@ -25,7 +26,7 @@ const editProfileValidator = [
     })
     .withMessage('Date of Birth must be a valid date in DD/MM/YYYY format'),
   body('phone')
-    .notEmpty()
+    .optional()
     .isMobilePhone('any', { strictMode: false })
     .withMessage('Phone number must be a valid mobile number'),
 ];

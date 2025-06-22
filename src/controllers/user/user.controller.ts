@@ -4,12 +4,15 @@ import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import bcrypt from 'bcrypt';
 import { decryptToken } from '@/utils/jwt';
+import { IUser } from '@/interfaces/user.interface';
 
 const getUser = async (req: Request, res: Response) => {
   const token = req.token as string;
   const decodedToken = decryptToken(token);
   try {
-    const user = await UserModel.findById(decodedToken?._id).select('-password');
+    const user = await UserModel.findById(decodedToken?._id).select(
+      '-password -googleId',
+    );
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
       return;
@@ -35,7 +38,8 @@ const editProfile = async (req: Request, res: Response) => {
     res.status(401).json({ message: 'Unauthorized' });
     return;
   }
-  const body = req.body;
+  const body: Partial<IUser> = req.body;
+
   try {
     const user = await UserModel.findOneAndUpdate(
       { _id: decodedToken?._id },
