@@ -19,29 +19,41 @@ const HealthCheckCampaignSchema = new Schema<IHealthCheckCampaign>({
     required: true,
     ref: 'HealthCheckTemplate',
   },
-  scheduleDate: {
+  startDate: {
     type: Date,
     required: true,
   },
+  endDate: {
+    type: Date,
+    default: null,
+  },
+  actualStartDate: {
+    type: Date,
+    default: null,
+  },
+  completedDate: {
+    type: Date,
+    default: null,
+  },
   participatingStaffs: {
     type: [String],
-    required: true,
     default: [],
   },
-  assignments: [
-    {
-      classId: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: 'Class',
+  assignments: {
+    type: [
+      {
+        classId: {
+          type: Schema.Types.ObjectId,
+          ref: 'Class',
+        },
+        nurseId: {
+          type: Schema.Types.ObjectId,
+          ref: 'User',
+        },
       },
-      nurseId: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref: 'User',
-      },
-    },
-  ],
+    ],
+    default: [],
+  },
   status: {
     type: String,
     required: true,

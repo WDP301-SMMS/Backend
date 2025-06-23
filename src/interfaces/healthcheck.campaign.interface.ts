@@ -5,11 +5,14 @@ export interface IHealthCheckCampaign {
   templateId: Types.ObjectId;
   name: string;
   schoolYear: string;
-  scheduleDate: Date;
+  startDate: Date;
+  endDate?: Date;
+  actualStartDate?: Date;
+  completedDate?: Date;
   createdAt?: Date;
   createdBy: Types.ObjectId;
-  participatingStaffs: String[];
-  assignments: IAssignment[];
+  participatingStaffs?: String[];
+  assignments?: IAssignment[];
   status: CampaignStatus;
 }
 
