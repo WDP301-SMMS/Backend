@@ -119,7 +119,7 @@ const updateCompleteProfile = async (
     return;
   }
 
-  const { password, dob, phone } = req.body;
+  const { password, dob, phone, gender } = req.body;
 
   try {
     const user = await UserModel.findById(decodedToken._id);
@@ -135,6 +135,7 @@ const updateCompleteProfile = async (
 
     user.dob = dob;
     user.phone = phone;
+    user.gender = gender;
     await user.save();
 
     res

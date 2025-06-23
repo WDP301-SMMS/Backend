@@ -1,4 +1,4 @@
-import { StudentGender } from '@/enums/StudentEnum';
+import { StudentGender, StudentStatus } from '@/enums/StudentEnum';
 import { Types } from 'mongoose';
 
 export interface IStudent {
@@ -8,7 +8,7 @@ export interface IStudent {
   fullName: string;
   dateOfBirth: Date;
   gender: StudentGender;
-  status: string;
+  status: StudentStatus;
 }
 
 export interface IInvitedCode {
