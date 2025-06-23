@@ -157,7 +157,7 @@ paths:
                   example: user@example.com
                 token:
                   type: string
-                  example: "123456"
+                  example: '123456'
               required:
                 - email
                 - token
@@ -180,7 +180,7 @@ paths:
                     properties:
                       resetToken:
                         type: string
-                        example: "a1b2c3d4e5"
+                        example: 'a1b2c3d4e5'
   /auth/reset-password:
     post:
       summary: Reset password
@@ -201,15 +201,15 @@ paths:
                   example: user@example.com
                 resetToken:
                   type: string
-                  example: "a1b2c3d4e5"
+                  example: 'a1b2c3d4e5'
                 newPassword:
                   type: string
                   format: password
-                  example: "NewPassword123!"
+                  example: 'NewPassword123!'
                 confirmNewPassword:
                   type: string
                   format: password
-                  example: "NewPassword123!"
+                  example: 'NewPassword123!'
               required:
                 - email
                 - resetToken
@@ -292,18 +292,22 @@ paths:
               properties:
                 username:
                   type: string
-                  example: "johndoe"
+                  example: 'johndoe'
                 dob:
                   type: string
-                  example: "31/12/1990"
+                  example: '31/12/1990'
                   description: Date of birth in DD/MM/YYYY format
                 phone:
                   type: string
-                  example: "+1234567890"
+                  example: '+1234567890'
+                gender:
+                  type: string
+                  enum: ['Male', 'Female']
               required:
                 - username
                 - dob
                 - phone
+                - gender
       responses:
         '200':
           description: User profile updated successfully
@@ -549,739 +553,1069 @@ paths:
             $ref: '#/components/responses/ForbiddenError'
           '404':
             description: Không tìm thấy người dùng với ID cung cấp.
-
-  /admin/students:
-      get:
-        tags:
-          - Admin - Quản lý Người dùng & Học sinh
-        summary: Lấy danh sách tất cả Học sinh
-        description: Lấy danh sách tất cả học sinh có phân trang. Có thể lọc theo lớp và tìm kiếm theo họ tên.
-        operationId: adminGetStudents
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: page
-            in: query
-            schema: { type: integer, default: 1 }
-            description: Số trang.
-          - name: limit
-            in: query
-            schema: { type: integer, default: 10 }
-            description: Số lượng mục trên mỗi trang.
-          - name: classId
-            in: query
-            schema: { type: string }
-            description: Lọc học sinh theo ID của lớp.
-          - name: search
-            in: query
-            schema: { type: string }
-            description: Từ khóa tìm kiếm theo họ tên học sinh.
-        responses:
-          '200':
-            description: Lấy danh sách học sinh thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/StudentListResponse'
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-      post:
-        tags:
-          - Admin - Quản lý Người dùng & Học sinh
-        summary: Tạo một Học sinh mới
-        description: Tạo một học sinh mới và liên kết với tài khoản phụ huynh và lớp học có sẵn.
-        operationId: adminCreateStudent
-        security:
-          - BearerAuth: []
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateStudentRequest'
-        responses:
-          '201':
-            description: Tạo học sinh thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/StudentResponse'
-          '400':
-            description: Thiếu các trường bắt buộc.
-          '404':
-            description: Không tìm thấy Phụ huynh hoặc Lớp học với ID cung cấp.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/students/{studentId}:
-      put:
-        tags:
-          - Admin - Quản lý Người dùng & Học sinh
-        summary: Cập nhật thông tin Học sinh
-        description: Cập nhật thông tin chi tiết của một học sinh đã có, bao gồm cả việc chuyển lớp.
-        operationId: adminUpdateStudent
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: studentId
-            in: path
-            required: true
-            schema: { type: string }
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UpdateStudentRequest'
-        responses:
-          '200':
-            description: Cập nhật học sinh thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/StudentResponse'
-          '400':
-            description: Dữ liệu gửi lên rỗng.
-          '404':
-            description: Không tìm thấy học sinh hoặc lớp học mới.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/classes:
-      get:
-        tags:
-          - Admin - Quản lý Lớp học
-        summary: Lấy danh sách Lớp học
-        description: Lấy danh sách tất cả các lớp học, có thể lọc theo năm học và khối.
-        operationId: adminGetClasses
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: page
-            in: query
-            schema: { type: integer, default: 1 }
-          - name: limit
-            in: query
-            schema: { type: integer, default: 10 }
-          - name: schoolYear
-            in: query
-            schema: { type: string, example: "2024-2025" }
-          - name: gradeLevel
-            in: query
-            schema: { type: integer, example: 1 }
-          - name: search
-            in: query
-            schema: { type: string }
-            description: Tìm kiếm theo tên lớp.
-        responses:
-          '200':
-            description: Lấy danh sách lớp học thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ClassListResponse'
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-      post:
-        tags:
-          - Admin - Quản lý Lớp học
-        summary: Tạo Lớp học mới
-        description: Tạo một lớp học mới cho một năm học và khối cụ thể.
-        operationId: adminCreateClass
-        security:
-          - BearerAuth: []
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateClassRequest'
-        responses:
-          '201':
-            description: Tạo lớp học thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ClassResponse'
-          '400':
-            description: Thiếu các trường bắt buộc.
-          '409':
-            description: Lớp học với tên, khối và năm học này đã tồn tại.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/classes/{classId}/add-students:
-      patch:
-        tags:
-          - Admin - Quản lý Lớp học
-        summary: Thêm học sinh vào Lớp
-        description: Thêm một hoặc nhiều học sinh vào một lớp học đã tồn tại. Sẽ báo lỗi nếu học sinh đã thuộc một lớp khác.
-        operationId: adminAddStudentsToClass
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: classId
-            in: path
-            required: true
-            schema: { type: string }
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AddRemoveStudentsRequest'
-        responses:
-          '200':
-            description: Thêm học sinh thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ClassResponse'
-          '400':
-            description: Mảng studentIds rỗng hoặc không hợp lệ.
-          '404':
-            description: Không tìm thấy lớp hoặc một trong các học sinh.
-          '409':
-            description: Một hoặc nhiều học sinh đã thuộc một lớp khác.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/classes/{classId}/remove-students:
-      patch:
-        tags:
-          - Admin - Quản lý Lớp học
-        summary: Xóa học sinh khỏi Lớp
-        description: Xóa một hoặc nhiều học sinh khỏi một lớp học. Thao tác này sẽ cập nhật classId của học sinh thành null.
-        operationId: adminRemoveStudentsFromClass
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: classId
-            in: path
-            required: true
-            schema: { type: string }
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AddRemoveStudentsRequest'
-        responses:
-          '200':
-            description: Xóa học sinh khỏi lớp thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ClassResponse'
-          '400':
-            description: Mảng studentIds rỗng hoặc không hợp lệ.
-          '404':
-            description: Không tìm thấy lớp hoặc không có học sinh nào trong danh sách thuộc lớp này.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/health-check-templates:
-      get:
-        tags:
-          - Admin - Quản lý Mẫu Khám
-        summary: Lấy danh sách Mẫu Khám
-        description: Lấy danh sách tất cả các mẫu khám sức khỏe.
-        operationId: adminGetHealthCheckTemplates
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: page
-            in: query
-            schema: { type: integer, default: 1 }
-          - name: limit
-            in: query
-            schema: { type: integer, default: 10 }
-          - name: type
-            in: query
-            schema: { type: string, enum: [GENERAL, DENTAL, VISION] }
-          - name: search
-            in: query
-            schema: { type: string }
-        responses:
-          '200':
-            description: Lấy danh sách mẫu khám thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/HealthCheckTemplateListResponse'
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-      post:
-        tags:
-          - Admin - Quản lý Mẫu Khám
-        summary: Tạo Mẫu Khám mới
-        description: Tạo một mẫu khám mới để có thể tái sử dụng cho các đợt khám sức khỏe.
-        operationId: adminCreateHealthCheckTemplate
-        security:
-          - BearerAuth: []
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
-        responses:
-          '201':
-            description: Tạo mẫu khám thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/HealthCheckTemplateResponse'
-          '400':
-            description: Thiếu các trường bắt buộc.
-          '409':
-            description: Đã tồn tại mẫu khám với tên này.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/health-check-templates/{templateId}:
-      get:
-        tags:
-          - Admin - Quản lý Mẫu Khám
-        summary: Lấy Mẫu Khám theo ID
-        description: Lấy thông tin chi tiết của một mẫu khám sức khỏe.
-        operationId: adminGetHealthCheckTemplateById
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: templateId
-            in: path
-            required: true
-            schema: { type: string }
-        responses:
-          '200':
-            description: Lấy thông tin mẫu khám thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/HealthCheckTemplateResponse'
-          '404':
-            description: Không tìm thấy mẫu khám.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-      put:
-        tags:
-          - Admin - Quản lý Mẫu Khám
-        summary: Cập nhật Mẫu Khám
-        description: Cập nhật thông tin một mẫu khám đã có.
-        operationId: adminUpdateHealthCheckTemplate
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: templateId
-            in: path
-            required: true
-            schema: { type: string }
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
-        responses:
-          '200':
-            description: Cập nhật mẫu khám thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/HealthCheckTemplateResponse'
-          '400':
-            description: Dữ liệu gửi lên rỗng.
-          '404':
-            description: Không tìm thấy mẫu khám để cập nhật.
-          '409':
-            description: Tên mẫu khám mới đã bị trùng.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-      delete:
-        tags:
-          - Admin - Quản lý Mẫu Khám
-        summary: Xóa Mẫu Khám
-        description: Xóa một mẫu khám. Sẽ không thể xóa nếu mẫu đang được sử dụng bởi một đợt khám nào đó.
-        operationId: adminDeleteHealthCheckTemplate
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: templateId
-            in: path
-            required: true
-            schema: { type: string }
-        responses:
-          '200':
-            description: Xóa mẫu khám thành công.
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message: { type: string }
-          '404':
-            description: Không tìm thấy mẫu khám để xóa.
-          '409':
-            description: Không thể xóa vì mẫu đang được sử dụng bởi một đợt khám.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/vaccines/suggestions:
-      get:
-        tags:
-          - Admin - Tiện ích
-        summary: Lấy gợi ý tên Vaccine
-        description: Cung cấp danh sách các tên vaccine duy nhất từ tất cả các nguồn dữ liệu trong hệ thống để phục vụ cho chức năng autocomplete.
-        operationId: getVaccineSuggestions
-        security:
-          - BearerAuth: []
-        responses:
-          '200':
-            description: Lấy danh sách gợi ý thành công.
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                    data:
-                      type: array
-                      items:
-                        type: string
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/partners:
-      get:
-        tags:
-          - Admin - Quản lý Đối tác
-        summary: Lấy danh sách Đối tác
-        description: Lấy danh sách tất cả các đối tác y tế.
-        operationId: adminGetPartners
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: page
-            in: query
-            schema: { type: integer, default: 1 }
-          - name: limit
-            in: query
-            schema: { type: integer, default: 10 }
-          - name: status
-            in: query
-            schema: { type: string, enum: [active, inactive] }
-          - name: search
-            in: query
-            schema: { type: string }
-        responses:
-          '200':
-            description: Lấy danh sách đối tác thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/PartnerListResponse'
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-      post:
-        tags:
-          - Admin - Quản lý Đối tác
-        summary: Tạo Đối tác mới
-        description: Thêm một tổ chức y tế mới làm đối tác và thông tin người quản lý của họ.
-        operationId: adminCreatePartner
-        security:
-          - BearerAuth: []
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CreatePartnerRequest'
-        responses:
-          '201':
-            description: Tạo đối tác thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/PartnerResponse'
-          '400':
-            description: Thiếu object `organization` hoặc `managerInfo`.
-          '409':
-            description: Tên hoặc email của đối tác đã tồn tại.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/partners/{partnerId}:
-      get:
-        tags:
-          - Admin - Quản lý Đối tác
-        summary: Lấy Đối tác theo ID
-        description: Lấy thông tin chi tiết của một đối tác cụ thể.
-        operationId: adminGetPartnerById
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: partnerId
-            in: path
-            required: true
-            schema: { type: string }
-        responses:
-          '200':
-            description: Lấy thông tin đối tác thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/PartnerResponse'
-          '404':
-            description: Không tìm thấy đối tác.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-      patch:
-        tags:
-          - Admin - Quản lý Đối tác
-        summary: Cập nhật thông tin Đối tác
-        description: Cập nhật một phần thông tin của đối tác (không bao gồm người quản lý và nhân viên).
-        operationId: adminUpdatePartner
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: partnerId
-            in: path
-            required: true
-            schema: { type: string }
-        requestBody:
-          required: true
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UpdatePartnerRequest'
-        responses:
-          '200':
-            description: Cập nhật đối tác thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/PartnerResponse'
-          '400':
-            description: Dữ liệu gửi lên rỗng.
-          '404':
-            description: Không tìm thấy đối tác.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/partners/{partnerId}/status:
-      patch:
-        tags:
-          - Admin - Quản lý Đối tác
-        summary: Cập nhật trạng thái Đối tác
-        description: Kích hoạt hoặc vô hiệu hóa một đối tác. Thao tác này cũng sẽ cập nhật trạng thái cho tất cả nhân viên của đối tác đó.
-        operationId: adminUpdatePartnerStatus
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: partnerId
-            in: path
-            required: true
-            schema: { type: string }
-        requestBody:
-          required: true
+            
+  /health-check/templates:
+    get:
+      tags:
+        - Health Check Templates
+      summary: Get all health check templates
+      description: Retrieves all available health check templates
+      operationId: getAllHealthCheckTemplates
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Health check templates retrieved successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  isActive: { type: boolean }
-                required: [isActive]
-        responses:
-          '200':
-            description: Cập nhật trạng thái đối tác thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/PartnerResponse'
-          '400':
-            description: Thiếu trường `isActive` hoặc không phải boolean.
-          '404':
-            description: Không tìm thấy đối tác.
-          '409':
-            description: Đối tác đã ở trạng thái được yêu cầu.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HealthCheckTemplate'
+        '404':
+          description: No templates found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      tags:
+        - Health Check Templates
+      summary: Create a new health check template
+      description: Creates a new health check template with specified checkup items
+      operationId: createHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
+      responses:
+        '200':
+          description: Health check template created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/HealthCheckTemplate'
+        '400':
+          description: Failed to create health check template or template with this name already exists
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /health-check/templates/{id}:
+    get:
+      tags:
+        - Health Check Templates
+      summary: Get a specific health check template
+      description: Retrieves a specific health check template by ID
+      operationId: getHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Health check template retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/HealthCheckTemplate'
+        '404':
+          description: Template not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    put:
+      tags:
+        - Health Check Templates
+      summary: Update a health check template
+      description: Updates an existing health check template
+      operationId: updateHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
+      responses:
+        '200':
+          description: Health check template updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/HealthCheckTemplate'
+        '400':
+          description: Invalid input data
+        '404':
+          description: Template not found
+        '409':
+          description: Template name already exists
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    delete:
+      tags:
+        - Health Check Templates
+      summary: Delete a health check template
+      description: Deletes an existing health check template. Cannot delete default templates.
+      operationId: deleteHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Health check template deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: Cannot delete the default Health Check Template
+        '404':
+          description: Template not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /health-check/templates/set-default:
+    post:
+      tags:
+        - Health Check Templates
+      summary: Set a template as default
+      description: Sets a specific health check template as the default, unsets all others
+      operationId: setDefaultForHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+              required:
+                - id
+      responses:
+        '200':
+          description: Health check template set as default successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/HealthCheckTemplate'
+        '400':
+          description: Template is already set as default
+        '404':
+          description: Template not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/dashboard:
+    get:
+      tags:
+        - Admin - Dashboard
+      summary: Lấy dữ liệu tổng quan cho Dashboard của Admin
+      description: Trả về các số liệu thống kê chính cho trang dashboard của quản trị viên, chẳng hạn như số lượng người dùng, học sinh, lớp học và các hoạt động gần đây.
+      operationId: getAdminDashboard
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lấy dữ liệu dashboard thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDashboardResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/users:
+    get:
+      tags:
+        - Admin - Quản lý Người dùng & Học sinh
+      summary: Lấy danh sách tất cả Người dùng (Users)
+      description: Lấy danh sách tất cả người dùng trong hệ thống có phân trang. Có thể lọc theo vai trò (role), trạng thái (status) và tìm kiếm theo tên hoặc email.
+      operationId: adminGetUsers
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+          description: Số trang.
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+          description: Số lượng mục trên mỗi trang.
+        - name: role
+          in: query
+          schema: { type: string, enum: [Parent, Admin, Nurse] }
+          description: Lọc người dùng theo vai trò.
+        - name: status
+          in: query
+          schema: { type: string, enum: [active, inactive] }
+          description: Lọc người dùng theo trạng thái hoạt động.
+        - name: search
+          in: query
+          schema: { type: string }
+          description: Từ khóa tìm kiếm cho tên người dùng hoặc email.
+      responses:
+        '200':
+          description: Lấy danh sách người dùng thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/users/{userId}/status:
+    patch:
+      tags:
+        - Admin - Quản lý Người dùng & Học sinh
+      summary: Cập nhật trạng thái Người dùng
+      description: Kích hoạt hoặc vô hiệu hóa một tài khoản người dùng.
+      operationId: adminUpdateUserStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: User registered successfully
+                isActive:
+                  type: boolean
+              required:
+                - isActive
+      responses:
+        '200':
+          description: Cập nhật trạng thái người dùng thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Dữ liệu không hợp lệ (isActive phải là boolean).
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          description: Không tìm thấy người dùng với ID cung cấp.
+
+  /admin/students:
+    get:
+      tags:
+        - Admin - Quản lý Người dùng & Học sinh
+      summary: Lấy danh sách tất cả Học sinh
+      description: Lấy danh sách tất cả học sinh có phân trang. Có thể lọc theo lớp và tìm kiếm theo họ tên.
+      operationId: adminGetStudents
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+          description: Số trang.
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+          description: Số lượng mục trên mỗi trang.
+        - name: classId
+          in: query
+          schema: { type: string }
+          description: Lọc học sinh theo ID của lớp.
+        - name: search
+          in: query
+          schema: { type: string }
+          description: Từ khóa tìm kiếm theo họ tên học sinh.
+      responses:
+        '200':
+          description: Lấy danh sách học sinh thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      tags:
+        - Admin - Quản lý Người dùng & Học sinh
+      summary: Tạo một Học sinh mới
+      description: Tạo một học sinh mới và liên kết với tài khoản phụ huynh và lớp học có sẵn.
+      operationId: adminCreateStudent
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStudentRequest'
+      responses:
+        '201':
+          description: Tạo học sinh thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentResponse'
+        '400':
+          description: Thiếu các trường bắt buộc.
+        '404':
+          description: Không tìm thấy Phụ huynh hoặc Lớp học với ID cung cấp.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/students/{studentId}:
+    put:
+      tags:
+        - Admin - Quản lý Người dùng & Học sinh
+      summary: Cập nhật thông tin Học sinh
+      description: Cập nhật thông tin chi tiết của một học sinh đã có, bao gồm cả việc chuyển lớp.
+      operationId: adminUpdateStudent
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStudentRequest'
+      responses:
+        '200':
+          description: Cập nhật học sinh thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudentResponse'
+        '400':
+          description: Dữ liệu gửi lên rỗng.
+        '404':
+          description: Không tìm thấy học sinh hoặc lớp học mới.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/classes:
+    get:
+      tags:
+        - Admin - Quản lý Lớp học
+      summary: Lấy danh sách Lớp học
+      description: Lấy danh sách tất cả các lớp học, có thể lọc theo năm học và khối.
+      operationId: adminGetClasses
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+        - name: schoolYear
+          in: query
+          schema: { type: string, example: '2024-2025' }
+        - name: gradeLevel
+          in: query
+          schema: { type: integer, example: 1 }
+        - name: search
+          in: query
+          schema: { type: string }
+          description: Tìm kiếm theo tên lớp.
+      responses:
+        '200':
+          description: Lấy danh sách lớp học thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      tags:
+        - Admin - Quản lý Lớp học
+      summary: Tạo Lớp học mới
+      description: Tạo một lớp học mới cho một năm học và khối cụ thể.
+      operationId: adminCreateClass
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClassRequest'
+      responses:
+        '201':
+          description: Tạo lớp học thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassResponse'
+        '400':
+          description: Thiếu các trường bắt buộc.
+        '409':
+          description: Lớp học với tên, khối và năm học này đã tồn tại.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/classes/{classId}/add-students:
+    patch:
+      tags:
+        - Admin - Quản lý Lớp học
+      summary: Thêm học sinh vào Lớp
+      description: Thêm một hoặc nhiều học sinh vào một lớp học đã tồn tại. Sẽ báo lỗi nếu học sinh đã thuộc một lớp khác.
+      operationId: adminAddStudentsToClass
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddRemoveStudentsRequest'
+      responses:
+        '200':
+          description: Thêm học sinh thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassResponse'
+        '400':
+          description: Mảng studentIds rỗng hoặc không hợp lệ.
+        '404':
+          description: Không tìm thấy lớp hoặc một trong các học sinh.
+        '409':
+          description: Một hoặc nhiều học sinh đã thuộc một lớp khác.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/classes/{classId}/remove-students:
+    patch:
+      tags:
+        - Admin - Quản lý Lớp học
+      summary: Xóa học sinh khỏi Lớp
+      description: Xóa một hoặc nhiều học sinh khỏi một lớp học. Thao tác này sẽ cập nhật classId của học sinh thành null.
+      operationId: adminRemoveStudentsFromClass
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: classId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddRemoveStudentsRequest'
+      responses:
+        '200':
+          description: Xóa học sinh khỏi lớp thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassResponse'
+        '400':
+          description: Mảng studentIds rỗng hoặc không hợp lệ.
+        '404':
+          description: Không tìm thấy lớp hoặc không có học sinh nào trong danh sách thuộc lớp này.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/health-check-templates:
+    get:
+      tags:
+        - Admin - Quản lý Mẫu Khám
+      summary: Lấy danh sách Mẫu Khám
+      description: Lấy danh sách tất cả các mẫu khám sức khỏe.
+      operationId: adminGetHealthCheckTemplates
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lấy danh sách mẫu khám thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckTemplateListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      tags:
+        - Admin - Quản lý Mẫu Khám
+      summary: Tạo Mẫu Khám mới
+      description: Tạo một mẫu khám mới để có thể tái sử dụng cho các đợt khám sức khỏe.
+      operationId: adminCreateHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
+      responses:
+        '201':
+          description: Tạo mẫu khám thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckTemplateResponse'
+        '400':
+          description: Thiếu các trường bắt buộc.
+        '409':
+          description: Đã tồn tại mẫu khám với tên này.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/health-check-templates/{templateId}:
+    get:
+      tags:
+        - Admin - Quản lý Mẫu Khám
+      summary: Lấy Mẫu Khám theo ID
+      description: Lấy thông tin chi tiết của một mẫu khám sức khỏe.
+      operationId: adminGetHealthCheckTemplateById
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lấy thông tin mẫu khám thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckTemplateResponse'
+        '404':
+          description: Không tìm thấy mẫu khám.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    put:
+      tags:
+        - Admin - Quản lý Mẫu Khám
+      summary: Cập nhật Mẫu Khám
+      description: Cập nhật thông tin một mẫu khám đã có.
+      operationId: adminUpdateHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
+      responses:
+        '200':
+          description: Cập nhật mẫu khám thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckTemplateResponse'
+        '400':
+          description: Dữ liệu gửi lên rỗng.
+        '404':
+          description: Không tìm thấy mẫu khám để cập nhật.
+        '409':
+          description: Tên mẫu khám mới đã bị trùng.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    delete:
+      tags:
+        - Admin - Quản lý Mẫu Khám
+      summary: Xóa Mẫu Khám
+      description: Xóa một mẫu khám. Sẽ không thể xóa nếu mẫu đang được sử dụng bởi một đợt khám nào đó.
+      operationId: adminDeleteHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: templateId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Xóa mẫu khám thành công.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+        '404':
+          description: Không tìm thấy mẫu khám để xóa.
+        '409':
+          description: Không thể xóa vì mẫu đang được sử dụng bởi một đợt khám.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/vaccines/suggestions:
+    get:
+      tags:
+        - Admin - Tiện ích
+      summary: Lấy gợi ý tên Vaccine
+      description: Cung cấp danh sách các tên vaccine duy nhất từ tất cả các nguồn dữ liệu trong hệ thống để phục vụ cho chức năng autocomplete.
+      operationId: getVaccineSuggestions
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lấy danh sách gợi ý thành công.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/partners:
+    get:
+      tags:
+        - Admin - Quản lý Đối tác
+      summary: Lấy danh sách Đối tác
+      description: Lấy danh sách tất cả các đối tác y tế.
+      operationId: adminGetPartners
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+        - name: status
+          in: query
+          schema: { type: string, enum: [active, inactive] }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lấy danh sách đối tác thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      tags:
+        - Admin - Quản lý Đối tác
+      summary: Tạo Đối tác mới
+      description: Thêm một tổ chức y tế mới làm đối tác và thông tin người quản lý của họ.
+      operationId: adminCreatePartner
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePartnerRequest'
+      responses:
+        '201':
+          description: Tạo đối tác thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerResponse'
+        '400':
+          description: Thiếu object `organization` hoặc `managerInfo`.
+        '409':
+          description: Tên hoặc email của đối tác đã tồn tại.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/partners/{partnerId}:
+    get:
+      tags:
+        - Admin - Quản lý Đối tác
+      summary: Lấy Đối tác theo ID
+      description: Lấy thông tin chi tiết của một đối tác cụ thể.
+      operationId: adminGetPartnerById
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lấy thông tin đối tác thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerResponse'
+        '404':
+          description: Không tìm thấy đối tác.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    patch:
+      tags:
+        - Admin - Quản lý Đối tác
+      summary: Cập nhật thông tin Đối tác
+      description: Cập nhật một phần thông tin của đối tác (không bao gồm người quản lý và nhân viên).
+      operationId: adminUpdatePartner
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePartnerRequest'
+      responses:
+        '200':
+          description: Cập nhật đối tác thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerResponse'
+        '400':
+          description: Dữ liệu gửi lên rỗng.
+        '404':
+          description: Không tìm thấy đối tác.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/partners/{partnerId}/status:
+    patch:
+      tags:
+        - Admin - Quản lý Đối tác
+      summary: Cập nhật trạng thái Đối tác
+      description: Kích hoạt hoặc vô hiệu hóa một đối tác. Thao tác này cũng sẽ cập nhật trạng thái cho tất cả nhân viên của đối tác đó.
+      operationId: adminUpdatePartnerStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isActive: { type: boolean }
+              required: [isActive]
+      responses:
+        '200':
+          description: Cập nhật trạng thái đối tác thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PartnerResponse'
+        '400':
+          description: Thiếu trường `isActive` hoặc không phải boolean.
+        '404':
+          description: Không tìm thấy đối tác.
+        '409':
+          description: Đối tác đã ở trạng thái được yêu cầu.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
 
   /admin/partners/{partnerId}/staff:
-      post:
-        tags:
-          - Admin - Quản lý Đối tác
-        summary: Thêm Nhân viên cho Đối tác
-        description: Thêm một nhân viên mới vào một tổ chức đối tác.
-        operationId: adminAddStaffToPartner
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: partnerId
-            in: path
-            required: true
-            schema: { type: string }
-        requestBody:
+    post:
+      tags:
+        - Admin - Quản lý Đối tác
+      summary: Thêm Nhân viên cho Đối tác
+      description: Thêm một nhân viên mới vào một tổ chức đối tác.
+      operationId: adminAddStaffToPartner
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: partnerId
+          in: path
           required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePartnerStaffRequest'
+      responses:
+        '201':
+          description: Thêm nhân viên thành công.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreatePartnerStaffRequest'
-        responses:
-          '201':
-            description: Thêm nhân viên thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/PartnerStaffResponse'
-          '404':
-            description: Không tìm thấy đối tác.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
+                $ref: '#/components/schemas/PartnerStaffResponse'
+        '404':
+          description: Không tìm thấy đối tác.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
 
   /admin/partners/{partnerId}/staff/{staffId}:
-      delete:
-        tags:
-          - Admin - Quản lý Đối tác
-        summary: Xóa Nhân viên của Đối tác
-        description: Xóa một nhân viên khỏi một tổ chức đối tác. Sẽ không thể xóa nếu nhân viên này có liên quan đến các hồ sơ tiêm chủng.
-        operationId: adminRemoveStaffFromPartner
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: partnerId
-            in: path
-            required: true
-            schema: { type: string }
-          - name: staffId
-            in: path
-            required: true
-            schema: { type: string }
-        responses:
-          '200':
-            description: Xóa nhân viên thành công.
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message: { type: string }
-          '404':
-            description: Không tìm thấy đối tác hoặc nhân viên trong đối tác đó.
-          '409':
-            description: Không thể xóa vì nhân viên đã có liên kết với hồ sơ tiêm chủng.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
-
-  /admin/partners/{partnerId}/manager:
-      put:
-        tags:
-          - Admin - Quản lý Đối tác
-        summary: Thay thế Người quản lý của Đối tác
-        description: Thay thế thông tin người quản lý của một đối tác. Người quản lý cũ sẽ bị xóa.
-        operationId: adminReplacePartnerManager
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: partnerId
-            in: path
-            required: true
-            schema: { type: string }
-        requestBody:
+    delete:
+      tags:
+        - Admin - Quản lý Đối tác
+      summary: Xóa Nhân viên của Đối tác
+      description: Xóa một nhân viên khỏi một tổ chức đối tác. Sẽ không thể xóa nếu nhân viên này có liên quan đến các hồ sơ tiêm chủng.
+      operationId: adminRemoveStaffFromPartner
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: partnerId
+          in: path
           required: true
+          schema: { type: string }
+        - name: staffId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Xóa nhân viên thành công.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateManagerInfoRequest'
-        responses:
-          '200':
-            description: Thay thế người quản lý thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ManagerInfoResponse'
-          '404':
-            description: Không tìm thấy đối tác.
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
+                type: object
+                properties:
+                  message: { type: string }
+        '404':
+          description: Không tìm thấy đối tác hoặc nhân viên trong đối tác đó.
+        '409':
+          description: Không thể xóa vì nhân viên đã có liên kết với hồ sơ tiêm chủng.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /admin/partners/{partnerId}/manager:
+    put:
+      tags:
+        - Admin - Quản lý Đối tác
+      summary: Thay thế Người quản lý của Đối tác
+      description: Thay thế thông tin người quản lý của một đối tác. Người quản lý cũ sẽ bị xóa.
+      operationId: adminReplacePartnerManager
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: partnerId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateManagerInfoRequest'
+      responses:
+        '200':
+          description: Thay thế người quản lý thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManagerInfoResponse'
+        '404':
+          description: Không tìm thấy đối tác.
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
 
   /admin/inventory:
-      get:
-        tags:
-          - Admin - Quản lý Kho
-        summary: Xem danh sách Kho vật tư
-        description: Lấy danh sách tất cả các vật tư y tế trong kho.
-        operationId: adminGetInventory
-        security:
-          - BearerAuth: []
-        parameters:
-          - name: page
-            in: query
-            schema: { type: integer, default: 1 }
-          - name: limit
-            in: query
-            schema: { type: integer, default: 10 }
-          - name: status
-            in: query
-            schema: { type: string, enum: [IN_STOCK, LOW_STOCK, OUT_OF_STOCK] }
-          - name: search
-            in: query
-            schema: { type: string }
-        responses:
-          '200':
-            description: Lấy danh sách kho thành công.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/AdminInventoryListResponse'
-          '401':
-            $ref: '#/components/responses/UnauthorizedError'
-          '403':
-            $ref: '#/components/responses/ForbiddenError'
+    get:
+      tags:
+        - Admin - Quản lý Kho
+      summary: Xem danh sách Kho vật tư
+      description: Lấy danh sách tất cả các vật tư y tế trong kho.
+      operationId: adminGetInventory
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+        - name: status
+          in: query
+          schema: { type: string, enum: [IN_STOCK, LOW_STOCK, OUT_OF_STOCK] }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lấy danh sách kho thành công.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInventoryListResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
 components:
   schemas:
     User:
@@ -1300,6 +1634,9 @@ components:
           type: string
           enum: [Parent, Admin, Teacher]
           description: User's role
+        gender:
+          type: string
+          enum: ['Male', 'Female']
         dob:
           type: string
           format: date
@@ -1357,6 +1694,9 @@ components:
           type: string
         email:
           type: string
+        gender:
+          type: string
+          enum: [Male, Female]
         dob:
           type: string
           format: date
@@ -1368,6 +1708,7 @@ components:
         - email
         - dob
         - phone
+        - gender
     SuccessResponse:
       type: object
       properties:
@@ -1593,9 +1934,19 @@ components:
       properties:
         _id: { type: string }
         parentId: { type: string }
-        classId: { type: string }
-        fullName: { type: string }
-        dateOfBirth: { type: string, format: date }
+        classId: { type: string, required: true }
+        fullName: { type: string, required: true }
+        gender: { type: string, enum: ['MALE', 'FEMALE'], required: true }
+        dateOfBirth: { type: string, format: date, required: true }
+        invitedCode:
+          type: object
+          properties:
+            isActive: { type: boolean, default: true }
+            createdAt: { type: string, format: date-time }
+        status: { type: string, enum: ['ACTIVE', 'INACTIVE', 'GRADUATED'], required: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    
     StudentDetail:
       type: object
       description: Thông tin chi tiết của học sinh, bao gồm cả thông tin lớp và phụ huynh.
@@ -1603,7 +1954,9 @@ components:
         _id: { type: string }
         fullName: { type: string }
         dateOfBirth: { type: string, format: date }
-        createdAt: { type: string, format: 'date-time' }
+        createdAt: { type: string, format: date-time }
+        gender: { type: string, enum: ['MALE', 'FEMALE'] }
+        status: { type: string, enum: ['ACTIVE', 'INACTIVE', 'GRADUATED'] }
         parent:
           type: object
           properties:
@@ -1615,20 +1968,26 @@ components:
           properties:
             _id: { type: string }
             className: { type: string }
+    
     CreateStudentRequest:
       type: object
       properties:
         parentId: { type: string }
         classId: { type: string }
         fullName: { type: string }
+        gender: { type: string, enum: ['MALE', 'FEMALE'] }
         dateOfBirth: { type: string, format: date }
-      required: [parentId, classId, fullName, dateOfBirth]
+        status: { type: string, enum: ['ACTIVE', 'INACTIVE', 'GRADUATED'] }
+      required: [parentId, classId, fullName, dateOfBirth, gender, status]
+    
     UpdateStudentRequest:
       type: object
       properties:
         classId: { type: string }
         fullName: { type: string }
+        gender: { type: string, enum: ['MALE', 'FEMALE'] }
         dateOfBirth: { type: string, format: date }
+        status: { type: string, enum: ['ACTIVE', 'INACTIVE', 'GRADUATED'] }
     AddRemoveStudentsRequest:
       type: object
       properties:
@@ -1659,29 +2018,47 @@ components:
     HealthCheckTemplate:
       type: object
       properties:
-        _id: { type: string }
-        name: { type: string }
-        description: { type: string }
-        type: { type: string, enum: [GENERAL, DENTAL, VISION] }
+        _id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
         checkupItems:
           type: array
           items:
             $ref: '#/components/schemas/CheckupItem'
-        isDefault: { type: boolean }
+        isDefault:
+          type: boolean
+      required:
+        - name
+        - checkupItems
+        - isDefault
     CheckupItem:
       type: object
       properties:
-        itemName: { type: string }
-        unit: { type: string }
-        dataType: { type: string, enum: [NUMBER, TEXT, BOOLEAN, SELECT] }
-        guideline: { type: string }
-        options: { type: array, items: { type: string } }
+        itemId:
+          type: string
+        itemName:
+          type: string
+        unit:
+          type: string
+          enum: [kg, cm, mmHg, bpm]
+        dataType:
+          type: string
+          enum: [NUMBER, TEXT, BOOLEAN, SELECT]
+        guideline:
+          type: string
+      required:
+        - itemId
+        - itemName
+        - dataType
     CreateHealthCheckTemplateRequest:
       type: object
       properties:
         name: { type: string }
         description: { type: string }
-        type: { type: string, enum: [GENERAL, DENTAL, VISION] }
         checkupItems:
           type: array
           items:

@@ -7,7 +7,7 @@ import {
   ICheckupItem,
   IHealthCheckTemplate,
 } from '@/interfaces/healthcheck.templates.interface';
-import mongoose, { model, Schema } from 'mongoose';
+import mongoose, { model, Schema, Types } from 'mongoose';
 
 const HealthCheckTemplateSchema = new Schema<IHealthCheckTemplate>({
   name: {
@@ -23,7 +23,7 @@ const HealthCheckTemplateSchema = new Schema<IHealthCheckTemplate>({
     type: [
       {
         itemId: {
-          type: String,
+          type: Number,
           required: true,
         },
         itemName: {

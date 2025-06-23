@@ -1,11 +1,7 @@
-import {
-  CheckupItemDataType,
-  CheckupItemUnit,
-  HealthCheckTemplateType,
-} from '@/enums/TemplateEnum';
+import { CheckupItemDataType, CheckupItemUnit } from '@/enums/TemplateEnum';
 
 export interface ICheckupItem {
-  itemId: string;
+  itemId: Number;
   itemName: string;
   unit?: CheckupItemUnit;
   dataType: CheckupItemDataType;
@@ -14,7 +10,7 @@ export interface ICheckupItem {
 
 export interface IHealthCheckTemplate {
   name: string;
-  description: string;
+  description: string | null;
   checkupItems: ICheckupItem[];
   isDefault: boolean;
 }

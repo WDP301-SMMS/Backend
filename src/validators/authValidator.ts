@@ -12,6 +12,7 @@ export const registerValidator = [
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long')
     .trim(),
+  body('gender').notEmpty().toUpperCase().withMessage('Gender is required'),
   body('username').notEmpty().withMessage('Username is required'),
   body('dob')
     .notEmpty()
