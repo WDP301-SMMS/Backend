@@ -22,13 +22,12 @@ const getAllRequest = async (
   next: NextFunction,
 ) => {
   try {
-    const data = await service.getAllRequest(); // đúng tên hàm service
+    const data = await service.getAllRequest();
     res.status(200).json({ message: 'Lấy danh sách thành công', data });
   } catch (err) {
     next(err);
   }
 };
-
 
 const getMedicationRequestById = async (
   req: Request,
@@ -58,9 +57,26 @@ const getMedicationRequestByParentId = async (
   }
 };
 
+const updateMedicationRequest = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const result = await service.updateRequestById(id, req.body);
+    res
+      .status(200)
+      .json({ message: 'Cập nhật yêu cầu thành công', data: result });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const RequestController = {
   createMedicationRequest,
   getAllRequest,
   getMedicationRequestById,
   getMedicationRequestByParentId,
+  updateMedicationRequest,
 };

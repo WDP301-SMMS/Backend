@@ -12,6 +12,7 @@ import {
 
 const router = express.Router();
 
+//REQUEST
 //Y tá tạo request
 router.post(
   '/requests',
@@ -28,7 +29,8 @@ router.post(
   RequestController.createMedicationRequest,
 );
 
-router.get('/allRequests', RequestController.getMedicationRequestById);
+//Lấy tất cả request
+router.get('/allRequests', RequestController.getAllRequest);
 
 //Lấy request theo id
 router.get('/requests/:id', RequestController.getMedicationRequestById);
@@ -39,6 +41,10 @@ router.get(
   RequestController.getMedicationRequestByParentId,
 );
 
+//Update Request
+router.patch('/requests/:id', RequestController.updateMedicationRequest);
+
+//SCHEDULE
 //Tạo schedule theo request
 router.post(
   '/schedules',
