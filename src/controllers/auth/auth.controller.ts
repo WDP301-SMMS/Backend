@@ -61,6 +61,7 @@ const handleGoogleCallback = async (req: Request, res: Response) => {
         password: null,
         dob: null,
         phone: null,
+        gender: null,
         authProvider: 'google',
         googleId: user.sub,
       });
@@ -125,6 +126,13 @@ const loginWithJwt = async (
         message: 'Please verify your email before logging in',
       });
       return;
+    }
+
+    if (!user.password) {
+      return res.status(400).json({
+        success: false,
+        message: "Tài khoản này không thể đăng nhập bằng mật khẩu",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user?.password as string);
