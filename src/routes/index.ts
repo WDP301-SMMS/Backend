@@ -5,6 +5,7 @@ import vaccinationCampaigns from './vaccine/vaccine';
 import reportsRouter from './reports/reports';
 import medicationRequestRouter from './medicationRequest/medication';
 import upload from './upload/upload';
+import healthProfileRouter from './health-profile/health.profile'
 import {
   handleToken,
   roleBaseAccess,
@@ -24,10 +25,14 @@ router.use(
 router.use('/user', handleToken, userRouter);
 router.use('/medication', medicationRequestRouter);
 router.use('/upload', upload);
-router.use('/vaccinationCampaigns', vaccinationCampaigns);
-router.use('reports', reportsRouter);
 router.use('/vaccinationCampaigns', handleToken, vaccinationCampaigns);
 router.use('/reports', reportsRouter);
+router.use(
+  '/health-profiles',
+  handleToken,
+  roleBaseAccess([RoleEnum.Parent]),
+  healthProfileRouter
+);
 router.use(
   '/health-check',
   handleToken,
