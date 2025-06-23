@@ -51,8 +51,6 @@ class AdminPartnerService {
       );
     }
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
     try {
       const newOrg = new this.partners(partnerData.organization);
 
@@ -60,19 +58,12 @@ class AdminPartnerService {
         ...partnerData.managerInfo,
         organizationId: newOrg._id,
       };
-      const [newManager] = await this.managers.create([newManagerData], {
-        session,
-      });
+      const [newManager] = await this.managers.create([newManagerData]);
 
       newOrg.managerInfo = newManager._id;
-      await newOrg.save({ session });
-
-      await session.commitTransaction();
-
+      await newOrg.save();
       return await this.getPartnerById(newOrg._id.toString());
     } catch (error) {
-      await session.abortTransaction();
-
       if (error instanceof Error) {
         throw createAppError(500, `Failed to create partner: ${error.message}`);
       } else {
@@ -81,9 +72,7 @@ class AdminPartnerService {
           `Failed to create partner due to an unknown error.`,
         );
       }
-    } finally {
-      session.endSession();
-    }
+    } 
   }
 
   public async addStaffToPartner(
@@ -95,28 +84,21 @@ class AdminPartnerService {
       throw createAppError(404, 'Partner not found to add staff to.');
     }
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
     try {
       const newStaffData = { ...staffData, organizationId: partnerId };
-      const [newStaff] = await this.staffs.create([newStaffData], { session });
+      const [newStaff] = await this.staffs.create([newStaffData]);
 
       await this.partners.findByIdAndUpdate(
         partnerId,
         { $push: { staffMembers: newStaff._id } },
-        { session },
       );
 
-      await session.commitTransaction();
       return newStaff;
     } catch (error) {
-      await session.abortTransaction();
       throw createAppError(
         500,
         `Failed to add staff member: ${(error as Error).message}`,
       );
-    } finally {
-      session.endSession();
     }
   }
 
@@ -148,11 +130,8 @@ class AdminPartnerService {
         `Cannot remove this staff member as they are associated with existing vaccination records. Please consider deactivating them instead.`,
       );
     }
-
-    const session = await mongoose.startSession();
-    session.startTransaction();
     try {
-      const partner = await this.partners.findById(partnerId).session(session);
+      const partner = await this.partners.findById(partnerId);
       if (!partner) {
         throw createAppError(404, 'Partner not found.');
       }
@@ -170,12 +149,10 @@ class AdminPartnerService {
       await this.partners.findByIdAndUpdate(
         partnerId,
         { $pull: { staffMembers: staffId } },
-        { session },
+      
       );
 
-      await this.staffs.findByIdAndDelete(staffId, { session });
-
-      await session.commitTransaction();
+      await this.staffs.findByIdAndDelete(staffId);
     } catch (error) {
       if (!(error instanceof Error && 'status' in error)) {
         throw createAppError(
@@ -184,9 +161,7 @@ class AdminPartnerService {
         );
       }
       throw error;
-    } finally {
-      session.endSession();
-    }
+    } 
   }
 
   public async updateManager(
@@ -213,34 +188,25 @@ class AdminPartnerService {
       throw createAppError(404, 'Partner not found to replace manager for.');
     }
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
     try {
       const createdManagerData = {
         ...newManagerData,
         organizationId: partnerId,
       };
-      const [newManager] = await this.managers.create([createdManagerData], {
-        session,
-      });
+      const [newManager] = await this.managers.create([createdManagerData]);
 
       const oldManagerId = partner.managerInfo;
       partner.managerInfo = newManager._id;
-      await partner.save({ session });
+      await partner.save();
 
-      await this.managers.findByIdAndDelete(oldManagerId, { session });
-
-      await session.commitTransaction();
+      await this.managers.findByIdAndDelete(oldManagerId);
       return newManager;
     } catch (error) {
-      await session.abortTransaction();
       throw createAppError(
         500,
         `Failed to replace manager: ${(error as Error).message}`,
       );
-    } finally {
-      session.endSession();
-    }
+    } 
   }
 
   public async getPartners(query: {
@@ -339,30 +305,23 @@ class AdminPartnerService {
       );
     }
 
-    const session = await mongoose.startSession();
-    session.startTransaction();
     try {
       partner.isActive = isActive;
-      await partner.save({ session });
+      await partner.save();
 
       await this.staffs.updateMany(
         { organizationId: partnerId },
         { $set: { isActive: isActive } },
-        { session },
       );
 
-      await session.commitTransaction();
 
       return await this.getPartnerById(partnerId);
     } catch (error) {
-      await session.abortTransaction();
       throw createAppError(
         500,
         `Failed to update partner status: ${(error as Error).message}`,
       );
-    } finally {
-      session.endSession();
-    }
+    } 
   }
 }
 

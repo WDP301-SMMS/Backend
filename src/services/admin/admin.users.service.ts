@@ -4,7 +4,7 @@ import { AppError } from '@/utils/globalErrorHandler';
 import { Class } from '@/models/class.model';
 import { StudentModel } from '@/models/student.model';
 import { UserModel } from '@/models/user.model';
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, Types } from 'mongoose';
 
 const createAppError = (status: number, message: string): AppError => {
   const error: AppError = new Error(message);
@@ -111,7 +111,9 @@ class AdminUserStudentService {
     }
 
     if (query.classId) {
-      findQuery.classId = query.classId;
+      if (Types.ObjectId.isValid(query.classId)) {
+        findQuery.classId = new Types.ObjectId(query.classId);
+      }
     }
 
     const aggregationPipeline: any[] = [
@@ -135,7 +137,7 @@ class AdminUserStudentService {
           as: 'classInfo',
         },
       },
-      
+
       {
         $unwind: { path: '$parentInfo', preserveNullAndEmptyArrays: true },
       },
@@ -149,6 +151,7 @@ class AdminUserStudentService {
           dateOfBirth: 1,
           createdAt: 1,
           invitedCode: 1,
+          gender: 1,
           parent: {
             _id: '$parentInfo._id',
             username: '$parentInfo.username',
