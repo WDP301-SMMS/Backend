@@ -17,6 +17,7 @@ export class VaccinationCampaignController {
     public createCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const createdByUserId = req.user?._id || req.body.createdBy;
+            console.log(req.body)
             if (!createdByUserId) {
                 throw new Error('User ID is required');
             }
