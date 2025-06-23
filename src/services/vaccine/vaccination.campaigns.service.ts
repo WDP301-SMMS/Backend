@@ -159,7 +159,7 @@ export class VaccinationCampaignService {
   private validateStateTransition(current: CampaignStatus, next: CampaignStatus): void {
     const allowedInPatch: Record<CampaignStatus, CampaignStatus[]> = {
       [CampaignStatus.DRAFT]: [CampaignStatus.CANCELED],
-      [CampaignStatus.ANNOUNCED]: [CampaignStatus.CANCELED],
+      [CampaignStatus.ANNOUNCED]: [CampaignStatus.IN_PROGRESS, CampaignStatus.CANCELED],
       [CampaignStatus.IN_PROGRESS]: [CampaignStatus.COMPLETED, CampaignStatus.CANCELED],
       [CampaignStatus.COMPLETED]: [],
       [CampaignStatus.CANCELED]: [],
