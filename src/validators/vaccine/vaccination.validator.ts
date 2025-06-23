@@ -38,7 +38,7 @@ const createCampaignSchema = Joi.object({
   }),
   vaccineName: Joi.string().required(),
   doseNumber: Joi.number().integer().min(1).required(),
-  partnerId: objectIdValidator.required().label('Partner ID'),
+  partnerId: objectIdValidator.required().label('partnerId is required'),
   targetGradeLevels: Joi.array()
     .items(Joi.number().integer().min(1))
     .min(1)
@@ -59,7 +59,7 @@ const createCampaignSchema = Joi.object({
         'School year must be in format YYYY-YYYY (e.g., 2023-2024).',
     }),
   destination: Joi.string().allow('').optional(),
-  createdBy: objectIdValidator.required().label('CreatedBy ID'),
+  createdBy: objectIdValidator.required().label('managerId'),
   actualStartDate: Joi.date().iso().optional(),
 });
 
@@ -80,6 +80,7 @@ const updateCampaignSchema = Joi.object({
   }),
   destination: Joi.string().allow('').optional(),
   actualStartDate: Joi.date().iso().optional(),
+  createdBy: objectIdValidator.required().label('nurseId'),
 }).min(1);
 
 const respondToConsentSchema = Joi.object({

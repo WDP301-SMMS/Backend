@@ -18,7 +18,7 @@ export class VaccinationCampaignController {
         try {
             const createdByUserId = req.user?._id || req.body.createdBy;
             if (!createdByUserId) {
-                throw new Error('User ID is required');
+                throw new Error('userId is required (Manager)');
             }
 
             const newCampaign = await campaignService.createCampaign(req.body, createdByUserId);
@@ -52,9 +52,9 @@ export class VaccinationCampaignController {
     public updateCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const { campaignId } = req.params;
-            const userId = req.user?._id || req.body.createdBy;
-             if (!userId) {
-                throw new Error('User ID is required');
+             const userId = req.user?._id || req.body.createdBy;
+            if (!userId) {
+                throw new Error('userId is required (Nurse)');
             }
 
             const updatedCampaign = await campaignService.updateCampaign(campaignId, req.body, userId);
