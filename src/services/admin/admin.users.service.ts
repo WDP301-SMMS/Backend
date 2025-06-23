@@ -135,6 +135,7 @@ class AdminUserStudentService {
           as: 'classInfo',
         },
       },
+      
       {
         $unwind: { path: '$parentInfo', preserveNullAndEmptyArrays: true },
       },
@@ -147,10 +148,12 @@ class AdminUserStudentService {
           fullName: 1,
           dateOfBirth: 1,
           createdAt: 1,
+          invitedCode: 1,
           parent: {
             _id: '$parentInfo._id',
             username: '$parentInfo.username',
             email: '$parentInfo.email',
+            phone: '$parentInfo.phone'
           },
           class: { _id: '$classInfo._id', className: '$classInfo.className' },
         },
@@ -184,17 +187,7 @@ class AdminUserStudentService {
     parentId: string;
     classId: string;
   }): Promise<IStudent> {
-    const parent = await this.users.findOne({
-      _id: studentData.parentId,
-      role: 'Parent',
-    });
 
-    if (!parent) {
-      throw createAppError(
-        404,
-        'Parent account not found or user is not a parent',
-      );
-    }
     const targetClass = await this.classes.findById(studentData.classId);
     if (!targetClass) {
       throw createAppError(404, 'Class not found');
