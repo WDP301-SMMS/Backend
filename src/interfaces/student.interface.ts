@@ -12,6 +12,7 @@ export interface IStudent {
 }
 
 export interface IInvitedCode {
+  code: string;
   isActive: boolean;
   createdAt: Date;
 }

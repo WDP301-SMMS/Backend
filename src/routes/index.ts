@@ -30,7 +30,6 @@ router.use('/reports', reportsRouter);
 router.use(
   '/health-profiles',
   handleToken,
-  roleBaseAccess([RoleEnum.Parent]),
   healthProfileRouter
 );
 router.use(
