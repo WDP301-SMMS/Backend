@@ -28,7 +28,7 @@ router.use('/upload', upload);
 router.use('/vaccinationCampaigns', handleToken, vaccinationCampaigns);
 router.use('/reports', reportsRouter);
 router.use(
-  '/health-profile',
+  '/health-profiles',
   handleToken,
   roleBaseAccess([RoleEnum.Parent]),
   healthProfileRouter
