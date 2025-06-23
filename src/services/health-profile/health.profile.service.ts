@@ -37,6 +37,11 @@ export class HealthProfileService {
     }
 
     await student.save();
+    
+    await student.populate({
+      path: 'classId',
+      select: 'className'
+    });
     return student;
   }
 
