@@ -33,8 +33,16 @@ const objectIdValidator = Joi.string().hex().length(24).required().messages({
 });
 
 
+
+const claimStudentSchema = Joi.object({
+  invitedCode: Joi.string().required().label('Invitation Code').messages({
+    'string.empty': 'Invitation code cannot be empty.',
+  }),
+});
+
+
 const createProfileSchema = Joi.object({
-  invitedCode: objectIdValidator.label('Invitation Code'),
+  studentId: objectIdValidator.label('Student ID'),
   
   allergies: Joi.string().required().max(1000).messages({
     'string.empty': 'Allergies information is required. Please enter "None" if there are no allergies.',
@@ -50,13 +58,11 @@ const createProfileSchema = Joi.object({
       vaccineName: Joi.string().required(),
       doseNumber: Joi.number().integer().min(1).required(),
     })
-  ).optional().default([]), 
+  ).optional().default([]),
 });
 
 
-
 const updateProfileSchema = Joi.object({
-
   allergies: Joi.string().max(1000).optional(),
   chronicConditions: Joi.string().max(1000).optional(),
   visionStatus: Joi.string().max(500).optional(),
@@ -75,5 +81,6 @@ const updateProfileSchema = Joi.object({
 
 
 
+export const claimStudentValidator = validate(claimStudentSchema);
 export const createProfileValidator = validate(createProfileSchema);
 export const updateProfileValidator = validate(updateProfileSchema);
