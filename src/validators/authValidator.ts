@@ -16,6 +16,7 @@ export const registerValidator = [
   body('username').notEmpty().withMessage('Username is required'),
   body('dob')
     .notEmpty()
+    .withMessage('Date of Birth is required')
     .custom((value) => {
       const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
       if (!isValid(parsedDate)) {
@@ -31,10 +32,7 @@ export const registerValidator = [
 
       return true;
     })
-    .customSanitizer((value) => {
-      return parse(value, 'dd/MM/yyyy', new Date());
-    })
-    .withMessage('Date of Birth must be a valid date in DD/MM/YYYY format'),
+    .customSanitizer((value) => parse(value, 'dd/MM/yyyy', new Date())),
   body('phone')
     .notEmpty()
     .isMobilePhone('any', { strictMode: false })

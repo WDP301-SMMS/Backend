@@ -53,4 +53,39 @@ const updatePasswordValidator = [
     .trim(),
 ];
 
-export { editProfileValidator, updatePasswordValidator };
+const completeProfileValidator = [
+  body('password')
+    .notEmpty()
+    .isLength({ min: 6 })
+    .withMessage('Password must be at least 6 characters long')
+    .trim(),
+
+  body('dob')
+    .notEmpty()
+    .withMessage('Date of Birth is required')
+    .custom((value) => {
+      const parsedDate = parse(value, 'dd/MM/yyyy', new Date());
+      if (!isValid(parsedDate)) {
+        throw new Error(
+          'Date of Birth must be in DD/MM/YYYY format (e.g., 31/12/2000)',
+        );
+      }
+
+      const age = differenceInYears(new Date(), parsedDate);
+      if (age <= 18) {
+        throw new Error('You must be over 18 years old');
+      }
+
+      return true;
+    })
+    .customSanitizer((value) => {
+      return parse(value, 'dd/MM/yyyy', new Date());
+    }),
+
+  body('phone')
+    .notEmpty()
+    .isMobilePhone('any', { strictMode: false })
+    .withMessage('Phone number must be a valid mobile number'),
+];
+
+export { editProfileValidator, updatePasswordValidator, completeProfileValidator };

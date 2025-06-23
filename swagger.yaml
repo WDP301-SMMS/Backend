@@ -370,6 +370,190 @@ paths:
                   message:
                     type: string
                     example: Password updated successfully
+  /user/complete-profile:
+    put:
+      tags:
+        - User Controller
+      summary: Complete user profile
+      description: Updates user's profile with phone, password and date of birth
+      operationId: completeProfile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  format: password
+                  description: New password (minimum 6 characters)
+                dob:
+                  type: string
+                  format: date
+                  description: Date of birth in DD/MM/YYYY format (must be over 18)
+                  example: "31/12/2000"
+                phone:
+                  type: string
+                  description: Valid phone number
+                  example: "0987654321"
+              required:
+                - password
+                - dob
+                - phone
+      responses:
+        '200':
+          description: Profile completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Profile completed successfully
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        msg:
+                          type: string
+                          example: Date of Birth must be a valid date in DD/MM/YYYY format
+                        path:
+                          type: string
+                          example: dob
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /admin/dashboard:
+      get:
+        tags:
+          - Admin - Dashboard
+        summary: Lấy dữ liệu tổng quan cho Dashboard của Admin
+        description: Trả về các số liệu thống kê chính cho trang dashboard của quản trị viên, chẳng hạn như số lượng người dùng, học sinh, lớp học và các hoạt động gần đây.
+        operationId: getAdminDashboard
+        security:
+          - BearerAuth: []
+        responses:
+          '200':
+            description: Lấy dữ liệu dashboard thành công.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/AdminDashboardResponse'
+          '401':
+            $ref: '#/components/responses/UnauthorizedError'
+          '403':
+            $ref: '#/components/responses/ForbiddenError'
+
+  /admin/users:
+      get:
+        tags:
+          - Admin - Quản lý Người dùng & Học sinh
+        summary: Lấy danh sách tất cả Người dùng (Users)
+        description: Lấy danh sách tất cả người dùng trong hệ thống có phân trang. Có thể lọc theo vai trò (role), trạng thái (status) và tìm kiếm theo tên hoặc email.
+        operationId: adminGetUsers
+        security:
+          - BearerAuth: []
+        parameters:
+          - name: page
+            in: query
+            schema: { type: integer, default: 1 }
+            description: Số trang.
+          - name: limit
+            in: query
+            schema: { type: integer, default: 10 }
+            description: Số lượng mục trên mỗi trang.
+          - name: role
+            in: query
+            schema: { type: string, enum: [Parent, Admin, Nurse] }
+            description: Lọc người dùng theo vai trò.
+          - name: status
+            in: query
+            schema: { type: string, enum: [active, inactive] }
+            description: Lọc người dùng theo trạng thái hoạt động.
+          - name: search
+            in: query
+            schema: { type: string }
+            description: Từ khóa tìm kiếm cho tên người dùng hoặc email.
+        responses:
+          '200':
+            description: Lấy danh sách người dùng thành công.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/UserListResponse'
+          '401':
+            $ref: '#/components/responses/UnauthorizedError'
+          '403':
+            $ref: '#/components/responses/ForbiddenError'
+
+  /admin/users/{userId}/status:
+      patch:
+        tags:
+          - Admin - Quản lý Người dùng & Học sinh
+        summary: Cập nhật trạng thái Người dùng
+        description: Kích hoạt hoặc vô hiệu hóa một tài khoản người dùng.
+        operationId: adminUpdateUserStatus
+        security:
+          - BearerAuth: []
+        parameters:
+          - name: userId
+            in: path
+            required: true
+            schema: { type: string }
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: User registered successfully
+                  isActive:
+                    type: boolean
+                required:
+                  - isActive
+        responses:
+          '200':
+            description: Cập nhật trạng thái người dùng thành công.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/UserResponse'
+          '400':
+            description: Dữ liệu không hợp lệ (isActive phải là boolean).
+          '401':
+            $ref: '#/components/responses/UnauthorizedError'
+          '403':
+            $ref: '#/components/responses/ForbiddenError'
+          '404':
+            description: Không tìm thấy người dùng với ID cung cấp.
+            
   /health-check/templates:
     get:
       tags:

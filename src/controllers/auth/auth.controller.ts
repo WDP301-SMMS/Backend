@@ -21,9 +21,11 @@ import generateOtp from '@/utils/otp';
 const otpCache = new NodeCache({ stdTTL: 300 });
 
 // Login with Google OAuth
-const redirectToUri = (req: Request, res: Response) => {
-  const url = generateGoogleAuthUrl();
-  res.redirect(url);
+export const redirectToUri = (req: Request, res: Response) => {
+  const silent = req.query.silent === 'true';
+
+  const url = generateGoogleAuthUrl(silent);
+  return res.redirect(url);
 };
 
 const handleGoogleCallback = async (req: Request, res: Response) => {
@@ -49,10 +51,16 @@ const handleGoogleCallback = async (req: Request, res: Response) => {
       }
     }
 
+    let isNewUser = false;
+
     if (!userInfo) {
+      isNewUser = true;
       userInfo = new UserModel({
         email: user.email,
         username: user.name,
+        password: null,
+        dob: null,
+        phone: null,
         authProvider: 'google',
         googleId: user.sub,
       });
@@ -68,10 +76,16 @@ const handleGoogleCallback = async (req: Request, res: Response) => {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     });
 
+    const hasMissingFields = !userInfo.dob || !userInfo.phone;
+
     res.send(`
       <script>
         window.opener.postMessage(
-          { accessToken: "${accessToken}" },
+          {
+            accessToken: "${accessToken}",
+            hasMissingFields: ${hasMissingFields},
+            isNewUser: ${isNewUser}
+          },
           "${process.env.FRONTEND_URL}"
         );
         window.close();

@@ -14,10 +14,11 @@ const client = new OAuth2Client({
   redirectUri: process.env.GOOGLE_REDIRECT_URI!,
 });
 
-export const generateGoogleAuthUrl = () => {
+export const generateGoogleAuthUrl = (silent = false) => {
   const authUrl = client.generateAuthUrl({
     access_type: 'offline',
     scope: ['profile', 'email'],
+    prompt: silent ? 'none' : 'consent',
   });
   return authUrl;
 };
