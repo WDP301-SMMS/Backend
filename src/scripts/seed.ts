@@ -974,6 +974,7 @@ const seedDatabase = async () => {
         startDate: new Date('2024-11-01T00:00:00Z'),
         endDate: new Date('2024-11-15T00:00:00Z'),
         createdBy: createdUsers.find((u) => u.username === 'Nguyễn Thị E')!._id,
+        actualStartDate: new Date('2024-11-01T00:00:00Z'),
         summary: {
           totalStudents: 0,
           totalConsents: 0,
@@ -998,6 +999,7 @@ const seedDatabase = async () => {
         startDate: new Date('2025-01-01T00:00:00Z'),
         endDate: new Date('2025-01-15T00:00:00Z'),
         createdBy: createdUsers.find((u) => u.username === 'Nguyễn Thị E')!._id,
+        actualStartDate: new Date('2025-01-01T00:00:00Z'),
         summary: {
           totalStudents: 0,
           totalConsents: 0,
