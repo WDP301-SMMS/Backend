@@ -519,7 +519,7 @@ const seedDatabase = async () => {
       {
         name: 'Chiến dịch khám sức khỏe định kỳ 2024',
         schoolYear: '2024-2025',
-        scheduleDate: new Date('2024-10-01T00:00:00Z'),
+        startDate: new Date('2024-10-01T00:00:00Z'), // Đổi từ scheduleDate -> startDate
         templateId: createdHealthCheckTemplates.find(
           (t) => t.name === 'Khám sức khỏe tổng quát',
         )!._id,
@@ -547,7 +547,7 @@ const seedDatabase = async () => {
       {
         name: 'Chiến dịch khám thị lực đầu năm 2025',
         schoolYear: '2024-2025',
-        scheduleDate: new Date('2025-02-01T00:00:00Z'),
+        startDate: new Date('2025-02-01T00:00:00Z'), // Đổi từ scheduleDate -> startDate
         templateId: createdHealthCheckTemplates.find(
           (t) => t.name === 'Khám thị lực',
         )!._id,
