@@ -9,4 +9,6 @@ export enum CampaignStatus {
   IN_PROGRESS = 'IN_PROGRESS',
   COMPLETED = 'COMPLETED',
   CANCELED = 'CANCELED',
+  PENDING = 'PENDING',
+  DELAYED = 'DELAYED',
 }
