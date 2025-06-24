@@ -44,14 +44,30 @@ const claimStudentSchema = Joi.object({
 const createProfileSchema = Joi.object({
   studentId: objectIdValidator.label('Student ID'),
   
-  allergies: Joi.string().required().max(1000).messages({
-    'string.empty': 'Allergies information is required. Please enter "None" if there are no allergies.',
-  }),
-  chronicConditions: Joi.string().required().max(1000).messages({
-    'string.empty': 'Chronic Conditions information is required. Please enter "None" if there are no chronic conditions.',
-  }),
-  visionStatus: Joi.string().required().max(500),
-  hearingStatus: Joi.string().required().max(500),
+  allergies: Joi.array().items(
+    Joi.object({
+      vaccineName: Joi.string().required(),
+      doseNumber: Joi.number().integer().min(1).required(),
+    })
+  ).optional().default([]),
+  chronicConditions: Joi.array().items(
+    Joi.object({
+      vaccineName: Joi.string().required(),
+      doseNumber: Joi.number().integer().min(1).required(),
+    })
+  ).optional().default([]),
+  visionStatus: Joi.array().items(
+    Joi.object({
+      vaccineName: Joi.string().required(),
+      doseNumber: Joi.number().integer().min(1).required(),
+    })
+  ).optional().default([]),
+  hearingStatus: Joi.array().items(
+    Joi.object({
+      vaccineName: Joi.string().required(),
+      doseNumber: Joi.number().integer().min(1).required(),
+    })
+  ).optional().default([]),
   
   vaccines: Joi.array().items(
     Joi.object({
@@ -63,17 +79,37 @@ const createProfileSchema = Joi.object({
 
 
 const updateProfileSchema = Joi.object({
-  allergies: Joi.string().max(1000).optional(),
-  chronicConditions: Joi.string().max(1000).optional(),
-  visionStatus: Joi.string().max(500).optional(),
-  hearingStatus: Joi.string().max(500).optional(),
+  allergies: Joi.array().items(
+    Joi.object({
+      vaccineName: Joi.string().required(),
+      doseNumber: Joi.number().integer().min(1).required(),
+    })
+  ).optional().default([]),
+  chronicConditions: Joi.array().items(
+    Joi.object({
+      vaccineName: Joi.string().required(),
+      doseNumber: Joi.number().integer().min(1).required(),
+    })
+  ).optional().default([]),
+  visionStatus: Joi.array().items(
+    Joi.object({
+      vaccineName: Joi.string().required(),
+      doseNumber: Joi.number().integer().min(1).required(),
+    })
+  ).optional().default([]),
+  hearingStatus: Joi.array().items(
+    Joi.object({
+      vaccineName: Joi.string().required(),
+      doseNumber: Joi.number().integer().min(1).required(),
+    })
+  ).optional().default([]),
   
   vaccines: Joi.array().items(
     Joi.object({
       vaccineName: Joi.string().required(),
       doseNumber: Joi.number().integer().min(1).required(),
     })
-  ).optional(),
+  ).optional().default([]),
 
 }).min(1).messages({ 
     'object.min': 'At least one field must be provided for update.'
