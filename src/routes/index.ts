@@ -19,7 +19,7 @@ router.use('/auth', authRouter);
 router.use(
   '/admin',
   handleToken,
-  roleBaseAccess([RoleEnum.Admin]),
+  // roleBaseAccess([RoleEnum.Admin]),
   dashboardRouter,
 );
 router.use('/user', handleToken, userRouter);
