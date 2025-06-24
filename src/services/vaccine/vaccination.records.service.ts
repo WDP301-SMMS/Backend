@@ -69,6 +69,52 @@ export class VaccinationRecordService {
         return registrants;
     }
 
+    public async getMedicalChecklist(campaignId: string): Promise<any> {
+        const checklist = await VaccinationConsentModel.aggregate([
+            {
+                $match: {
+                    campaignId: new mongoose.Types.ObjectId(campaignId),
+                    status: { $in: [ConsentStatus.APPROVED, ConsentStatus.COMPLETED] }
+                }
+            },
+            {
+                $lookup: { from: 'students', localField: 'studentId', foreignField: '_id', as: 'studentInfo' }
+            },
+            { $unwind: '$studentInfo' },
+            {
+                $lookup: { from: 'classes', localField: 'studentInfo.classId', foreignField: '_id', as: 'classInfo' }
+            },
+            { $unwind: '$classInfo' },
+            {
+                $lookup: { from: 'healthprofiles', localField: 'studentId', foreignField: 'studentId', as: 'healthProfile' }
+            },
+            { $unwind: { path: '$healthProfile', preserveNullAndEmptyArrays: true } },
+            {
+                $sort: { 'classInfo.className': 1, 'studentInfo.fullName': 1 }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    consentId: '$_id',
+                    studentId: '$studentInfo._id',
+                    fullName: '$studentInfo.fullName',
+                    dateOfBirth: '$studentInfo.dateOfBirth',
+                    className: '$classInfo.className',
+                    allergies: { $ifNull: ['$healthProfile.allergies', 'Chưa có thông tin'] },
+                    chronicConditions: { $ifNull: ['$healthProfile.chronicConditions', 'Chưa có thông tin'] },
+                    vaccinationStatus: {
+                        $cond: {
+                            if: { $eq: ['$status', ConsentStatus.COMPLETED] },
+                            then: 'COMPLETED',
+                            else: 'PENDING_VACCINATION'
+                        }
+                    }
+                }
+            }
+        ]);
+        return checklist;
+    }
+
     public async createVaccinationRecord(payload: ICreateRecordPayload): Promise<IVaccinationRecord> {
         const { consentId, administeredAt, administeredByStaffId } = payload;
 
@@ -76,7 +122,7 @@ export class VaccinationRecordService {
         try {
             const consent = await VaccinationConsentModel.findById(consentId)
                 .populate<{ campaignId: IVaccinationCampaign }>('campaignId')
-                // .session(session);
+            // .session(session);
 
             if (!consent) {
                 const error: AppError = new Error('Consent form not found.');
@@ -121,7 +167,7 @@ export class VaccinationRecordService {
                 appError.status = 409;
                 throw appError;
             }
-            throw error ;
+            throw error;
         }
         //  finally {
         //     session.endSession();

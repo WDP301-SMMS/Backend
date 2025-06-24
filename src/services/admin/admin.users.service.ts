@@ -4,7 +4,7 @@ import { AppError } from '@/utils/globalErrorHandler';
 import { Class } from '@/models/class.model';
 import { StudentModel } from '@/models/student.model';
 import { UserModel } from '@/models/user.model';
-import { FilterQuery } from 'mongoose';
+import { FilterQuery, Types } from 'mongoose';
 
 const createAppError = (status: number, message: string): AppError => {
   const error: AppError = new Error(message);
@@ -111,7 +111,9 @@ class AdminUserStudentService {
     }
 
     if (query.classId) {
-      findQuery.classId = query.classId;
+      if (Types.ObjectId.isValid(query.classId)) {
+        findQuery.classId = new Types.ObjectId(query.classId);
+      }
     }
 
     const aggregationPipeline: any[] = [
@@ -135,6 +137,7 @@ class AdminUserStudentService {
           as: 'classInfo',
         },
       },
+
       {
         $unwind: { path: '$parentInfo', preserveNullAndEmptyArrays: true },
       },
@@ -147,10 +150,13 @@ class AdminUserStudentService {
           fullName: 1,
           dateOfBirth: 1,
           createdAt: 1,
+          invitedCode: 1,
+          gender: 1,
           parent: {
             _id: '$parentInfo._id',
             username: '$parentInfo.username',
             email: '$parentInfo.email',
+            phone: '$parentInfo.phone'
           },
           class: { _id: '$classInfo._id', className: '$classInfo.className' },
         },
@@ -184,17 +190,7 @@ class AdminUserStudentService {
     parentId: string;
     classId: string;
   }): Promise<IStudent> {
-    const parent = await this.users.findOne({
-      _id: studentData.parentId,
-      role: 'Parent',
-    });
 
-    if (!parent) {
-      throw createAppError(
-        404,
-        'Parent account not found or user is not a parent',
-      );
-    }
     const targetClass = await this.classes.findById(studentData.classId);
     if (!targetClass) {
       throw createAppError(404, 'Class not found');
