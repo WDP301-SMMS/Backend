@@ -57,9 +57,9 @@ class AdminUserStudentController {
 
   public createStudent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const studentData = req.body; // Mong đợi { fullName, dateOfBirth, parentId, classId }
-      if (!studentData.fullName || !studentData.dateOfBirth || !studentData.parentId || !studentData.classId) {
-        res.status(400).json({ message: 'Missing required fields: fullName, dateOfBirth, parentId, classId' });
+      const studentData = req.body; // Mong đợi { fullName, dateOfBirth, classId }
+      if (!studentData.fullName || !studentData.dateOfBirth  || !studentData.classId) {
+        res.status(400).json({ message: 'Missing required fields: fullName, dateOfBirth, classId' });
         return;
       }
 
