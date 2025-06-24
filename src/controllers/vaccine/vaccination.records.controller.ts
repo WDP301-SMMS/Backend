@@ -20,6 +20,21 @@ export class VaccinationRecordController {
     }
   };
 
+   public getMedicalChecklist = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { campaignId } = req.params;
+      const checklist = await recordService.getMedicalChecklist(campaignId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Medical checklist retrieved successfully.',
+        data: checklist,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
   public createVaccinationRecord = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const newRecord = await recordService.createVaccinationRecord(req.body);

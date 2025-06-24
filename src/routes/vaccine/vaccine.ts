@@ -72,7 +72,12 @@ router.get(
     RecordController.getRegistrants
 );
 
-// Ghi nhận một lượt tiêm chủng cho học sinh
+router.get(
+    '/campaigns/:campaignId/checklist',
+    // roleMiddleware([RoleEnum.Admin, RoleEnum.Nurse]),
+    RecordController.getMedicalChecklist
+);
+
 router.post(
     '/records',
     // roleMiddleware([RoleEnum.Admin, RoleEnum.Nurse]),
