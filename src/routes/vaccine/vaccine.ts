@@ -1,9 +1,14 @@
 import { VaccinationCampaignController } from '@/controllers/vaccine/vaccination.campaigns.controller';
 import { VaccinationConsentController } from '@/controllers/vaccine/vaccination.consents.controller';
 import { VaccinationRecordController } from '@/controllers/vaccine/vaccination.records.controller';
-import { addObservationValidator, createCampaignValidator, createRecordValidator, respondToConsentValidator, updateCampaignValidator } from '@/validators/vaccine/vaccination.validator';
+import {
+  addObservationValidator,
+  createCampaignValidator,
+  createRecordValidator,
+  respondToConsentValidator,
+  updateCampaignValidator,
+} from '@/validators/vaccine/vaccination.validator';
 const express = require('express');
-
 
 const router = express.Router();
 const CampaignController = new VaccinationCampaignController();
@@ -11,34 +16,19 @@ const ConsentController = new VaccinationConsentController();
 const RecordController = new VaccinationRecordController();
 
 // Vaccination Campaign Routes
-router.get(
-    '/',
-    CampaignController.getAllCampaigns
-);
+router.get('/', CampaignController.getAllCampaigns);
 
+router.post('/', createCampaignValidator, CampaignController.createCampaign);
 
-router.post(
-    '/',
-    createCampaignValidator,
-    CampaignController.createCampaign
-);
-
-
-router.get(
-    '/:campaignId',
-    CampaignController.getCampaignById
-);
+router.get('/:campaignId', CampaignController.getCampaignById);
 
 router.patch(
-    '/:campaignId',
-    updateCampaignValidator,
-    CampaignController.updateCampaign
+  '/:campaignId',
+  updateCampaignValidator,
+  CampaignController.updateCampaign,
 );
 
-router.post(
-    '/:campaignId/dispatch',
-    CampaignController.dispatchCampaign
-);
+router.post('/:campaignId/dispatch', CampaignController.dispatchCampaign);
 
 // Lấy báo cáo summary của một campaign
 // router.get(
@@ -48,28 +38,33 @@ router.post(
 //     controller.getCampaignSummary // Bạn sẽ cần tạo hàm này trong controller và service
 // );
 
-
 // VACCINATION CONSENT ROUTES(Parents)
 router.get(
-    '/consents/my-requests',
+  '/consents/my-requests',
 
-    // roleMiddleware([RoleEnum.Parent]),
-    ConsentController.getMyConsents
+  // roleMiddleware([RoleEnum.Parent]),
+  ConsentController.getMyConsents,
+);
+
+router.get(
+  '/consents/my-requests/:consentId',
+
+  // roleMiddleware([RoleEnum.Parent]),
+  ConsentController.getConsentById,
 );
 
 router.patch(
-     '/consent/:campaignId/students/:studentId/respond',
-    // roleMiddleware([RoleEnum.Parent]),
-    respondToConsentValidator, 
-    ConsentController.respondByStudentAndCampaign
+  '/consent/:campaignId/students/:studentId/respond',
+  // roleMiddleware([RoleEnum.Parent]),
+  respondToConsentValidator,
+  ConsentController.respondByStudentAndCampaign,
 );
-
 
 // VACCINATION RECORD ROUTES (Admin/Nurse)
 router.get(
-    '/campaigns/:campaignId/registrants',
-    // roleMiddleware([RoleEnum.Admin, RoleEnum.Nurse]),
-    RecordController.getRegistrants
+  '/campaigns/:campaignId/registrants',
+  // roleMiddleware([RoleEnum.Admin, RoleEnum.Nurse]),
+  RecordController.getRegistrants,
 );
 
 router.get(
@@ -79,16 +74,16 @@ router.get(
 );
 
 router.post(
-    '/records',
-    // roleMiddleware([RoleEnum.Admin, RoleEnum.Nurse]),
-    createRecordValidator, 
-    RecordController.createVaccinationRecord
+  '/records',
+  // roleMiddleware([RoleEnum.Admin, RoleEnum.Nurse]),
+  createRecordValidator,
+  RecordController.createVaccinationRecord,
 );
 
 router.post(
-    '/records/:recordId/observations',
-    // roleMiddleware([RoleEnum.Admin, RoleEnum.Nurse]),
-    addObservationValidator, 
-    RecordController.addObservation
+  '/records/:recordId/observations',
+  // roleMiddleware([RoleEnum.Admin, RoleEnum.Nurse]),
+  addObservationValidator,
+  RecordController.addObservation,
 );
 export default router;
