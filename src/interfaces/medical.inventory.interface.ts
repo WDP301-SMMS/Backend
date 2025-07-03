@@ -1,15 +1,19 @@
-import { Types } from "mongoose";
+import { InventoryType } from '@/enums/InventoryEnums';
+import { Document, Types } from 'mongoose';
 
-export interface IMedicalInventory {
-  detailId: Types.ObjectId;
-  itemName: string;
-  unit: string;
-  quantityTotal: number;
-  lowStockThreshold: number;
-  status: string;
-}
-
-export interface IInventoryDetail {
+export interface IInventoryBatch {
+  _id?: Types.ObjectId;
   quantity: number;
   expirationDate: Date;
+  addedAt: Date;
+}
+
+export interface IMedicalInventory extends Document {
+  itemName: string;
+  description?: string;
+  type: InventoryType;
+  unit: string;
+  lowStockThreshold: number;
+  status: string;
+  batches: IInventoryBatch[];
 }

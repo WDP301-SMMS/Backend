@@ -1,3 +1,4 @@
+import { EAllergySeverity } from '@/enums/AllergyEnums';
 import { NextFunction, Request, Response } from 'express';
 import Joi from 'joi';
 
@@ -41,41 +42,79 @@ const claimStudentSchema = Joi.object({
 });
 
 
-const createProfileSchema = Joi.object({
-  studentId: objectIdValidator.label('Student ID'),
-  
-  allergies: Joi.string().required().max(1000).messages({
-    'string.empty': 'Allergies information is required. Please enter "None" if there are no allergies.',
-  }),
-  chronicConditions: Joi.string().required().max(1000).messages({
-    'string.empty': 'Chronic Conditions information is required. Please enter "None" if there are no chronic conditions.',
-  }),
-  visionStatus: Joi.string().required().max(500),
-  hearingStatus: Joi.string().required().max(500),
-  
-  vaccines: Joi.array().items(
-    Joi.object({
-      vaccineName: Joi.string().required(),
-      doseNumber: Joi.number().integer().min(1).required(),
-    })
-  ).optional().default([]),
+const allergySchema = Joi.object({
+  type: Joi.string().optional(),
+  reaction: Joi.string().optional(),
+  severity: Joi.string().valid(...Object.values(EAllergySeverity)).optional(),
+  notes: Joi.string().optional(),
+});
+
+const chronicConditionSchema = Joi.object({
+  conditionName: Joi.string().optional(),
+  diagnosedDate: Joi.date().iso().optional(),
+  medication: Joi.string().optional(),
+  notes: Joi.string().optional(),
+});
+
+const medicalHistoryEventSchema = Joi.object({
+  condition: Joi.string().optional(),
+  facility: Joi.string().optional(),
+  treatmentDate: Joi.date().iso().optional(),
+  method: Joi.string().optional(),
+  notes: Joi.string().allow('').optional(),
+});
+
+const visionCheckupSchema = Joi.object({
+  checkupDate: Joi.date().iso().optional(),
+  rightEyeVision: Joi.string().optional(),
+  leftEyeVision: Joi.string().optional(),
+  wearsGlasses: Joi.boolean().optional(),
+  isColorblind: Joi.boolean().optional(),
+  notes: Joi.string().allow('').optional(),
+});
+
+const hearingCheckupSchema = Joi.object({
+  checkupDate: Joi.date().iso().optional(),
+  rightEarStatus: Joi.string().optional(),
+  leftEarStatus: Joi.string().optional(),
+  usesHearingAid: Joi.boolean().optional(),
+  notes: Joi.string().allow('').optional(),
+});
+
+const injectedVaccineSchema = Joi.object({
+  vaccineName: Joi.string().optional(),
+  doseNumber: Joi.number().integer().min(1).optional(),
+  note: Joi.string().optional(),
+  dateInjected: Joi.date().iso().optional(),
+  locationInjected: Joi.string().optional(),
 });
 
 
-const updateProfileSchema = Joi.object({
-  allergies: Joi.string().max(1000).optional(),
-  chronicConditions: Joi.string().max(1000).optional(),
-  visionStatus: Joi.string().max(500).optional(),
-  hearingStatus: Joi.string().max(500).optional(),
+// 1. Validator cho việc tạo mới Health Profile
+const createProfileSchema = Joi.object({
+  studentId: objectIdValidator.label('Student ID'),
   
-  vaccines: Joi.array().items(
-    Joi.object({
-      vaccineName: Joi.string().required(),
-      doseNumber: Joi.number().integer().min(1).required(),
-    })
-  ).optional(),
+  // Áp dụng các schema con đã định nghĩa
+  allergies: Joi.array().items(allergySchema).optional().default([]),
+  chronicConditions: Joi.array().items(chronicConditionSchema).optional().default([]),
+  medicalHistory: Joi.array().items(medicalHistoryEventSchema).optional().default([]),
+  visionHistory: Joi.array().items(visionCheckupSchema).optional().default([]),
+  hearingHistory: Joi.array().items(hearingCheckupSchema).optional().default([]),
+  vaccines: Joi.array().items(injectedVaccineSchema).optional().default([]),
+});
 
-}).min(1).messages({ 
+
+// 2. Validator cho việc cập nhật Health Profile
+const updateProfileSchema = Joi.object({
+  // Tất cả các trường đều là optional, nhưng nếu tồn tại, phải tuân theo schema con
+  allergies: Joi.array().items(allergySchema).optional(),
+  chronicConditions: Joi.array().items(chronicConditionSchema).optional(),
+  medicalHistory: Joi.array().items(medicalHistoryEventSchema).optional(),
+  visionHistory: Joi.array().items(visionCheckupSchema).optional(),
+  hearingHistory: Joi.array().items(hearingCheckupSchema).optional(),
+  vaccines: Joi.array().items(injectedVaccineSchema).optional(),
+
+}).min(1).messages({
     'object.min': 'At least one field must be provided for update.'
 });
 

@@ -1,34 +1,85 @@
+import { InventoryStatus, InventoryType } from '@/enums/InventoryEnums';
 import {
-  IInventoryDetail,
   IMedicalInventory,
+  IInventoryBatch,
 } from '@/interfaces/medical.inventory.interface';
-import mongoose, { Schema } from 'mongoose';
 
-const MedicalInventorySchema: Schema = new Schema<IMedicalInventory>({
-  detailId: {
-    type: Schema.Types.ObjectId,
-    ref: 'InventoryDetail',
-    required: true,
-    index: true,
-  }, // Foreign key, indexed for lookups
-  itemName: { type: String, required: true },
-  unit: { type: String, required: true },
-  quantityTotal: { type: Number, required: true },
-  lowStockThreshold: { type: Number, required: true },
-  status: { type: String, required: true },
+import mongoose, { Schema, Types } from 'mongoose';
+
+const InventoryBatchSchema = new Schema<IInventoryBatch>(
+  {
+    quantity: {
+      type: Number,
+      required: true,
+      min: [0, 'Quantity cannot be negative'],
+    },
+    expirationDate: {
+      type: Date,
+      required: true,
+    },
+    addedAt: {
+      type: Date,
+      required: true,
+      default: Date.now,
+    },
+  },
+  { _id: true },
+);
+
+const MedicalInventorySchema = new Schema<IMedicalInventory>(
+  {
+    itemName: {
+      type: String,
+      required: true,
+      trim: true,
+      unique: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+      type: { // <-- THÊM TRƯỜNG NÀY
+      type: String,
+      required: true,
+      enum: Object.values(InventoryType),
+    },
+    unit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    lowStockThreshold: {
+      type: Number,
+      required: true,
+      min: [0, 'Low stock threshold cannot be negative'],
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: Object.values(InventoryStatus),
+      default: InventoryStatus.IN_STOCK,
+    },
+    batches: {
+      type: [InventoryBatchSchema],
+      required: true,
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
+  },
+);
+
+MedicalInventorySchema.virtual('totalQuantity').get(function (
+  this: IMedicalInventory,
+) {
+  return this.batches.reduce((total, batch) => total + batch.quantity, 0);
 });
 
 export const MedicalInventoryModel = mongoose.model<IMedicalInventory>(
   'MedicalInventory',
   MedicalInventorySchema,
-);
-
-const InventoryDetailSchema: Schema = new Schema<IInventoryDetail>({
-  quantity: { type: Number, required: true },
-  expirationDate: { type: Date, required: true },
-});
-
-export const InventoryDetailModel = mongoose.model<IInventoryDetail>(
-  'InventoryDetail',
-  InventoryDetailSchema,
 );

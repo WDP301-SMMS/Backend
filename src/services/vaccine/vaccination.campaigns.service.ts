@@ -196,7 +196,7 @@ export class VaccinationCampaignService {
 
   public async getCampaignById(campaignId: string): Promise<IVaccinationCampaign> {
     const campaign = await VaccinationCampaignModel.findById(campaignId)
-      .populate('partnerId', 'name address phone')
+      .populate('partnerId')
       .populate({ path: 'createdBy', model: 'User', select: 'username email' });
     if (!campaign) {
       const error: AppError = new Error('Campaign not found.');

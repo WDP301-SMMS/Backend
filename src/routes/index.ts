@@ -6,6 +6,7 @@ import reportsRouter from './reports/reports';
 import medicationRequestRouter from './medicationRequest/medication';
 import upload from './upload/upload';
 import healthProfileRouter from './health-profile/health.profile';
+import inventoryRouter from './inventory/inventory'
 import {
   handleToken,
   roleBaseAccess,
@@ -19,7 +20,7 @@ router.use('/auth', authRouter);
 router.use(
   '/admin',
   handleToken,
-  roleBaseAccess([RoleEnum.Admin]),
+  // roleBaseAccess([RoleEnum.Admin]),
   dashboardRouter,
 );
 router.use('/user', handleToken, userRouter);
@@ -34,5 +35,6 @@ router.use(
   roleBaseAccess([RoleEnum.Admin, RoleEnum.Manager]),
   healthCheckRouter,
 );
+router.use('/inventory', handleToken, inventoryRouter)
 
 export default router;
