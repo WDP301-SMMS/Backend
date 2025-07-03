@@ -13,7 +13,11 @@ declare global {
 const consentService = new VaccinationConsentService();
 
 export class VaccinationConsentController {
-  public getMyConsents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getMyConsents = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const parentId = req.user?._id;
       if (!parentId) {
@@ -32,15 +36,51 @@ export class VaccinationConsentController {
     }
   };
 
-public respondByStudentAndCampaign = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getConsentById = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
-      const { campaignId, studentId } = req.params; 
+      const { consentId } = req.params;
       const parentId = req.user?._id;
       if (!parentId) {
         throw new Error('User authentication error: User ID not found.');
       }
 
-      const updatedConsent = await consentService.respondByStudentAndCampaign(campaignId, studentId, parentId, req.body);
+      const consentByStudent = await consentService.getConsentById(
+        consentId,
+        parentId,
+      );
+
+      res.status(200).json({
+        success: true,
+        message: 'Consent retrieved successfully.',
+        data: consentByStudent, // đồng nhất với getMyConsents
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public respondByStudentAndCampaign = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const { campaignId, studentId } = req.params;
+      const parentId = req.user?._id;
+      if (!parentId) {
+        throw new Error('User authentication error: User ID not found.');
+      }
+
+      const updatedConsent = await consentService.respondByStudentAndCampaign(
+        campaignId,
+        studentId,
+        parentId,
+        req.body,
+      );
 
       res.status(200).json({
         success: true,
@@ -50,9 +90,13 @@ public respondByStudentAndCampaign = async (req: Request, res: Response, next: N
     } catch (error) {
       next(error);
     }
-};
+  };
 
-  public getCampaignSummary = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getCampaignSummary = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const { campaignId } = req.params;
       const summary = await consentService.getCampaignSummary(campaignId);
@@ -66,5 +110,4 @@ public respondByStudentAndCampaign = async (req: Request, res: Response, next: N
       next(error);
     }
   };
-
 }
