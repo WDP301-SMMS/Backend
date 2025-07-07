@@ -51,8 +51,8 @@ export class VaccinationRecordController {
 
   public addObservation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { recordId } = req.params;
-      const updatedRecord = await recordService.addObservation(recordId, req.body);
+      const { consentId } = req.params;
+      const updatedRecord = await recordService.addObservation(consentId, req.body);
 
       res.status(200).json({
         success: true,

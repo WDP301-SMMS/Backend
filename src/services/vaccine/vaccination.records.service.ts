@@ -74,7 +74,7 @@ export class VaccinationRecordService {
             {
                 $match: {
                     campaignId: new mongoose.Types.ObjectId(campaignId),
-                    status: { $in: [ConsentStatus.APPROVED, ConsentStatus.COMPLETED] }
+                    status: { $in: [ConsentStatus.APPROVED, ConsentStatus.COMPLETED, ConsentStatus.UNDER_OBSERVATION, ConsentStatus.REVOKED] }
                 }
             },
             {
@@ -104,9 +104,9 @@ export class VaccinationRecordService {
                     chronicConditions: { $ifNull: ['$healthProfile.chronicConditions', 'Chưa có thông tin'] },
                     vaccinationStatus: {
                         $cond: {
-                            if: { $eq: ['$status', ConsentStatus.COMPLETED] },
-                            then: 'COMPLETED',
-                            else: 'PENDING_VACCINATION'
+                            if: { $eq: ['$status', ConsentStatus.APPROVED] },
+                            then: 'PENDING_VACCINATION',
+                            else: '$status'
                         }
                     }
                 }
@@ -149,7 +149,7 @@ export class VaccinationRecordService {
 
             await newRecord.save();
 
-            consent.status = ConsentStatus.COMPLETED;
+            consent.status = ConsentStatus.UNDER_OBSERVATION;
             await consent.save();
 
             await VaccinationCampaignModel.updateOne(
@@ -174,19 +174,26 @@ export class VaccinationRecordService {
         // }
     }
 
-    public async addObservation(recordId: string, observationData: IObservation): Promise<IVaccinationRecord> {
-        const updatedRecord = await VaccinationRecordModel.findByIdAndUpdate(
-            recordId,
-            { $push: { postVaccinationChecks: observationData } },
-            { new: true }
-        );
 
-        if (!updatedRecord) {
-            const error: AppError = new Error('Vaccination record not found.');
-            error.status = 404;
-            throw error;
-        }
+public async addObservation(consentId: string, observationData: IObservation): Promise<IVaccinationRecord> {
+    const updatedRecord = await VaccinationRecordModel.findOneAndUpdate(
+        { consentId: consentId },
+        { $push: { postVaccinationChecks: observationData } },
+        { new: true, runValidators: true }
+    );
 
-        return updatedRecord;
+    if (!updatedRecord) {
+        const error: AppError = new Error('Vaccination record associated with this consent ID not found.');
+        error.status = 404;
+        throw error;
     }
+
+    const newStatus = observationData.isAbnormal
+        ? ConsentStatus.ADVERSE_REACTION
+        : ConsentStatus.COMPLETED;
+
+    await VaccinationConsentModel.findByIdAndUpdate(consentId, { status: newStatus });
+
+    return updatedRecord;
+}
 }

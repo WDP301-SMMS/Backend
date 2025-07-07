@@ -81,7 +81,7 @@ router.post(
 );
 
 router.post(
-  '/records/:recordId/observations',
+  '/records/:consentId/observations',
   // roleMiddleware([RoleEnum.Admin, RoleEnum.Nurse]),
   addObservationValidator,
   RecordController.addObservation,
