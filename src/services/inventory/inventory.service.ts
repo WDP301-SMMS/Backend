@@ -226,7 +226,7 @@ class InventoryService {
     await item.save();
 
     const log = await this.logs.create({
-      // inventoryId: item._id,
+      inventoryId: item._id,
       nurseId: managerId,
       typeLog: type,
       quantityChanged,
