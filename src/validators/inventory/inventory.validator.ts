@@ -1,4 +1,4 @@
-import { InventoryLogType, InventoryType } from '@/enums/InventoryEnums';
+import { InventoryLogType, InventoryStatus, InventoryType } from '@/enums/InventoryEnums';
 import { Request, Response, NextFunction } from 'express';
 import Joi from 'joi';
 
@@ -46,6 +46,7 @@ const updateItemSchema = Joi.object({
   lowStockThreshold: Joi.number().integer().min(0).optional(),
   description: Joi.string().allow('').max(500).optional(),
   type: Joi.string().valid(...Object.values(InventoryType)).optional(),
+  status: Joi.string().valid(...Object.values(InventoryStatus)).optional(),
 }).min(1);
 
 const dispenseItemSchema = Joi.object({
@@ -73,7 +74,21 @@ const adjustStockSchema = Joi.object({
     ),
 });
 
+const addBatchSchema = Joi.object({
+  quantity: Joi.number().positive().required().messages({
+    'number.base': 'Quantity must be a number.',
+    'number.positive': 'Quantity must be a positive number.',
+    'any.required': 'Quantity is required.',
+  }),
+  expirationDate: Joi.date().iso().required().messages({
+    'date.base': 'Expiration date must be a valid date.',
+    'date.format': 'Expiration date must be in ISO 8601 format (YYYY-MM-DD).',
+    'any.required': 'Expiration date is required.',
+  }),
+});
+
 export const stockInItemValidator = validate(stockInItemSchema);
 export const updateItemValidator = validate(updateItemSchema);
 export const dispenseMedicationValidator = validate(dispenseMedicationSchema);
 export const adjustStockValidator = validate(adjustStockSchema);
+export const addBatchValidator = validate(addBatchSchema);

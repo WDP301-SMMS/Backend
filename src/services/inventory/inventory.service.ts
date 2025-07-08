@@ -68,7 +68,7 @@ class InventoryService {
 
     return item;
   }
-  
+
   public async withdrawItemForIncident(
     withdrawalData: {
       itemId: string;
@@ -108,11 +108,10 @@ class InventoryService {
       reason: incidentId ? `Withdrawal for incident` : 'General withdrawal',
       usageInstructions: usageInstructions || null,
     }]);
-    
+
     return log[0];
   }
-  
-  // --- HÀM MỚI CHO LOGIC CẤP PHÁT ---
+
 
   public async findIncidentsToDispense(filters: FilterQuery<IMedicalIncident>): Promise<IMedicalIncident[]> {
     const incidents = await this.incidents
@@ -149,17 +148,16 @@ class InventoryService {
           nurseId
         );
       }
-      
+
       incident.status = 'COMPLETED';
       await incident.save();
       return incident;
     } catch (error) {
       throw error;
-    } 
+    }
   }
-  
-  // --- CÁC HÀM KHÁC GIỮ NGUYÊN ---
-  
+
+
   public async findAllItems(
     filters: FilterQuery<IMedicalInventory>,
   ): Promise<IMedicalInventory[]> {
@@ -181,7 +179,7 @@ class InventoryService {
   public async updateItemInfo(
     itemId: string,
     itemData: Partial<
-      Pick<IMedicalInventory, 'itemName' | 'unit' | 'lowStockThreshold' | 'description' | 'type'>
+      Pick<IMedicalInventory, 'itemName' | 'unit' | 'lowStockThreshold' | 'description' | 'type' | 'status'>
     >,
   ): Promise<IMedicalInventory> {
     if (!itemData || Object.keys(itemData).length === 0) {
@@ -197,7 +195,7 @@ class InventoryService {
     }
     return updatedItem;
   }
-  
+
   public async adjustStock(
     adjustmentData: {
       itemId: string;
@@ -216,10 +214,10 @@ class InventoryService {
 
     const batch = item.batches.find(b => b._id?.toString() === batchId);
     if (!batch) throw createError(404, 'Batch not found in this item');
-    
+
     const quantityChanged = newQuantity - batch.quantity;
     if (quantityChanged === 0) throw createError(400, 'No change in quantity detected.');
-    
+
     batch.quantity = newQuantity;
     if (batch.quantity === 0) {
       item.batches = item.batches.filter(b => b._id?.toString() !== batchId);
@@ -228,7 +226,7 @@ class InventoryService {
     await item.save();
 
     const log = await this.logs.create({
-      inventoryId: item._id,
+      // inventoryId: item._id,
       nurseId: managerId,
       typeLog: type,
       quantityChanged,
@@ -240,32 +238,60 @@ class InventoryService {
   public async findLogs(filters: FilterQuery<IInventoryLog>): Promise<IInventoryLog[]> {
     const logs = await this.logs
       .find(filters)
-      .populate('inventoryId', 'itemName unit')
+      .populate('inventoryId', 'itemName unit batches')
       .populate('nurseId', 'username email')
       .sort({ createdAt: -1 });
     return logs;
-  }
+  } 
 
   public async getDispenseHistory(filters: any): Promise<any[]> {
     const pipeline: any[] = [
-        { $match: { typeLog: InventoryLogType.WITHDRAWAL_FOR_INCIDENT, incidentId: { $ne: null } } },
-        { $sort: { createdAt: -1 } },
-        { $lookup: { from: 'medicalinventories', localField: 'inventoryId', foreignField: '_id', as: 'itemInfo' } },
-        { $unwind: '$itemInfo' },
-        { $group: { _id: "$incidentId", dispensedItems: { $push: { itemName: '$itemInfo.itemName', quantity: { $abs: '$quantityChanged' }, unit: '$itemInfo.unit', usageInstructions: '$usageInstructions' } }, dispensedAt: { $first: "$createdAt" } } },
-        { $lookup: { from: 'medicalincidents', localField: '_id', foreignField: '_id', as: 'incidentInfo' } },
-        { $unwind: '$incidentInfo' },
-        { $lookup: { from: 'students', localField: 'incidentInfo.studentId', foreignField: '_id', as: 'studentInfo' } },
-        { $unwind: '$studentInfo' },
-        { $lookup: { from: 'classes', localField: 'studentInfo.classId', foreignField: '_id', as: 'classInfo' } },
-        { $unwind: '$classInfo' },
-        { $project: { _id: 0, incidentId: '$_id', incidentType: '$incidentInfo.incidentType', incidentDescription: '$incidentInfo.description', incidentTime: '$incidentInfo.incidentTime', studentName: '$studentInfo.fullName', studentClassName: '$classInfo.className', dispensedItems: '$dispensedItems', dispensedAt: '$dispensedAt' } }
+      { $match: { typeLog: InventoryLogType.WITHDRAWAL_FOR_INCIDENT, incidentId: { $ne: null } } },
+      { $sort: { createdAt: -1 } },
+      { $lookup: { from: 'medicalinventories', localField: 'inventoryId', foreignField: '_id', as: 'itemInfo' } },
+      { $unwind: '$itemInfo' },
+      { $group: { _id: "$incidentId", dispensedItems: { $push: { itemName: '$itemInfo.itemName', quantity: { $abs: '$quantityChanged' }, unit: '$itemInfo.unit', usageInstructions: '$usageInstructions' } }, dispensedAt: { $first: "$createdAt" } } },
+      { $lookup: { from: 'medicalincidents', localField: '_id', foreignField: '_id', as: 'incidentInfo' } },
+      { $unwind: '$incidentInfo' },
+      { $lookup: { from: 'students', localField: 'incidentInfo.studentId', foreignField: '_id', as: 'studentInfo' } },
+      { $unwind: '$studentInfo' },
+      { $lookup: { from: 'classes', localField: 'studentInfo.classId', foreignField: '_id', as: 'classInfo' } },
+      { $unwind: '$classInfo' },
+      { $project: { _id: 0, incidentId: '$_id', incidentType: '$incidentInfo.incidentType', incidentDescription: '$incidentInfo.description', incidentTime: '$incidentInfo.incidentTime', studentName: '$studentInfo.fullName', studentClassName: '$classInfo.className', dispensedItems: '$dispensedItems', dispensedAt: '$dispensedAt' } }
     ];
     const matchStage: { [key: string]: any } = {};
     if (filters.studentId) matchStage['incidentInfo.studentId'] = new mongoose.Types.ObjectId(filters.studentId);
     if (filters.classId) matchStage['studentInfo.classId'] = new mongoose.Types.ObjectId(filters.classId);
     if (Object.keys(matchStage).length > 0) pipeline.splice(5, 0, { $match: matchStage });
     return this.logs.aggregate(pipeline);
+  }
+
+  public async addBatch(
+    itemId: string,
+    batchData: { quantity: number; expirationDate: Date },
+    managerId: string,
+  ): Promise<IMedicalInventory> {
+    const item = await this.inventory.findById(itemId);
+    if (!item) {
+      throw createError(404, 'Item not found');
+    }
+    item.batches.push({
+      quantity: batchData.quantity,
+      expirationDate: batchData.expirationDate,
+      addedAt: new Date(),
+    });
+
+    this._updateItemStatus(item);
+    await item.save();
+    await this.logs.create({
+      inventoryId: item._id,
+      nurseId: managerId,
+      typeLog: InventoryLogType.ADD_STOCK,
+      quantityChanged: batchData.quantity,
+      reason: `Stock-in: Added new batch for existing item. Expiration: ${batchData.expirationDate.toISOString().split('T')[0]}`,
+    });
+
+    return item;
   }
 
   private _updateItemStatus(item: IMedicalInventory): void {

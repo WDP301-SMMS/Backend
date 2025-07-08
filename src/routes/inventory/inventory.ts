@@ -5,6 +5,7 @@ import {
   updateItemValidator,
   dispenseMedicationValidator,
   adjustStockValidator,
+  addBatchValidator,
 } from '@/validators/inventory/inventory.validator';
 
 const router = Router();
@@ -33,10 +34,17 @@ router.patch(
   inventoryController.updateItem,
 );
 
-router.post(
+router.patch(
   '/adjustment',
   adjustStockValidator,
   inventoryController.adjustStock,
+);
+
+
+router.post(
+  '/items/:itemId/batches', 
+  addBatchValidator,        
+  inventoryController.addBatchToItem,
 );
 
 // --- API LIÊN QUAN ĐẾN CẤP PHÁT CHO SỰ CỐ ---

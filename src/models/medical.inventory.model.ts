@@ -39,7 +39,7 @@ const MedicalInventorySchema = new Schema<IMedicalInventory>(
       trim: true,
       default: null,
     },
-      type: { // <-- THÊM TRƯỜNG NÀY
+    type: { // <-- THÊM TRƯỜNG NÀY
       type: String,
       required: true,
       enum: Object.values(InventoryType),
@@ -68,7 +68,13 @@ const MedicalInventorySchema = new Schema<IMedicalInventory>(
   },
   {
     timestamps: true,
-    toJSON: { virtuals: true },
+    id: false,
+    toJSON: {
+      virtuals: true,
+      transform: function (doc, ret) {
+        delete ret.__v;
+      }
+    },
     toObject: { virtuals: true },
   },
 );
@@ -76,7 +82,7 @@ const MedicalInventorySchema = new Schema<IMedicalInventory>(
 MedicalInventorySchema.virtual('totalQuantity').get(function (
   this: IMedicalInventory,
 ) {
-  return this.batches.reduce((total, batch) => total + batch.quantity, 0);
+  return (this.batches || []).reduce((total, batch) => total + batch.quantity, 0);
 });
 
 export const MedicalInventoryModel = mongoose.model<IMedicalInventory>(

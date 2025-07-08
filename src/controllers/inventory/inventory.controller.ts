@@ -90,7 +90,7 @@ class InventoryController {
       next(error);
     }
   };
-  
+
   public adjustStock = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const adjustmentData: {
@@ -104,6 +104,19 @@ class InventoryController {
 
       const log: IInventoryLog = await this.inventoryService.adjustStock(adjustmentData, managerId);
       res.status(201).json({ data: log, message: 'adjustmentSuccessful' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+
+  public addBatchToItem = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { itemId } = req.params;
+      const batchData: { quantity: number; expirationDate: Date } = req.body;
+      const managerId = req.user!._id!.toString();
+      const updatedItem = await this.inventoryService.addBatch(itemId, batchData, managerId);
+      res.status(200).json({ data: updatedItem, message: 'batchAddedSuccessfully' });
     } catch (error) {
       next(error);
     }
