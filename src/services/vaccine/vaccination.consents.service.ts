@@ -64,10 +64,7 @@ export class VaccinationConsentService {
     return Object.values(resultsByStudent);
   }
 
-  public async getConsentById(
-    consentId: string,
-    parentId: string,
-  ): Promise<{
+  public async getConsentById(consentId: string): Promise<{
     studentId: string;
     studentName: string;
     consents: (Omit<IVaccinationConsent, 'campaignId'> & {
@@ -85,14 +82,6 @@ export class VaccinationConsentService {
     if (!consent) {
       const error: AppError = new Error('Consent not found.');
       error.status = 404;
-      throw error;
-    }
-
-    if (!consent.parentId.equals(parentId)) {
-      const error: AppError = new Error(
-        'You are not authorized to view this consent.',
-      );
-      error.status = 403;
       throw error;
     }
 
