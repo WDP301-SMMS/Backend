@@ -7,6 +7,7 @@ import medicationRequestRouter from './medicationRequest/medication';
 import upload from './upload/upload';
 import healthProfileRouter from './health-profile/health.profile';
 import inventoryRouter from './inventory/inventory'
+import healthHistoryRouter from './health-history/health.history';
 import {
   handleToken,
   roleBaseAccess,
@@ -29,6 +30,12 @@ router.use('/upload', upload);
 router.use('/vaccinationCampaigns', handleToken, vaccinationCampaigns);
 router.use('/reports', reportsRouter);
 router.use('/health-profiles', handleToken, healthProfileRouter);
+router.use(
+  '/health-history',
+  handleToken,
+  roleBaseAccess([RoleEnum.Parent]),
+  healthHistoryRouter
+);
 router.use(
   '/health-check',
   handleToken,
