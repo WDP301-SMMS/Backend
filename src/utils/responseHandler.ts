@@ -7,7 +7,6 @@ export const handleSuccessResponse = (
   data?: any,
 ) => {
   res.status(status).json({
-    status,
     success: true,
     message,
     data,
