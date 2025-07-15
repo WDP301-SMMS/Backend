@@ -2604,7 +2604,7 @@ components:
         lowStockThreshold: { type: number }
         status: { type: string }
         expirationDate: { type: string, format: date }
-        HealthCheckCampaign:
+    HealthCheckCampaign:
       type: object
       properties:
         _id:
