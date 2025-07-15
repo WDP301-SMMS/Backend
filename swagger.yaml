@@ -1230,7 +1230,8 @@ paths:
         - name: templateId
           in: path
           required: true
-          schema: { type: string }
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -1266,7 +1267,8 @@ paths:
         - name: templateId
           in: path
           required: true
-          schema: { type: string }
+          schema:
+            type: string
       responses:
         '200':
           description: Xóa mẫu khám thành công.
@@ -1616,6 +1618,475 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
+  /health-check/campaigns:
+    get:
+      tags:
+        - Health Check Campaigns
+      summary: Get all health check campaigns with advanced filtering
+      description: Retrieves all health check campaigns with comprehensive filtering, sorting, and pagination options
+      operationId: getAllHealthCheckCampaigns
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          description: Search term for campaign name or school year
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: status
+          in: query
+          description: Filter by campaign status (single or multiple)
+          required: false
+          schema:
+            oneOf:
+              - type: string
+                enum: [DRAFT, ANNOUNCED, IN_PROGRESS, COMPLETED, CANCELED]
+              - type: array
+                items:
+                  type: string
+                  enum: [DRAFT, ANNOUNCED, IN_PROGRESS, COMPLETED, CANCELED]
+        - name: schoolYear
+          in: query
+          description: Filter by school year (single or multiple)
+          required: false
+          schema:
+            oneOf:
+              - type: string
+                pattern: '^\d{4}-\d{4}$'
+              - type: array
+                items:
+                  type: string
+                  pattern: '^\d{4}-\d{4}$'
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+            enum: [name, startDate, endDate, createdAt, status, schoolYear, completedDate, actualStartDate]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page (max 100)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: startDateFrom
+          in: query
+          description: Filter campaigns starting from this date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: startDateTo
+          in: query
+          description: Filter campaigns starting before this date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: endDateFrom
+          in: query
+          description: Filter campaigns ending from this date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: endDateTo
+          in: query
+          description: Filter campaigns ending before this date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: createdBy
+          in: query
+          description: Filter by creator user ID(s)
+          required: false
+          schema:
+            oneOf:
+              - type: string
+                pattern: '^[0-9a-fA-F]{24}$'
+              - type: array
+                items:
+                  type: string
+                  pattern: '^[0-9a-fA-F]{24}$'
+        - name: participatingStaff
+          in: query
+          description: Filter campaigns where specific staff participates
+          required: false
+          schema:
+            type: string
+            pattern: '^[0-9a-fA-F]{24}$'
+      responses:
+        '200':
+          description: Health check campaigns retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignListResponse'
+        '400':
+          description: Invalid query parameters
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - Health Check Campaigns
+      summary: Create a new health check campaign
+      description: Creates a new health check campaign with DRAFT status
+      operationId: createHealthCheckCampaign
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCampaignRequest'
+      responses:
+        '200':
+          description: Health check campaign created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+        '400':
+          description: Validation errors or missing required fields
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/campaigns/search:
+    get:
+      tags:
+        - Health Check Campaigns
+      summary: Search health check campaigns
+      description: Search campaigns by name, school year, or status with quick results
+      operationId: searchHealthCheckCampaigns
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: q
+          in: query
+          description: Search term (required)
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+            enum: [name, startDate, endDate, createdAt, status, schoolYear]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: limit
+          in: query
+          description: Maximum number of results (max 50)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: Search results retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignSearchResponse'
+        '400':
+          description: Search term is required or invalid
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/campaigns/stats:
+    get:
+      tags:
+        - Health Check Campaigns
+      summary: Get campaign statistics
+      description: Retrieves campaign statistics and dashboard data including status breakdown
+      operationId: getCampaignStats
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Campaign statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignStatsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/campaigns/status/{status}:
+    get:
+      tags:
+        - Health Check Campaigns
+      summary: Get campaigns by specific status
+      description: Retrieves campaigns filtered by a specific status with pagination
+      operationId: getCampaignsByStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: path
+          description: Campaign status to filter by
+          required: true
+          schema:
+            type: string
+            enum: [DRAFT, ANNOUNCED, IN_PROGRESS, COMPLETED, CANCELED]
+        - name: sortBy
+          in: query
+          description: Field to sort by
+          required: false
+          schema:
+            type: string
+            enum: [name, startDate, endDate, createdAt, schoolYear]
+            default: createdAt
+        - name: sortOrder
+          in: query
+          description: Sort order
+          required: false
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+        - name: page
+          in: query
+          description: Page number for pagination
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page (max 50)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+      responses:
+        '200':
+          description: Campaigns by status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignsByStatusResponse'
+        '400':
+          description: Invalid campaign status
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/campaigns/{id}:
+    get:
+      tags:
+        - Health Check Campaigns
+      summary: Get campaign details
+      description: Retrieves detailed information about a specific health check campaign
+      operationId: getHealthCheckCampaignDetail
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Campaign ID
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9a-fA-F]{24}$'
+      responses:
+        '200':
+          description: Campaign details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignDetailResponse'
+        '404':
+          description: Campaign not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - Health Check Campaigns
+      summary: Update health check campaign
+      description: Updates campaign details (only allowed for DRAFT or ANNOUNCED status)
+      operationId: updateHealthCheckCampaign
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Campaign ID
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9a-fA-F]{24}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCampaignRequest'
+      responses:
+        '200':
+          description: Campaign updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+        '400':
+          description: Validation errors or campaign cannot be updated in current status
+        '404':
+          description: Campaign not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/campaigns/{id}/status:
+    patch:
+      tags:
+        - Health Check Campaigns
+      summary: Update campaign status
+      description: Updates campaign status with proper transition validation and automatic date setting
+      operationId: updateCampaignStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Campaign ID
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9a-fA-F]{24}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatusRequest'
+      responses:
+        '200':
+          description: Campaign status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+        '400':
+          description: Invalid status transition or validation errors
+        '404':
+          description: Campaign not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/campaigns/{id}/assignments:
+    put:
+      tags:
+        - Health Check Campaigns
+      summary: Assign staff to campaign
+      description: Assigns nurses and classes to a health check campaign
+      operationId: assignStaffToHealthCheckCampaign
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Campaign ID
+          required: true
+          schema:
+            type: string
+            pattern: '^[0-9a-fA-F]{24}$'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignStaffRequest'
+      responses:
+        '200':
+          description: Staff assigned to campaign successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+        '400':
+          description: Validation errors or invalid assignments
+        '404':
+          description: Campaign not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
 components:
   schemas:
     User:
@@ -2133,6 +2604,323 @@ components:
         lowStockThreshold: { type: number }
         status: { type: string }
         expirationDate: { type: string, format: date }
+    HealthCheckCampaign:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Campaign ID
+        name:
+          type: string
+          description: Campaign name
+        schoolYear:
+          type: string
+          pattern: '^\d{4}-\d{4}$'
+          description: School year in format YYYY-YYYY
+        templateId:
+          $ref: '#/components/schemas/HealthCheckTemplate'
+        startDate:
+          type: string
+          format: date-time
+          description: Planned start date
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+          description: Planned end date
+        actualStartDate:
+          type: string
+          format: date-time
+          nullable: true
+          description: Actual start date (set when status becomes IN_PROGRESS)
+        completedDate:
+          type: string
+          format: date-time
+          nullable: true
+          description: Completion date (set when status becomes COMPLETED)
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        createdBy:
+          $ref: '#/components/schemas/User'
+        participatingStaffs:
+          type: array
+          items:
+            type: string
+          description: Array of participating staff IDs
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CampaignAssignment'
+          description: Class and nurse assignments
+        status:
+          type: string
+          enum: [DRAFT, ANNOUNCED, IN_PROGRESS, COMPLETED, CANCELED]
+          description: Current campaign status
+
+    CampaignAssignment:
+      type: object
+      properties:
+        classId:
+          $ref: '#/components/schemas/Class'
+        nurseId:
+          $ref: '#/components/schemas/User'
+      required:
+        - classId
+        - nurseId
+
+    CreateCampaignRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Campaign name
+        templateId:
+          type: string
+          pattern: '^[0-9a-fA-F]{24}$'
+          description: Health check template ID
+        startDate:
+          type: string
+          format: date-time
+          description: Planned start date
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+          description: Planned end date (optional)
+      required:
+        - name
+        - templateId
+        - startDate
+
+    UpdateCampaignRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+          description: Campaign name
+        startDate:
+          type: string
+          format: date-time
+          description: Planned start date
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+          description: Planned end date
+
+    UpdateStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [DRAFT, ANNOUNCED, IN_PROGRESS, COMPLETED, CANCELED]
+          description: New campaign status
+      required:
+        - status
+
+    AssignStaffRequest:
+      type: object
+      properties:
+        assignments:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            properties:
+              classId:
+                type: string
+                pattern: '^[0-9a-fA-F]{24}$'
+                description: Class ID
+              nurseId:
+                type: string
+                pattern: '^[0-9a-fA-F]{24}$'
+                description: Nurse ID
+            required:
+              - classId
+              - nurseId
+      required:
+        - assignments
+
+    CampaignResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/HealthCheckCampaign'
+
+    CampaignDetailResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/HealthCheckCampaign'
+
+    CampaignListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            campaigns:
+              type: array
+              items:
+                $ref: '#/components/schemas/HealthCheckCampaign'
+            pagination:
+              $ref: '#/components/schemas/PaginationInfo'
+            filters:
+              $ref: '#/components/schemas/AppliedFilters'
+
+    CampaignSearchResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCheckCampaign'
+
+    CampaignsByStatusResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        message:
+          type: string
+        data:
+          type: object
+          properties:
+            campaigns:
+              type: array
+              items:
+                $ref: '#/components/schemas/HealthCheckCampaign'
+            pagination:
+              $ref: '#/components/schemas/PaginationInfo'
+
+    CampaignStatsResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: true
+        message:
+          type: string
+        data:
+          $ref: '#/components/schemas/CampaignStats'
+
+    CampaignStats:
+      type: object
+      properties:
+        totalCampaigns:
+          type: integer
+          description: Total number of campaigns
+        currentSchoolYear:
+          type: string
+          description: Current school year
+        currentYearCampaigns:
+          type: integer
+          description: Number of campaigns in current school year
+        statusBreakdown:
+          type: array
+          items:
+            $ref: '#/components/schemas/StatusBreakdown'
+        availableStatuses:
+          type: array
+          items:
+            type: string
+            enum: [DRAFT, ANNOUNCED, IN_PROGRESS, COMPLETED, CANCELED]
+
+    StatusBreakdown:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [DRAFT, ANNOUNCED, IN_PROGRESS, COMPLETED, CANCELED]
+        count:
+          type: integer
+          description: Number of campaigns with this status
+        recentCampaigns:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              name:
+                type: string
+              createdAt:
+                type: string
+                format: date-time
+
+    PaginationInfo:
+      type: object
+      properties:
+        currentPage:
+          type: integer
+          description: Current page number
+        totalPages:
+          type: integer
+          description: Total number of pages
+        totalCount:
+          type: integer
+          description: Total number of items
+        limit:
+          type: integer
+          description: Items per page
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page
+        hasPrevPage:
+          type: boolean
+          description: Whether there is a previous page
+
+    AppliedFilters:
+      type: object
+      properties:
+        search:
+          type: string
+          nullable: true
+        status:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          nullable: true
+        schoolYear:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: string
+          nullable: true
+        sortBy:
+          type: string
+        sortOrder:
+          type: string
   securitySchemes:
     BearerAuth:
       type: http
