@@ -13,4 +13,5 @@ export interface IUser extends Document {
   isActive: boolean;
   googleId?: string | null;
   authProvider: 'local' | 'google';
+    pushTokens?: string[];
 }
