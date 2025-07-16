@@ -58,7 +58,7 @@ connectDB();
 
 const swaggerRaw = fs.readFileSync(path.join(__dirname, '../swagger.yaml'), 'utf8');
 const baseUrl = process.env.BASE_URL || 'http://localhost:3000/api';
-const swaggerText = swaggerRaw.replace('__BASE_URL__', baseUrl);
+const swaggerText = swaggerRaw.replace('__BASE_URL__', `${baseUrl}/api`);
 const swaggerDocument = YAML.parse(swaggerText);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
