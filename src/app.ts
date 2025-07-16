@@ -16,6 +16,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   /^https:\/\/.*\.ngrok-free\.app$/,
   'http://localhost:5173',
+  process.env.BASE_URL || '*',
 ];
 
 app.use(
