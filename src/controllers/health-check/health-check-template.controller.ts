@@ -16,6 +16,7 @@ const createHealthCheckTemplate = async (req: Request, res: Response) => {
     const existingTemplate = await HealthCheckTemplate.findOne({
       name: body.name,
     });
+
     const isMatch = existingTemplate && existingTemplate.name === body.name;
     if (isMatch) {
       res.status(400).json({
@@ -23,6 +24,16 @@ const createHealthCheckTemplate = async (req: Request, res: Response) => {
         message: 'Health Check Template with this name already exists',
       });
       return;
+    }
+
+    if (body.isDefault) {
+      const allTemplates = await HealthCheckTemplate.find();
+      if (allTemplates.length > 0) {
+        await HealthCheckTemplate.updateMany(
+          { isDefault: true },
+          { isDefault: false },
+        );
+      }
     }
 
     const template: IHealthCheckTemplate =
