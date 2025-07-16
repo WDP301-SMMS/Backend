@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API documentation for School Medical Management System
 servers:
-  - url: https://backend-test-103x.onrender.com/api
+  - url: __BASE_URL__
 paths:
   /auth/google:
     get:

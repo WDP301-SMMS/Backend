@@ -7,6 +7,8 @@ import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import cookieParser from 'cookie-parser';
 import apiRoutes from './routes/index';
+import fs from 'fs';
+import path from 'path';
 
 const app = express();
 app.use(express.json());
@@ -54,10 +56,12 @@ app.use(
 );
 connectDB();
 
-const swaggerDocument = YAML.load('swagger.yaml');
+const swaggerRaw = fs.readFileSync(path.join(__dirname, '../swagger.yaml'), 'utf8');
+const baseUrl = process.env.BASE_URL || 'http://localhost:3000/api';
+const swaggerText = swaggerRaw.replace('__BASE_URL__', baseUrl);
+const swaggerDocument = YAML.parse(swaggerText);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Add a simple health check route
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
