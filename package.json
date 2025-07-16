@@ -73,13 +73,13 @@
     "yamljs": "^0.3.0"
   },
   "_moduleAliases": {
-    "@": "./dist",
-    "@controllers": "./dist/controllers",
-    "@routes": "./dist/routes",
-    "@middlewares": "./dist/middlewares",
-    "@models": "./dist/models",
-    "@config": "./dist/config",
-    "@enums": "./dist/enums",
-    "@interfaces": "./dist/interfaces"
+    "@": "./src",
+    "@controllers": "./src/controllers",
+    "@routes": "./src/routes",
+    "@middlewares": "./src/middlewares",
+    "@models": "./src/models",
+    "@config": "./src/config",
+    "@enums": "./src/enums",
+    "@interfaces": "./src/interfaces"
   }
 }
