@@ -1,7 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import { RoleEnum } from '@/enums/RoleEnum';
 import { IUser } from '@/interfaces/user.interface';
-import bcrypt from 'bcrypt';
 import { StudentGender } from '@/enums/StudentEnum';
 
 const UserSchema = new Schema<IUser>({
