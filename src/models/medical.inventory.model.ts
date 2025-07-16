@@ -70,6 +70,7 @@ const MedicalInventorySchema = new Schema<IMedicalInventory>(
   {
     timestamps: true,
     id: false,
+    toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
 );
