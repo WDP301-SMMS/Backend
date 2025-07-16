@@ -43,15 +43,8 @@ export class VaccinationConsentController {
   ): Promise<void> => {
     try {
       const { consentId } = req.params;
-      const parentId = req.user?._id;
-      if (!parentId) {
-        throw new Error('User authentication error: User ID not found.');
-      }
 
-      const consentByStudent = await consentService.getConsentById(
-        consentId,
-        parentId,
-      );
+      const consentByStudent = await consentService.getConsentById(consentId);
 
       res.status(200).json({
         success: true,

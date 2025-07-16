@@ -1,4 +1,4 @@
-import { Types } from "mongoose";
+import { Types } from 'mongoose';
 
 export interface IMedicalIncident {
   studentId: Types.ObjectId;
@@ -8,5 +8,6 @@ export interface IMedicalIncident {
   severity: string;
   status: string;
   actionsTaken: string;
+  note?: string;
   incidentTime: Date;
 }
