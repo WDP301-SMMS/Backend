@@ -22,10 +22,10 @@ class MedicationScheduleService {
     reason?: string,
   ) {
     const schedule = await MedicationScheduleModel.findById(scheduleId);
-    if (!schedule) throw createAppError(404, 'Schedule not found.');
+    if (!schedule) throw createAppError(404, 'Không tìm thấy lịch uống');
 
     if (schedule.status === newStatus) {
-      throw createAppError(400, `Schedule is already marked as ${newStatus}.`);
+      throw createAppError(400, `Lịch uống đã được đánh dấu là ${newStatus}.`);
     }
 
     if (
@@ -37,7 +37,7 @@ class MedicationScheduleService {
     ) {
       throw createAppError(
         400,
-        `Reason is required when status is '${newStatus}'.`,
+        `Lý do là bắt buộc khi trạng thái là '${newStatus}'.`,
       );
     }
 
@@ -62,6 +62,40 @@ class MedicationScheduleService {
     }
 
     return schedule;
+  }
+
+  public async getSchedulesByRequestId(
+    medicationRequestId: string,
+    startDate?: string,
+    endDate?: string,
+  ) {
+    const filter: any = { medicationRequestId };
+
+    if (startDate && endDate) {
+      filter.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    return await MedicationScheduleModel.find(filter).sort({ date: 1 });
+  }
+
+  public async getSchedulesByStudentId(
+    studentId: string,
+    startDate?: string,
+    endDate?: string,
+  ) {
+    const filter: any = { studentId };
+
+    if (startDate && endDate) {
+      filter.date = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    return await MedicationScheduleModel.find(filter).sort({ date: 1 });
   }
 }
 

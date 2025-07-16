@@ -37,7 +37,7 @@ router.get('/requests/:id', RequestController.getMedicationRequestById);
 
 //Lấy request theo phụ huynh
 router.get(
-  '/requests/parent/:id',
+  '/requests/parent',
   RequestController.getMedicationRequestByParentId,
 );
 
@@ -57,6 +57,18 @@ router.patch(
   '/schedules/update/:scheduleId',
   validateUpdateStatus,
   ScheduleController.updateScheduleStatus,
+);
+
+// Lấy schedules theo medicationRequestId
+router.get(
+  '/schedules/request/:medicationRequestId',
+  ScheduleController.getSchedulesByRequestId,
+);
+
+// Lấy schedules theo studentId
+router.get(
+  '/schedules/student/:studentId',
+  ScheduleController.getSchedulesByStudentId,
 );
 
 export default router;

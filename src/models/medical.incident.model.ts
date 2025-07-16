@@ -19,6 +19,11 @@ const MedicalIncidentSchema: Schema = new Schema<IMedicalIncident>({
   severity: { type: String, required: true },
   status: { type: String, required: true },
   actionsTaken: { type: String, required: true },
+  note: {
+    type: String,
+    default: null,
+    sparse: true,
+  },
   incidentTime: { type: Date, required: true },
 });
 
