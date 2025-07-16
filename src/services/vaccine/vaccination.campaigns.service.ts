@@ -40,11 +40,8 @@ export class VaccinationCampaignService {
   }
 
   public async dispatchCampaign(campaignId: string): Promise<{ message: string }> {
-    // const session = await mongoose.startSession();
-    // session.startTransaction();
     try {
       const campaign = await VaccinationCampaignModel.findById(campaignId)
-      // .session(session);
       if (!campaign) {
         const error: AppError = new Error('Campaign not found.');
         error.status = 404;
@@ -57,19 +54,17 @@ export class VaccinationCampaignService {
       }
 
       const targetClasses = await Class.find({ gradeLevel: { $in: campaign.targetGradeLevels } }).select('_id')
-      // .session(session);
       if (targetClasses.length === 0) {
         const error: AppError = new Error(`No classes found for the target grade levels [${campaign.targetGradeLevels.join(', ')}]. Please check campaign settings or class data.`);
-        error.status = 404; // Not Found
+        error.status = 404; 
         throw error;
       }
       const targetClassIds = targetClasses.map(c => c._id);
       const students = await StudentModel.find({ classId: { $in: targetClassIds } }).select('parentId')
-      // .session(session);
 
        if (students.length === 0) {
         const error: AppError = new Error('No students found for the target classes. Consent forms were not created.');
-        error.status = 404; // Not Found
+        error.status = 404; 
         throw error;
       }
       
@@ -78,7 +73,6 @@ export class VaccinationCampaignService {
         const consentsToCreate = students.map(student => ({
           campaignId: campaign._id, studentId: student._id, parentId: student.parentId, status: 'PENDING',
         }));
-        // const result = await VaccinationConsentModel.insertMany(consentsToCreate, { session });
         const result = await VaccinationConsentModel.insertMany(consentsToCreate);
         createdCount = result.length;
       }
@@ -89,17 +83,12 @@ export class VaccinationCampaignService {
       campaign.summary.totalConsents = createdCount;
 
       await campaign.save();
-      // await campaign.save({ session });
-      // await session.commitTransaction();
+
 
       return { message: `Campaign dispatched successfully. ${createdCount} consent forms created.` };
     } catch (error) {
-      // await session.abortTransaction();
       throw error;
     }
-    // } finally {
-    //   session.endSession();
-    // }
   }
 
   public async updateCampaign(campaignId: string, updateData: UpdateCampaignInput, userId: string): Promise<IVaccinationCampaign> {

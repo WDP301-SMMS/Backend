@@ -1,22 +1,6 @@
 import * as admin from 'firebase-admin';
 import { UserModel } from '@/models/user.model';
-
-// Lưu ý quan trọng: Trong môi trường production, bạn nên tải file key này
-// từ một nơi an toàn hoặc truyền nội dung của nó qua biến môi trường,
-// thay vì hardcode đường dẫn.
-try {
-  const serviceAccount = require('/path/to/your/serviceAccountKey.json');
-
-  if (admin.apps.length === 0) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-    console.log('Firebase Admin SDK initialized successfully.');
-  }
-} catch (error) {
-  console.error('Failed to initialize Firebase Admin SDK. Make sure the service account key file path is correct.', error);
-}
-
+import schoolHealthApp from '@/config/firebase-school-health'; 
 
 class PushNotificationService {
   public async sendPushNotification(
@@ -26,31 +10,25 @@ class PushNotificationService {
     data?: { [key: string]: string },
   ): Promise<void> {
     
-    // Kiểm tra xem SDK đã được khởi tạo thành công chưa
-    if (admin.apps.length === 0) {
-      console.error('Firebase Admin SDK is not initialized. Skipping push notification.');
+    if (!schoolHealthApp) {
+      console.error('School Health Firebase App is not initialized. Cannot send push notification.');
       return;
     }
 
     const user = await UserModel.findById(userId).select('pushTokens').lean();
 
-    if (!user || !user.pushTokens || user.pushTokens.length === 0) {
-      console.log(`User ${userId} has no push tokens. Skipping push notification.`);
+    if (!user || !user.pushTokens ) {
+      console.log(`User ${userId} has no push tokens. Skipping.`);
       return;
     }
 
     const tokens = user.pushTokens;
 
     const message: admin.messaging.MulticastMessage = {
-      notification: {
-        title,
-        body,
-      },
+      notification: { title, body },
       data: data || {},
       tokens: tokens,
-      android: {
-        priority: 'high' as const,
-      },
+      android: { priority: 'high' },
       apns: {
         payload: {
           aps: {
@@ -62,9 +40,9 @@ class PushNotificationService {
     };
 
     try {
-      const response = await admin.messaging().sendEachForMulticast(message);
+      const response = await schoolHealthApp.messaging().sendEachForMulticast(message);
       
-      console.log(`Push notification sent for user ${userId}: ${response.successCount} success, ${response.failureCount} failure.`);
+      console.log(`Push sent for user ${userId}: ${response.successCount} success, ${response.failureCount} failure.`);
 
       const tokensToRemove: string[] = [];
       response.responses.forEach((result, index) => {
@@ -74,7 +52,6 @@ class PushNotificationService {
             errorCode === 'messaging/invalid-registration-token' ||
             errorCode === 'messaging/registration-token-not-registered'
           ) {
-            console.log(`Invalid token found: ${tokens[index]}. Scheduling for removal.`);
             tokensToRemove.push(tokens[index]);
           }
         }
@@ -89,7 +66,7 @@ class PushNotificationService {
       }
 
     } catch (error) {
-      console.error(`Error sending multicasting message for user ${userId}:`, error);
+      console.error(`Error sending push notification for user ${userId}:`, error);
     }
   }
 }

@@ -4,7 +4,6 @@ import { Types } from 'mongoose';
 
 export interface INotification {
   recipientId: Types.ObjectId;
-  actorId: Types.ObjectId;
   type: NotificationType;
   isRead: boolean;
   entityId: Types.ObjectId;
