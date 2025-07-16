@@ -72,7 +72,9 @@ const MedicalInventorySchema = new Schema<IMedicalInventory>(
     toJSON: {
       virtuals: true,
       transform: function (doc, ret) {
-        delete ret.__v;
+        if (ret.__v !== undefined) {
+          delete ret.__v;
+        }
       }
     },
     toObject: { virtuals: true },
