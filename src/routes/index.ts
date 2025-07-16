@@ -38,12 +38,7 @@ router.use(
   roleBaseAccess([RoleEnum.Parent]),
   healthHistoryRouter,
 );
-router.use(
-  '/health-check',
-  handleToken,
-  roleBaseAccess([RoleEnum.Admin, RoleEnum.Manager]),
-  healthCheckRouter,
-);
+router.use('/health-check', handleToken, healthCheckRouter);
 router.use('/inventory', handleToken, inventoryRouter);
 
 export default router;
