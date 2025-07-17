@@ -3020,10 +3020,15 @@ components:
           format: date-time
           nullable: true
           description: Planned end date (optional)
+        createdBy:
+          type: string
+          pattern: '^[0-9a-fA-F]{24}$'
+          description: ID of the user creating the campaign
       required:
         - name
         - templateId
         - startDate
+        - createdBy
 
     UpdateCampaignRequest:
       type: object
