@@ -553,230 +553,6 @@ paths:
             $ref: '#/components/responses/ForbiddenError'
           '404':
             description: Không tìm thấy người dùng với ID cung cấp.
-            
-  /health-check/templates:
-    get:
-      tags:
-        - Health Check Templates
-      summary: Get all health check templates
-      description: Retrieves all available health check templates
-      operationId: getAllHealthCheckTemplates
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Health check templates retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/HealthCheckTemplate'
-        '404':
-          description: No templates found
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-    post:
-      tags:
-        - Health Check Templates
-      summary: Create a new health check template
-      description: Creates a new health check template with specified checkup items
-      operationId: createHealthCheckTemplate
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
-      responses:
-        '200':
-          description: Health check template created successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  data:
-                    $ref: '#/components/schemas/HealthCheckTemplate'
-        '400':
-          description: Failed to create health check template or template with this name already exists
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-
-  /health-check/templates/{id}:
-    get:
-      tags:
-        - Health Check Templates
-      summary: Get a specific health check template
-      description: Retrieves a specific health check template by ID
-      operationId: getHealthCheckTemplate
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Health check template retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  data:
-                    $ref: '#/components/schemas/HealthCheckTemplate'
-        '404':
-          description: Template not found
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-    put:
-      tags:
-        - Health Check Templates
-      summary: Update a health check template
-      description: Updates an existing health check template
-      operationId: updateHealthCheckTemplate
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
-      responses:
-        '200':
-          description: Health check template updated successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  data:
-                    $ref: '#/components/schemas/HealthCheckTemplate'
-        '400':
-          description: Invalid input data
-        '404':
-          description: Template not found
-        '409':
-          description: Template name already exists
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-    delete:
-      tags:
-        - Health Check Templates
-      summary: Delete a health check template
-      description: Deletes an existing health check template. Cannot delete default templates.
-      operationId: deleteHealthCheckTemplate
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Health check template deleted successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-        '400':
-          description: Cannot delete the default Health Check Template
-        '404':
-          description: Template not found
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-
-  /health-check/templates/set-default:
-    post:
-      tags:
-        - Health Check Templates
-      summary: Set a template as default
-      description: Sets a specific health check template as the default, unsets all others
-      operationId: setDefaultForHealthCheckTemplate
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id:
-                  type: string
-              required:
-                - id
-      responses:
-        '200':
-          description: Health check template set as default successfully
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  message:
-                    type: string
-                  data:
-                    $ref: '#/components/schemas/HealthCheckTemplate'
-        '400':
-          description: Template is already set as default
-        '404':
-          description: Template not found
-        '401':
-          $ref: '#/components/responses/UnauthorizedError'
-        '403':
-          $ref: '#/components/responses/ForbiddenError'
-
   /admin/dashboard:
     get:
       tags:
@@ -1618,6 +1394,230 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
+            
+  /health-check/templates:
+    get:
+      tags:
+        - Health Check Templates
+      summary: Get all health check templates
+      description: Retrieves all available health check templates
+      operationId: getAllHealthCheckTemplates
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Health check templates retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HealthCheckTemplate'
+        '404':
+          description: No templates found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    post:
+      tags:
+        - Health Check Templates
+      summary: Create a new health check template
+      description: Creates a new health check template with specified checkup items
+      operationId: createHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
+      responses:
+        '200':
+          description: Health check template created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/HealthCheckTemplate'
+        '400':
+          description: Failed to create health check template or template with this name already exists
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /health-check/templates/{id}:
+    get:
+      tags:
+        - Health Check Templates
+      summary: Get a specific health check template
+      description: Retrieves a specific health check template by ID
+      operationId: getHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Health check template retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/HealthCheckTemplate'
+        '404':
+          description: Template not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    put:
+      tags:
+        - Health Check Templates
+      summary: Update a health check template
+      description: Updates an existing health check template
+      operationId: updateHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateHealthCheckTemplateRequest'
+      responses:
+        '200':
+          description: Health check template updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/HealthCheckTemplate'
+        '400':
+          description: Invalid input data
+        '404':
+          description: Template not found
+        '409':
+          description: Template name already exists
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+    delete:
+      tags:
+        - Health Check Templates
+      summary: Delete a health check template
+      description: Deletes an existing health check template. Cannot delete default templates.
+      operationId: deleteHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Health check template deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+        '400':
+          description: Cannot delete the default Health Check Template
+        '404':
+          description: Template not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /health-check/templates/set-default:
+    post:
+      tags:
+        - Health Check Templates
+      summary: Set a template as default
+      description: Sets a specific health check template as the default, unsets all others
+      operationId: setDefaultForHealthCheckTemplate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+              required:
+                - id
+      responses:
+        '200':
+          description: Health check template set as default successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    $ref: '#/components/schemas/HealthCheckTemplate'
+        '400':
+          description: Template is already set as default
+        '404':
+          description: Template not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
   /health-check/campaigns:
     get:
       tags:
@@ -2080,6 +2080,335 @@ paths:
           description: Validation errors or invalid assignments
         '404':
           description: Campaign not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/consents:
+    get:
+      tags:
+        - Health Check - Consents
+      summary: Get all health check consents
+      description: Retrieves all health check consents in the system
+      operationId: getAllHealthCheckConsents
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Health check consents retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/consents/campaign/{campaignId}:
+    get:
+      tags:
+        - Health Check - Consents
+      summary: Get health check consents by campaign ID
+      description: Retrieves all health check consents for a specific campaign
+      operationId: getHealthCheckConsentsByCampaignId
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the health check campaign
+      responses:
+        '200':
+          description: Health check consents retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid campaign ID
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/consents/campaign/add-students:
+    post:
+      tags:
+        - Health Check - Consents
+      summary: Add all students to consent by campaign ID
+      description: Creates consent records for all active students in the classes assigned to a campaign
+      operationId: addAllStudentToConsentByCampaignId
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - campaignId
+              properties:
+                campaignId:
+                  type: string
+                  description: The ID of the health check campaign
+      responses:
+        '201':
+          description: Students added to health check consent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid campaign ID or no class assignments found
+        '404':
+          description: Campaign not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/consents/{consentId}/status:
+    patch:
+      tags:
+        - Health Check - Consents
+      summary: Update consent status
+      description: Updates the status of a health check consent (approve/decline)
+      operationId: handleStatusConsent
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: consentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the consent to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [APPROVED, DECLINED, REVOKED, COMPLETED, UNDER_OBSERVATION, ADVERSE_REACTION]
+                  description: The new status for the consent
+                reasonForDeclining:
+                  type: string
+                  description: Reason for declining (required when status is DECLINED)
+      responses:
+        '200':
+          description: Consent status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid consent status or consent not in pending state
+        '404':
+          description: Consent not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/record/{id}:
+    get:
+      tags:
+        - Health Check - Records
+      summary: Get student health check records
+      description: Retrieves all health check records for a specific student
+      operationId: getStudentHealthCheckRecord
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the student
+      responses:
+        '200':
+          description: Health check records retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Records not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/record/{id}/latest:
+    get:
+      tags:
+        - Health Check - Records
+      summary: Get latest health check record for student
+      description: Retrieves the most recent health check record for a specific student
+      operationId: getStudentLatestHealthCheckRecord
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the student
+      responses:
+        '200':
+          description: Latest health check record retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Record not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/record/create-result:
+    post:
+      tags:
+        - Health Check - Records
+      summary: Create health check result based on template
+      description: Creates a new health check result using a template structure
+      operationId: createHealthCheckResultBaseOnTemplate
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - templateId
+                - campaignId
+                - nurseId
+                - studentId
+              properties:
+                templateId:
+                  type: string
+                  description: The ID of the health check template
+                campaignId:
+                  type: string
+                  description: The ID of the health check campaign
+                nurseId:
+                  type: string
+                  description: The ID of the nurse conducting the check
+                studentId:
+                  type: string
+                  description: The ID of the student being checked
+                checkupDate:
+                  type: string
+                  format: date-time
+                  description: The date of the checkup (optional, defaults to current date)
+      responses:
+        '201':
+          description: Health check result created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Template not found
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '500':
+          description: Internal server error
+
+  /health-check/record/result/{resultId}:
+    put:
+      tags:
+        - Health Check - Records
+      summary: Update health check result
+      description: Updates an existing health check result with new data
+      operationId: updateHealthCheckResult
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: resultId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the health check result to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                resultsData:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      itemName:
+                        type: string
+                      value:
+                        type: string
+                      unit:
+                        type: string
+                      isAbnormal:
+                        type: boolean
+                      notes:
+                        type: string
+                  description: Array of health check result data
+                isAbnormal:
+                  type: boolean
+                  description: Whether the overall result is abnormal
+                recommendations:
+                  type: string
+                  description: Recommendations from the health check
+                overallConclusion:
+                  type: string
+                  description: Overall conclusion of the health check
+                checkupDate:
+                  type: string
+                  format: date-time
+                  description: The date of the checkup
+      responses:
+        '200':
+          description: Health check result updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Health check result not found
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -2921,6 +3250,209 @@ components:
           type: string
         sortOrder:
           type: string
+
+    # Health Check Consent Schemas
+    HealthCheckConsent:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the consent
+        campaignId:
+          type: string
+          description: ID of the health check campaign
+        studentId:
+          type: string
+          description: ID of the student
+        classId:
+          type: string
+          description: ID of the student's class
+        parentId:
+          type: string
+          description: ID of the student's parent
+        nurseId:
+          type: string
+          description: ID of the assigned nurse
+        status:
+          type: string
+          enum: [PENDING, APPROVED, DECLINED, REVOKED, COMPLETED, UNDER_OBSERVATION, ADVERSE_REACTION]
+          description: Current status of the consent
+        reasonForDeclining:
+          type: string
+          nullable: true
+          description: Reason provided when consent is declined
+        confirmedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when consent was confirmed
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when consent was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when consent was last updated
+
+    # Health Check Record Schemas
+    HealthCheckRecord:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the record
+        resultId:
+          type: string
+          description: ID of the health check result
+        studentId:
+          type: string
+          description: ID of the student
+        latestResultId:
+          type: string
+          description: ID of the latest health check result
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when record was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when record was last updated
+
+    HealthCheckResult:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the result
+        campaignId:
+          type: string
+          description: ID of the health check campaign
+        nurseId:
+          type: string
+          description: ID of the nurse who conducted the check
+        studentId:
+          type: string
+          description: ID of the student
+        checkupDate:
+          type: string
+          format: date-time
+          description: Date when the checkup was performed
+        isAbnormal:
+          type: boolean
+          description: Whether the overall result is abnormal
+        recommendations:
+          type: string
+          description: Recommendations from the health check
+        overallConclusion:
+          type: string
+          description: Overall conclusion of the health check
+        resultsData:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCheckResultItem'
+          description: Array of individual health check measurements
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when result was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: Timestamp when result was last updated
+
+    HealthCheckResultItem:
+      type: object
+      properties:
+        itemName:
+          type: string
+          description: Name of the health check item (e.g., height, weight, vision)
+        value:
+          type: string
+          nullable: true
+          description: Measured value
+        unit:
+          type: string
+          nullable: true
+          description: Unit of measurement
+        isAbnormal:
+          type: boolean
+          description: Whether this specific measurement is abnormal
+        notes:
+          type: string
+          description: Additional notes for this measurement
+
+    # Request/Response Schemas
+    CreateHealthCheckResultRequest:
+      type: object
+      required:
+        - templateId
+        - campaignId
+        - nurseId
+        - studentId
+      properties:
+        templateId:
+          type: string
+          description: ID of the health check template
+        campaignId:
+          type: string
+          description: ID of the health check campaign
+        nurseId:
+          type: string
+          description: ID of the nurse conducting the check
+        studentId:
+          type: string
+          description: ID of the student being checked
+        checkupDate:
+          type: string
+          format: date-time
+          description: Date of the checkup (optional)
+
+    UpdateHealthCheckResultRequest:
+      type: object
+      properties:
+        resultsData:
+          type: array
+          items:
+            $ref: '#/components/schemas/HealthCheckResultItem'
+          description: Updated result data
+        isAbnormal:
+          type: boolean
+          description: Whether the overall result is abnormal
+        recommendations:
+          type: string
+          description: Updated recommendations
+        overallConclusion:
+          type: string
+          description: Updated overall conclusion
+        checkupDate:
+          type: string
+          format: date-time
+          description: Updated checkup date
+
+    UpdateConsentStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [APPROVED, DECLINED, REVOKED, COMPLETED, UNDER_OBSERVATION, ADVERSE_REACTION]
+          description: New status for the consent
+        reasonForDeclining:
+          type: string
+          description: Reason for declining (required when status is DECLINED)
+
+    AddStudentsToConsentRequest:
+      type: object
+      required:
+        - campaignId
+      properties:
+        campaignId:
+          type: string
+          description: ID of the health check campaign
+
   securitySchemes:
     BearerAuth:
       type: http

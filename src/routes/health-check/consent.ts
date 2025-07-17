@@ -1,0 +1,25 @@
+import express from 'express';
+import consentController from '@/controllers/health-check/health-check-consents.controller';
+
+const router = express.Router();
+
+// Async handler wrapper
+const asyncHandler = (fn: Function) => {
+  return (req: any, res: any, next: any) => {
+    Promise.resolve(fn(req, res, next)).catch(next);
+  };
+};
+
+// Get all health check consents
+router.get('/', asyncHandler(consentController.getAllConsents));
+
+// Get health check consents by campaign ID
+router.get('/campaign/:campaignId', asyncHandler(consentController.getHealthCheckConsentsByCampaignId));
+
+// Add all students to consent by campaign ID
+router.post('/campaign/add-students', asyncHandler(consentController.addAllStudentToConsentByCampaignId));
+
+// Handle consent status (approve/decline)
+router.patch('/:consentId/status', asyncHandler(consentController.handleStatusConsent));
+
+export default router;
