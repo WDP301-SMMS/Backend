@@ -9,6 +9,7 @@ import upload from './upload/upload';
 import healthProfileRouter from './health-profile/health.profile';
 import inventoryRouter from './inventory/inventory';
 import healthHistoryRouter from './health-history/health.history';
+import appointmentRouter from './appointment/appointment';
 import {
   handleToken,
   roleBaseAccess,
@@ -42,5 +43,6 @@ router.use(
 router.use('/health-check', handleToken, healthCheckRouter);
 router.use('/inventory', handleToken, inventoryRouter);
 router.use('/messages', handleToken, messageRouter);
+router.use('/appointments', handleToken, appointmentRouter);
 
 export default router;
