@@ -30,19 +30,43 @@ class MedicationRequestService {
     return { request, items };
   }
 
-  public async getAllRequest() {
-    const requests = await MedicationRequestModel.find()
-      .populate({
-        path: 'parentId',
-        select: 'username', //Thêm gender vào
-      })
-      .populate({
-        path: 'studentId',
-        select: 'fullName', //thêm gender vào
-      });
-    if (!requests || requests.length === 0) {
-      throw createAppError(404, 'Không tìm thấy yêu cầu nào.');
+  public async getAllRequest(query: {
+    page?: number;
+    limit?: number;
+    status?: string;
+    parentId?: string;
+    studentId?: string;
+    startDate?: Date;
+    endDate?: Date;
+  }) {
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      parentId,
+      studentId,
+      startDate,
+      endDate,
+    } = query;
+
+    const filter: Record<string, any> = {};
+    if (status) filter.status = status;
+    if (parentId) filter.parentId = parentId;
+    if (studentId) filter.studentId = studentId;
+    if (startDate || endDate) {
+      filter.startDate = {};
+      if (startDate) filter.startDate.$gte = new Date(startDate);
+      if (endDate) filter.startDate.$lte = new Date(endDate);
     }
+
+    const total = await MedicationRequestModel.countDocuments(filter);
+    const requests = await MedicationRequestModel.find(filter)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ startDate: -1 })
+      .populate({ path: 'parentId', select: 'username' })
+      .populate({ path: 'studentId', select: 'fullName' });
+
     const resultWithItems = await Promise.all(
       requests.map(async (request) => {
         const requestItems = await RequestItemModel.find({
@@ -55,20 +79,29 @@ class MedicationRequestService {
         };
       }),
     );
-    return resultWithItems;
+
+    return {
+      data: resultWithItems,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   public async getRequestById(id: string) {
     const request = await MedicationRequestModel.findById(id)
       .populate({
         path: 'parentId',
-        select: 'username', //Thêm gender vào
+        select: 'username',
       })
       .populate({
         path: 'studentId',
-        select: 'fullName', //thêm gender vào
+        select: 'fullName',
       });
-    if (!request) throw createAppError(404, 'Request not found.');
+    if (!request) throw createAppError(404, 'Không tìm thấy yêu cầu nào.');
 
     const requestItems = await RequestItemModel.find({
       medicationRequestId: request._id,
@@ -80,20 +113,42 @@ class MedicationRequestService {
     };
   }
 
-  public async getRequestByParentId(parentId: string) {
-    const requests = await MedicationRequestModel.find({ parentId })
-      .populate({
-        path: 'parentId',
-        select: 'username', //Thêm gender vào
-      })
-      .populate({
-        path: 'studentId',
-        select: 'fullName', //thêm gender vào
-      });
+  public async getRequestByParentId(
+    parentId: string,
+    query: {
+      page?: number;
+      limit?: number;
+      status?: string;
+      studentId?: string;
+      startDate?: Date;
+      endDate?: Date;
+    },
+  ) {
+    const {
+      page = 1,
+      limit = 10,
+      status,
+      studentId,
+      startDate,
+      endDate,
+    } = query;
 
-    if (!requests || requests.length === 0) {
-      throw createAppError(404, 'Request not found.');
+    const filter: Record<string, any> = { parentId };
+    if (status) filter.status = status;
+    if (studentId) filter.studentId = studentId;
+    if (startDate || endDate) {
+      filter.startDate = {};
+      if (startDate) filter.startDate.$gte = new Date(startDate);
+      if (endDate) filter.startDate.$lte = new Date(endDate);
     }
+
+    const total = await MedicationRequestModel.countDocuments(filter);
+    const requests = await MedicationRequestModel.find(filter)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .sort({ startDate: -1 })
+      .populate({ path: 'parentId', select: 'username' })
+      .populate({ path: 'studentId', select: 'fullName' });
 
     const resultWithItems = await Promise.all(
       requests.map(async (request) => {
@@ -108,7 +163,15 @@ class MedicationRequestService {
       }),
     );
 
-    return resultWithItems;
+    return {
+      data: resultWithItems,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   public async updateRequestById(
@@ -141,7 +204,7 @@ class MedicationRequestService {
     );
 
     if (!updatedRequest) {
-      throw createAppError(404, 'Request not found.');
+      throw createAppError(404, 'Không tìm thấy yêu cầu nào.');
     }
 
     // Cập nhật request items nếu có

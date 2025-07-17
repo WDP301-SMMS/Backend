@@ -4,9 +4,10 @@ import dashboardRouter from './dashboard/dashboard';
 import vaccinationCampaigns from './vaccine/vaccine';
 import reportsRouter from './reports/reports';
 import medicationRequestRouter from './medicationRequest/medication';
+import medicalIncident from './incident/incident';
 import upload from './upload/upload';
 import healthProfileRouter from './health-profile/health.profile';
-import inventoryRouter from './inventory/inventory'
+import inventoryRouter from './inventory/inventory';
 import healthHistoryRouter from './health-history/health.history';
 import {
   handleToken,
@@ -25,7 +26,8 @@ router.use(
   dashboardRouter,
 );
 router.use('/user', handleToken, userRouter);
-router.use('/medication', medicationRequestRouter);
+router.use('/medication', handleToken, medicationRequestRouter);
+router.use('/incident', handleToken, medicalIncident);
 router.use('/upload', upload);
 router.use('/vaccinationCampaigns', handleToken, vaccinationCampaigns);
 router.use('/reports', reportsRouter);
@@ -34,14 +36,9 @@ router.use(
   '/health-history',
   handleToken,
   roleBaseAccess([RoleEnum.Parent]),
-  healthHistoryRouter
+  healthHistoryRouter,
 );
-router.use(
-  '/health-check',
-  handleToken,
-  roleBaseAccess([RoleEnum.Admin, RoleEnum.Manager]),
-  healthCheckRouter,
-);
-router.use('/inventory', handleToken, inventoryRouter)
+router.use('/health-check', handleToken, healthCheckRouter);
+router.use('/inventory', handleToken, inventoryRouter);
 
 export default router;

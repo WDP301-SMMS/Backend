@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API documentation for School Medical Management System
 servers:
-  - url: http://localhost:3000/api
+  - url: __BASE_URL__
 paths:
   /auth/google:
     get:
@@ -2604,7 +2604,7 @@ components:
         lowStockThreshold: { type: number }
         status: { type: string }
         expirationDate: { type: string, format: date }
-        HealthCheckCampaign:
+    HealthCheckCampaign:
       type: object
       properties:
         _id:
