@@ -8,6 +8,7 @@ import { VaccinationCampaignModel } from '@/models/vaccination.campaign.model';
 import { VaccinationConsentModel } from '@/models/vaccination.consent.model';
 import { AppError } from '@/utils/globalErrorHandler';
 import { ConsentStatus } from '@/enums/ConsentsEnum';
+import { sendAnnounceNotification } from '@/utils/notification.helper';
 
 
 type CreateCampaignInput = Pick<
@@ -83,6 +84,8 @@ export class VaccinationCampaignService {
       campaign.summary.totalConsents = createdCount;
 
       await campaign.save();
+
+      sendAnnounceNotification(campaign)
 
 
       return { message: `Campaign dispatched successfully. ${createdCount} consent forms created.` };
