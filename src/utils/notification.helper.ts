@@ -88,3 +88,38 @@ export const sendHealthCheckAnnounceNotification = async (campaign: any): Promis
     console.error(`[Notification Helper] Failed to send notification for HEALTH CHECK campaign ${campaign._id}:`, error);
   }
 }
+
+export const sendIncidentNotificationToParent = async (incident: any): Promise<void> => {
+  try {
+    // Kiểm tra xem sự cố có studentId không
+    if (!incident.studentId) {
+      console.warn(`[Notification Helper] Incident ${incident._id} has no studentId. Cannot notify parent.`);
+      return;
+    }
+    
+    console.log(`[Notification Helper] Preparing to notify parent about incident: ${incident._id}`);
+    const student = await StudentModel.findById(incident.studentId).select('parentId').lean();
+
+    // Kiểm tra xem học sinh có phụ huynh không
+    if (!student || !student.parentId) {
+      console.warn(`[Notification Helper] Student ${incident.studentId} not found or has no parent. Cannot send notification.`);
+      return;
+    }
+
+    const parentId = student.parentId.toString();
+    console.log(`[Notification Helper] Found parent ${parentId} to notify for incident ${incident._id}.`);
+
+    // Gửi job vào queue cho một người nhận duy nhất
+    await addNotificationJob({
+      recipientIds: [parentId],
+      type: NotificationType.MEDICAL_INCIDENT_PARENT_ALERT, 
+      entityId: incident._id.toString(),
+      entityModel: 'MedicalIncident'
+    });
+
+    console.log(`[Notification Helper] Job added for new incident ${incident._id}.`);
+
+  } catch (error) {
+    console.error(`[Notification Helper] Failed to send notification for new incident ${incident._id}:`, error);
+  }
+}

@@ -9,6 +9,7 @@ export enum NotificationType {
   MEETING_SCHEDULE_NEW = 'MEETING_SCHEDULE_NEW',           // Có lịch hẹn mới với y tá
   MEETING_SCHEDULE_UPDATED = 'MEETING_SCHEDULE_UPDATED',     // Lịch hẹn được cập nhật
   MEETING_SCHEDULE_CANCELED = 'MEETING_SCHEDULE_CANCELED',   // Lịch hẹn bị hủy
+  MEDICAL_INCIDENT_PARENT_ALERT = 'MEDICAL_INCIDENT_PARENT_ALERT', // Thông báo sự cố y tế đến phụ huynh
 
   // === Dành cho Y tá (Nurse) / Quản lý (Manager) ===
   PARENT_SUBMITTED_CONSENT = 'PARENT_SUBMITTED_CONSENT', // Phụ huynh đã đồng ý/từ chối
