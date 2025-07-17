@@ -16,6 +16,7 @@ import {
 import { RoleEnum } from '@/enums/RoleEnum';
 import userRouter from './user/user';
 import healthCheckRouter from './health-check';
+import messageRouter from './message/message';
 const router = express.Router();
 
 router.use('/auth', authRouter);
@@ -40,5 +41,6 @@ router.use(
 );
 router.use('/health-check', handleToken, healthCheckRouter);
 router.use('/inventory', handleToken, inventoryRouter);
+router.use('/messages', handleToken, messageRouter);
 
 export default router;
