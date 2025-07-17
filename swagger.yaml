@@ -2247,6 +2247,7 @@ paths:
           schema:
             type: string
           description: The ID of the student
+          example: "507f1f77bcf86cd799439011"
       responses:
         '200':
           description: Health check records retrieved successfully
@@ -2254,8 +2255,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid student ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Records not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -2279,6 +2290,7 @@ paths:
           schema:
             type: string
           description: The ID of the student
+          example: "507f1f77bcf86cd799439011"
       responses:
         '200':
           description: Latest health check record retrieved successfully
@@ -2286,8 +2298,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid student ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -2311,27 +2333,74 @@ paths:
             schema:
               type: object
               required:
-                - templateId
                 - campaignId
                 - nurseId
                 - studentId
+                - resultsData
               properties:
-                templateId:
-                  type: string
-                  description: The ID of the health check template
                 campaignId:
                   type: string
                   description: The ID of the health check campaign
+                  example: "507f1f77bcf86cd799439011"
                 nurseId:
                   type: string
                   description: The ID of the nurse conducting the check
+                  example: "507f1f77bcf86cd799439012"
                 studentId:
                   type: string
                   description: The ID of the student being checked
+                  example: "507f1f77bcf86cd799439013"
+                resultsData:
+                  type: array
+                  description: Array of health check result data
+                  items:
+                    type: object
+                    required:
+                      - itemName
+                      - value
+                      - isAbnormal
+                    properties:
+                      itemName:
+                        type: string
+                        description: Name of the health check item
+                        example: "Height"
+                      value:
+                        type: string
+                        description: Value of the measurement
+                        example: "150"
+                      unit:
+                        type: string
+                        description: Unit of measurement
+                        example: "cm"
+                      isAbnormal:
+                        type: boolean
+                        description: Whether this specific result is abnormal
+                        example: false
+                      notes:
+                        type: string
+                        description: Additional notes for this item
+                        example: "Normal growth pattern"
+                      guideline:
+                        type: string
+                        description: Guideline reference for this item
+                        example: "WHO growth standards"
                 checkupDate:
                   type: string
                   format: date-time
                   description: The date of the checkup (optional, defaults to current date)
+                  example: "2025-07-17T10:30:00Z"
+                isAbnormal:
+                  type: boolean
+                  description: Whether the overall result is abnormal
+                  example: false
+                recommendations:
+                  type: string
+                  description: Recommendations from the health check
+                  example: "Continue regular exercise and balanced diet"
+                overallConclusion:
+                  type: string
+                  description: Overall conclusion of the health check
+                  example: "Student is in good health condition"
       responses:
         '201':
           description: Health check result created successfully
@@ -2339,8 +2408,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Missing required fields or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
-          description: Template not found
+          description: Campaign not found or has no template
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
@@ -2364,6 +2443,7 @@ paths:
           schema:
             type: string
           description: The ID of the health check result to update
+          example: "507f1f77bcf86cd799439011"
       requestBody:
         required: true
         content:
@@ -2373,33 +2453,51 @@ paths:
               properties:
                 resultsData:
                   type: array
+                  description: Array of health check result data
                   items:
                     type: object
                     properties:
                       itemName:
                         type: string
+                        description: Name of the health check item
+                        example: "Height"
                       value:
                         type: string
+                        description: Value of the measurement
+                        example: "152"
                       unit:
                         type: string
+                        description: Unit of measurement
+                        example: "cm"
                       isAbnormal:
                         type: boolean
+                        description: Whether this specific result is abnormal
+                        example: false
                       notes:
                         type: string
-                  description: Array of health check result data
+                        description: Additional notes for this item
+                        example: "Updated measurement"
+                      guideline:
+                        type: string
+                        description: Guideline reference for this item
+                        example: "WHO growth standards"
                 isAbnormal:
                   type: boolean
                   description: Whether the overall result is abnormal
+                  example: false
                 recommendations:
                   type: string
                   description: Recommendations from the health check
+                  example: "Continue current health regimen"
                 overallConclusion:
                   type: string
                   description: Overall conclusion of the health check
+                  example: "Updated health assessment shows improvement"
                 checkupDate:
                   type: string
                   format: date-time
                   description: The date of the checkup
+                  example: "2025-07-17T10:30:00Z"
       responses:
         '200':
           description: Health check result updated successfully
@@ -2407,14 +2505,328 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Invalid ID format or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Health check result not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':
           $ref: '#/components/responses/ForbiddenError'
         '500':
           description: Internal server error
+
+  # Appointment Management
+  /appointments/students/abnormal-results:
+    get:
+      tags:
+        - Appointments
+      summary: Get students with abnormal health results
+      description: Retrieves students who have abnormal health check results and are eligible for appointments (Nurse only)
+      operationId: getStudentsWithAbnormalResults
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Students with abnormal results retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Students with abnormal results retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StudentWithAbnormalResult'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /appointments:
+    get:
+      tags:
+        - Appointments
+      summary: Get appointments
+      description: Retrieves appointments based on user role and filters
+      operationId: getAppointments
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number for pagination
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          description: Number of items per page
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [SCHEDULED, COMPLETED, CANCELLED]
+          description: Filter by appointment status
+        - name: studentId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by student ID
+      responses:
+        '200':
+          description: Appointments retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Appointments retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AppointmentDetail'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+    post:
+      tags:
+        - Appointments
+      summary: Create appointment
+      description: Creates a new appointment for a student with abnormal health results (Nurse only)
+      operationId: createAppointment
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppointmentRequest'
+      responses:
+        '201':
+          description: Appointment created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Appointment created successfully"
+                  data:
+                    $ref: '#/components/schemas/AppointmentDetail'
+        '400':
+          description: Bad request - validation failed or business rules violated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /appointments/{appointmentId}/respond:
+    patch:
+      tags:
+        - Appointments
+      summary: Respond to appointment
+      description: Accept or decline an appointment (Parent only)
+      operationId: respondToAppointment
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the appointment to respond to
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespondToAppointmentRequest'
+      responses:
+        '200':
+          description: Response to appointment recorded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Appointment accepted successfully"
+                  data:
+                    $ref: '#/components/schemas/AppointmentDetail'
+        '400':
+          description: Bad request - validation failed or invalid operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          description: Appointment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /appointments/{appointmentId}/status:
+    patch:
+      tags:
+        - Appointments
+      summary: Update appointment status
+      description: Updates the status of an appointment (Nurse only)
+      operationId: updateAppointmentStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the appointment to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAppointmentStatusRequest'
+      responses:
+        '200':
+          description: Appointment status updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Appointment status updated successfully"
+                  data:
+                    $ref: '#/components/schemas/AppointmentDetail'
+        '400':
+          description: Bad request - validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          description: Appointment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /appointments/{appointmentId}/notes:
+    patch:
+      tags:
+        - Appointments
+      summary: Add after-meeting notes
+      description: Adds notes after the appointment meeting and marks it as completed (Nurse only)
+      operationId: addAfterMeetingNotes
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the appointment to add notes to
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddAfterMeetingNotesRequest'
+      responses:
+        '200':
+          description: After-meeting notes added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "After-meeting notes added successfully"
+                  data:
+                    $ref: '#/components/schemas/AppointmentDetail'
+        '400':
+          description: Bad request - validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          description: Appointment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
@@ -2933,6 +3345,204 @@ components:
         lowStockThreshold: { type: number }
         status: { type: string }
         expirationDate: { type: string, format: date }
+
+    # Appointment Schemas
+    AppointmentDetail:
+      type: object
+      description: Detailed appointment information
+      properties:
+        _id:
+          type: string
+          description: Appointment ID
+        studentId:
+          type: object
+          description: Student information
+          properties:
+            _id:
+              type: string
+            fullName:
+              type: string
+            dateOfBirth:
+              type: string
+              format: date
+            gender:
+              type: string
+        parentId:
+          type: object
+          description: Parent information
+          properties:
+            _id:
+              type: string
+            fullName:
+              type: string
+            email:
+              type: string
+            phone:
+              type: string
+        resultId:
+          type: object
+          nullable: true
+          description: Related health check result
+          properties:
+            _id:
+              type: string
+            checkupDate:
+              type: string
+              format: date-time
+            isAbnormal:
+              type: boolean
+            overallConclusion:
+              type: string
+        meetingTime:
+          type: string
+          format: date-time
+          description: Scheduled meeting time
+        location:
+          type: string
+          description: Meeting location
+        status:
+          type: string
+          enum: [SCHEDULED, COMPLETED, CANCELLED]
+          description: Appointment status
+        notes:
+          type: string
+          description: General notes about the appointment
+        afterMeetingNotes:
+          type: string
+          description: Notes added after the meeting
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    StudentWithAbnormalResult:
+      type: object
+      description: Student information with abnormal health results
+      properties:
+        _id:
+          type: string
+          description: Student ID
+        studentId:
+          type: string
+          description: Student ID (duplicate for compatibility)
+        studentName:
+          type: string
+          description: Student full name
+        studentGender:
+          type: string
+          description: Student gender
+        studentDateOfBirth:
+          type: string
+          format: date
+          description: Student date of birth
+        parentId:
+          type: string
+          description: Parent ID
+        parentName:
+          type: string
+          description: Parent full name
+        parentEmail:
+          type: string
+          description: Parent email
+        parentPhone:
+          type: string
+          description: Parent phone number
+        latestCheckupDate:
+          type: string
+          format: date-time
+          description: Date of the latest health checkup
+        latestResultId:
+          type: string
+          description: ID of the latest health check result
+        abnormalResultsCount:
+          type: integer
+          description: Number of abnormal results for this student
+
+    CreateAppointmentRequest:
+      type: object
+      required:
+        - studentId
+        - parentId
+        - meetingTime
+        - location
+      properties:
+        studentId:
+          type: string
+          description: ID of the student
+          example: "507f1f77bcf86cd799439011"
+        parentId:
+          type: string
+          description: ID of the parent
+          example: "507f1f77bcf86cd799439012"
+        resultId:
+          type: string
+          nullable: true
+          description: ID of the specific health check result (optional)
+          example: "507f1f77bcf86cd799439013"
+        meetingTime:
+          type: string
+          format: date-time
+          description: Scheduled meeting time (must be in the future)
+          example: "2025-07-25T10:00:00.000Z"
+        location:
+          type: string
+          minLength: 3
+          maxLength: 200
+          description: Meeting location
+          example: "School Health Office"
+        notes:
+          type: string
+          maxLength: 1000
+          description: Additional notes about the appointment
+          example: "Follow-up appointment for vision screening results"
+
+    RespondToAppointmentRequest:
+      type: object
+      required:
+        - action
+      properties:
+        action:
+          type: string
+          enum: [accept, decline]
+          description: Response action
+          example: "accept"
+        reason:
+          type: string
+          minLength: 3
+          maxLength: 500
+          description: Reason for response (required when declining)
+          example: "Family vacation planned for that week"
+
+    UpdateAppointmentStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [SCHEDULED, COMPLETED, CANCELLED]
+          description: New appointment status
+          example: "COMPLETED"
+        reason:
+          type: string
+          maxLength: 500
+          description: Reason for status change
+          example: "Meeting completed successfully"
+
+    AddAfterMeetingNotesRequest:
+      type: object
+      required:
+        - afterMeetingNotes
+      properties:
+        afterMeetingNotes:
+          type: string
+          minLength: 10
+          maxLength: 2000
+          description: Notes to add after the meeting
+          example: "Discussed student's vision issue with parent. Recommended consultation with ophthalmologist. Parent agreed to schedule appointment within 2 weeks."
+
     HealthCheckCampaign:
       type: object
       properties:
@@ -3369,50 +3979,80 @@ components:
 
     HealthCheckResultItem:
       type: object
+      required:
+        - itemName
+        - value
+        - isAbnormal
       properties:
         itemName:
           type: string
           description: Name of the health check item (e.g., height, weight, vision)
+          example: "Height"
         value:
           type: string
-          nullable: true
           description: Measured value
+          example: "150"
         unit:
           type: string
           nullable: true
           description: Unit of measurement
+          example: "cm"
         isAbnormal:
           type: boolean
           description: Whether this specific measurement is abnormal
+          example: false
         notes:
           type: string
           description: Additional notes for this measurement
+          example: "Normal growth pattern"
+        guideline:
+          type: string
+          description: Guideline reference for this item
+          example: "WHO growth standards"
 
     # Request/Response Schemas
     CreateHealthCheckResultRequest:
       type: object
       required:
-        - templateId
         - campaignId
         - nurseId
         - studentId
+        - resultsData
       properties:
-        templateId:
-          type: string
-          description: ID of the health check template
         campaignId:
           type: string
           description: ID of the health check campaign
+          example: "507f1f77bcf86cd799439011"
         nurseId:
           type: string
           description: ID of the nurse conducting the check
+          example: "507f1f77bcf86cd799439012"
         studentId:
           type: string
           description: ID of the student being checked
+          example: "507f1f77bcf86cd799439013"
+        resultsData:
+          type: array
+          description: Array of health check result data
+          items:
+            $ref: '#/components/schemas/HealthCheckResultItem'
         checkupDate:
           type: string
           format: date-time
-          description: Date of the checkup (optional)
+          description: Date of the checkup (optional, defaults to current date)
+          example: "2025-07-17T10:30:00Z"
+        isAbnormal:
+          type: boolean
+          description: Whether the overall result is abnormal
+          example: false
+        recommendations:
+          type: string
+          description: Recommendations from the health check
+          example: "Continue regular exercise and balanced diet"
+        overallConclusion:
+          type: string
+          description: Overall conclusion of the health check
+          example: "Student is in good health condition"
 
     UpdateHealthCheckResultRequest:
       type: object
