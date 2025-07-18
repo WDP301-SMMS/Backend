@@ -49,6 +49,11 @@ const HealthCheckResultSchema: Schema = new Schema<IHealthCheckResult>({
           type: String,
           required: false,
         },
+        notes: {
+          type: String,
+          required: false,
+          trim: true,
+        },
       },
     ],
     required: true,
@@ -63,6 +68,11 @@ const HealthCheckResultSchema: Schema = new Schema<IHealthCheckResult>({
     type: String,
     required: false,
     trim: true,
+  },
+  isAbnormal: {
+    type: Boolean,
+    required: true,
+    default: false,
   },
 });
 
