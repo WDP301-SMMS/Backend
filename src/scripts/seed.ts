@@ -6,7 +6,10 @@ import { UserModel } from '../models/user.model';
 import { StudentModel } from '../models/student.model';
 import { Class } from '../models/class.model';
 import { MedicalIncidentModel } from '../models/medical.incident.model';
-import { MedicationRequestModel, RequestItemModel } from '../models/medication.request.model';
+import {
+  MedicationRequestModel,
+  RequestItemModel,
+} from '../models/medication.request.model';
 import { MedicalInventoryModel } from '../models/medical.inventory.model';
 import { HealthCheckCampaign } from '../models/healthcheck.campaign.model';
 import { HealthCheckResult } from '../models/healthcheck.result.model';
@@ -27,15 +30,23 @@ import { VaccinationConsentModel } from '../models/vaccination.consent.model';
 import { VaccinationCampaignModel } from '../models/vaccination.campaign.model';
 import { BlogPostModel } from '../models/blog.post.model';
 
+import { IncidentSeverity } from '@/enums/IncidentEnum';
 import { RoleEnum } from '../enums/RoleEnum';
 import { ConsentStatus } from '../enums/ConsentsEnum';
 import { CampaignStatus } from '../enums/CampaignEnum';
 import { StudentGender, StudentStatus } from '../enums/StudentEnum';
 import { CheckupItemDataType, CheckupItemUnit } from '../enums/TemplateEnum';
-import { MedicationRequestEnum, MedicationScheduleEnum } from '../enums/MedicationEnum';
+import {
+  MedicationRequestEnum,
+  MedicationScheduleEnum,
+} from '../enums/MedicationEnum';
 import { SlotEnum } from '../enums/SlotEnum';
 import { EAllergySeverity } from '../enums/AllergyEnums';
-import { InventoryLogType, InventoryStatus, InventoryType } from '../enums/InventoryEnums';
+import {
+  InventoryLogType,
+  InventoryStatus,
+  InventoryType,
+} from '../enums/InventoryEnums';
 import { OrganizationEnum } from '../enums/OrganizationEnum';
 import { VaccinationRecordModel } from '@/models/vacination.record.model';
 
@@ -80,7 +91,8 @@ const seedDatabase = async () => {
     const users = [
       {
         username: 'Trần Đoàn A',
-        password: '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
+        password:
+          '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
         email: 'parent1@example.com',
         role: RoleEnum.Parent,
         dob: new Date('1980-01-01T00:00:00Z'),
@@ -90,7 +102,8 @@ const seedDatabase = async () => {
       },
       {
         username: 'Nguyễn Thị B',
-        password: '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
+        password:
+          '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
         email: 'parent2@example.com',
         role: RoleEnum.Parent,
         dob: new Date('1982-02-02T00:00:00Z'),
@@ -100,7 +113,8 @@ const seedDatabase = async () => {
       },
       {
         username: 'Nguyễn Ngọc C',
-        password: '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
+        password:
+          '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
         email: 'nurse1@example.com',
         role: RoleEnum.Nurse,
         dob: new Date('1975-03-03T00:00:00Z'),
@@ -110,7 +124,8 @@ const seedDatabase = async () => {
       },
       {
         username: 'Nguyễn Ngọc CAB',
-        password: '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
+        password:
+          '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
         email: 'nurse2@example.com',
         role: RoleEnum.Nurse,
         dob: new Date('1975-01-03T00:00:00Z'),
@@ -120,7 +135,8 @@ const seedDatabase = async () => {
       },
       {
         username: 'Trần Văn D',
-        password: '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
+        password:
+          '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
         email: 'admin1@example.com',
         role: RoleEnum.Admin,
         dob: new Date('1970-04-04T00:00:00Z'),
@@ -130,7 +146,8 @@ const seedDatabase = async () => {
       },
       {
         username: 'Nguyễn Thị E',
-        password: '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
+        password:
+          '$2b$10$Qu73RNaLyG95KDqb/AoDZevFrn54Mrx.lburY9ZO7WXrwyW5L0yfy',
         email: 'manager1@example.com',
         role: RoleEnum.Manager,
         dob: new Date('1978-05-05T00:00:00Z'),
@@ -263,9 +280,8 @@ const seedDatabase = async () => {
         organizationId: dummyOrgId2,
       },
     ];
-    const createdOrganizationManagers = await OrganizationManager.insertMany(
-      organizationManagers,
-    );
+    const createdOrganizationManagers =
+      await OrganizationManager.insertMany(organizationManagers);
 
     console.log('Seeding OrganizationStaff data...');
     const organizationStaff = [
@@ -288,9 +304,8 @@ const seedDatabase = async () => {
         organizationId: dummyOrgId1,
       },
     ];
-    const createdOrganizationStaff = await OrganizationStaffs.insertMany(
-      organizationStaff,
-    );
+    const createdOrganizationStaff =
+      await OrganizationStaffs.insertMany(organizationStaff);
 
     console.log('Seeding HealthcareOrganization data...');
     const healthcareOrganizations = [
@@ -356,9 +371,8 @@ const seedDatabase = async () => {
         isDefault: true,
       },
     ];
-    const createdHealthCheckTemplates = await HealthCheckTemplate.insertMany(
-      healthCheckTemplates,
-    );
+    const createdHealthCheckTemplates =
+      await HealthCheckTemplate.insertMany(healthCheckTemplates);
 
     console.log('Seeding HealthCheckCampaign data...');
     const healthCheckCampaigns = [
@@ -383,9 +397,8 @@ const seedDatabase = async () => {
         createdBy: manager._id,
       },
     ];
-    const createdHealthCheckCampaigns = await HealthCheckCampaign.insertMany(
-      healthCheckCampaigns,
-    );
+    const createdHealthCheckCampaigns =
+      await HealthCheckCampaign.insertMany(healthCheckCampaigns);
 
     console.log('Seeding HealthCheckConsent data...');
     const healthCheckConsents = [
@@ -444,7 +457,8 @@ const seedDatabase = async () => {
         recommendations: 'Tiếp tục theo dõi chế độ dinh dưỡng và vận động.',
       },
     ];
-    const createdHealthCheckResults = await HealthCheckResult.insertMany(healthCheckResults);
+    const createdHealthCheckResults =
+      await HealthCheckResult.insertMany(healthCheckResults);
 
     console.log('Seeding HealthProfile data...');
     const healthProfiles = [
@@ -568,9 +582,8 @@ const seedDatabase = async () => {
         ],
       },
     ];
-    const createdMedicalInventories = await MedicalInventoryModel.insertMany(
-      medicalInventories,
-    );
+    const createdMedicalInventories =
+      await MedicalInventoryModel.insertMany(medicalInventories);
 
     console.log('Seeding MedicalIncident data...');
     const medicalIncidents = [
@@ -579,15 +592,13 @@ const seedDatabase = async () => {
         nurseId: nurses[0]._id,
         incidentType: 'Chấn thương nhẹ',
         description: 'Trầy xước đầu gối do ngã ở sân chơi.',
-        severity: 'Nhẹ',
-        status: 'Đã xử lý',
+        severity: IncidentSeverity.Mild,
         actionsTaken: 'Rửa sạch vết thương, dán băng gạc cá nhân.',
         incidentTime: new Date('2024-09-15T10:00:00Z'),
       },
     ];
-    const createdMedicalIncidents = await MedicalIncidentModel.insertMany(
-      medicalIncidents,
-    );
+    const createdMedicalIncidents =
+      await MedicalIncidentModel.insertMany(medicalIncidents);
 
     console.log('Seeding InventoryLog data...');
     const inventoryLogs = [
@@ -620,9 +631,8 @@ const seedDatabase = async () => {
         status: MedicationRequestEnum.Scheduled,
       },
     ];
-    const createdMedicationRequests = await MedicationRequestModel.insertMany(
-      medicationRequests,
-    );
+    const createdMedicationRequests =
+      await MedicationRequestModel.insertMany(medicationRequests);
 
     console.log('Seeding RequestItem data...');
     const requestItems = [
@@ -656,7 +666,7 @@ const seedDatabase = async () => {
       },
     ];
     await MedicationScheduleModel.insertMany(medicationSchedules);
-    
+
     console.log('Seeding VaccinationCampaign data...');
     const vaccinationCampaigns = [
       {
@@ -673,55 +683,64 @@ const seedDatabase = async () => {
         endDate: new Date('2024-11-15T00:00:00Z'),
         createdBy: manager._id,
         summary: {
-            totalStudents: 5, totalConsents: 3, approved: 1, declined: 1, administered: 1, absent: 0,
+          totalStudents: 5,
+          totalConsents: 3,
+          approved: 1,
+          declined: 1,
+          administered: 1,
+          absent: 0,
         },
-      }
+      },
     ];
-    const createdVaccinationCampaigns = await VaccinationCampaignModel.insertMany(vaccinationCampaigns);
+    const createdVaccinationCampaigns =
+      await VaccinationCampaignModel.insertMany(vaccinationCampaigns);
 
     console.log('Seeding VaccinationConsent data...');
     const vaccinationConsents = [
-        {
-            campaignId: createdVaccinationCampaigns[0]._id,
-            studentId: createdStudents[0]._id,
-            parentId: createdStudents[0].parentId!,
-            status: ConsentStatus.APPROVED,
-            confirmedAt: new Date('2024-10-22T00:00:00Z')
-        },
-        {
-            campaignId: createdVaccinationCampaigns[0]._id,
-            studentId: createdStudents[1]._id,
-            parentId: createdStudents[1].parentId!,
-            status: ConsentStatus.DECLINED,
-            reasonForDeclining: "Gia đình không đồng ý.",
-            confirmedAt: new Date('2024-10-23T00:00:00Z')
-        },
-        {
-            campaignId: createdVaccinationCampaigns[0]._id,
-            studentId: createdStudents[2]._id,
-            parentId: createdStudents[2].parentId!,
-            status: ConsentStatus.PENDING,
-        }
+      {
+        campaignId: createdVaccinationCampaigns[0]._id,
+        studentId: createdStudents[0]._id,
+        parentId: createdStudents[0].parentId!,
+        status: ConsentStatus.APPROVED,
+        confirmedAt: new Date('2024-10-22T00:00:00Z'),
+      },
+      {
+        campaignId: createdVaccinationCampaigns[0]._id,
+        studentId: createdStudents[1]._id,
+        parentId: createdStudents[1].parentId!,
+        status: ConsentStatus.DECLINED,
+        reasonForDeclining: 'Gia đình không đồng ý.',
+        confirmedAt: new Date('2024-10-23T00:00:00Z'),
+      },
+      {
+        campaignId: createdVaccinationCampaigns[0]._id,
+        studentId: createdStudents[2]._id,
+        parentId: createdStudents[2].parentId!,
+        status: ConsentStatus.PENDING,
+      },
     ];
-    const createdVaccinationConsents = await VaccinationConsentModel.insertMany(vaccinationConsents);
+    const createdVaccinationConsents =
+      await VaccinationConsentModel.insertMany(vaccinationConsents);
 
     console.log('Seeding VaccinationRecord data...');
     const vaccinationRecords = [
-        {
-            consentId: createdVaccinationConsents[0]._id,
-            partnerId: createdVaccinationCampaigns[0].partnerId,
-            administeredByStaffId: createdOrganizationStaff[2]._id, // Nurse Carol Green from City Health Clinic
-            studentId: createdStudents[0]._id,
-            postVaccinationChecks: [{
-                observedAt: new Date('2024-11-01T10:30:00Z'),
-                temperatureLevel: 37.0,
-                notes: 'Bình thường, không có phản ứng phụ.',
-                isAbnormal: false,
-            }],
-            administeredAt: new Date('2024-11-01T10:00:00Z'),
-            vaccineName: 'MMR',
-            doseNumber: 1,
-        }
+      {
+        consentId: createdVaccinationConsents[0]._id,
+        partnerId: createdVaccinationCampaigns[0].partnerId,
+        administeredByStaffId: createdOrganizationStaff[2]._id, // Nurse Carol Green from City Health Clinic
+        studentId: createdStudents[0]._id,
+        postVaccinationChecks: [
+          {
+            observedAt: new Date('2024-11-01T10:30:00Z'),
+            temperatureLevel: 37.0,
+            notes: 'Bình thường, không có phản ứng phụ.',
+            isAbnormal: false,
+          },
+        ],
+        administeredAt: new Date('2024-11-01T10:00:00Z'),
+        vaccineName: 'MMR',
+        doseNumber: 1,
+      },
     ];
     await VaccinationRecordModel.insertMany(vaccinationRecords);
 
@@ -736,7 +755,8 @@ const seedDatabase = async () => {
         status: 'Đã hoàn thành',
         reasons: 'Trao đổi về kết quả khám sức khỏe của học sinh.',
         notes: 'Phụ huynh vui lòng mang theo sổ sức khỏe của con.',
-        afterMeetingNotes: 'Phụ huynh đã nắm thông tin, đồng ý với kế hoạch theo dõi.',
+        afterMeetingNotes:
+          'Phụ huynh đã nắm thông tin, đồng ý với kế hoạch theo dõi.',
       },
     ];
     await MeetingScheduleModel.insertMany(meetingSchedules);
@@ -746,15 +766,17 @@ const seedDatabase = async () => {
       {
         authorId: admin._id,
         title: '5 Lời khuyên để Giữ gìn Sức khỏe cho Học sinh',
-        content: 'Duy trì sức khỏe học sinh bao gồm dinh dưỡng hợp lý, tập thể dục và khám sức khỏe định kỳ...',
+        content:
+          'Duy trì sức khỏe học sinh bao gồm dinh dưỡng hợp lý, tập thể dục và khám sức khỏe định kỳ...',
         publishedAt: new Date('2025-01-15T10:00:00Z'),
       },
       {
         authorId: admin._id,
         title: 'Tầm quan trọng của việc Tiêm chủng',
-        content: 'Tiêm chủng là biện pháp quan trọng để ngăn ngừa dịch bệnh trong môi trường học đường...',
+        content:
+          'Tiêm chủng là biện pháp quan trọng để ngăn ngừa dịch bệnh trong môi trường học đường...',
         publishedAt: new Date('2025-02-20T12:00:00Z'),
-      }
+      },
     ];
     await BlogPostModel.insertMany(blogPosts);
 

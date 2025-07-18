@@ -1,3 +1,4 @@
+import { IncidentSeverity } from '@/enums/IncidentEnum';
 import { Types } from 'mongoose';
 
 export interface IMedicalIncident {
@@ -5,8 +6,7 @@ export interface IMedicalIncident {
   nurseId: Types.ObjectId;
   incidentType: string;
   description: string;
-  severity: string;
-  status: string;
+  severity: IncidentSeverity;
   actionsTaken: string;
   note?: string;
   incidentTime: Date;

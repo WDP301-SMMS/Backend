@@ -15,15 +15,15 @@ class MedicalIncidentService {
   public async getAllIncidents(query: {
     page?: number;
     limit?: number;
-    status?: string;
+    severity?: string;
     nurseId?: string;
     studentId?: string;
   }) {
-    const { page = 1, limit = 10, status, nurseId, studentId } = query;
+    const { page = 1, limit = 10, severity, nurseId, studentId } = query;
 
     const filters: Record<string, any> = {};
 
-    if (status) filters.status = status;
+    if (severity) filters.severity = severity;
     if (nurseId) filters.nurseId = nurseId;
     if (studentId) filters.studentId = studentId;
 
@@ -33,7 +33,9 @@ class MedicalIncidentService {
       MedicalIncidentModel.find(filters)
         .sort({ incidentTime: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .populate({ path: 'studentId', select: 'fullName' })
+        .populate({ path: 'nurseId', select: 'fullName' }),
       MedicalIncidentModel.countDocuments(filters),
     ]);
 
@@ -47,7 +49,9 @@ class MedicalIncidentService {
   }
 
   public async getIncidentById(id: string) {
-    const incident = await MedicalIncidentModel.findById(id);
+    const incident = await MedicalIncidentModel.findById(id)
+      .populate({ path: 'studentId', select: 'fullName' })
+      .populate({ path: 'nurseId', select: 'fullName' });
     if (!incident) throw createAppError(404, 'Không tìm thấy sự cố y tế');
     return incident;
   }

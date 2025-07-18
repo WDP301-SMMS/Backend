@@ -78,7 +78,10 @@ class MedicationScheduleService {
       };
     }
 
-    return await MedicationScheduleModel.find(filter).sort({ date: 1 });
+    return await MedicationScheduleModel.find(filter)
+      .sort({ date: 1 })
+      .populate({ path: 'nurseId', select: 'fullName' })
+      .populate({ path: 'studentId', select: 'fullName' });
   }
 
   public async getSchedulesByStudentId(
@@ -95,7 +98,10 @@ class MedicationScheduleService {
       };
     }
 
-    return await MedicationScheduleModel.find(filter).sort({ date: 1 });
+    return await MedicationScheduleModel.find(filter)
+      .sort({ date: 1 })
+      .populate({ path: 'studentId', select: 'fullName' })
+      .populate({ path: 'nurseId', select: 'fullName' });
   }
 }
 

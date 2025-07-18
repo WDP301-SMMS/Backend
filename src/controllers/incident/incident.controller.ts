@@ -36,12 +36,12 @@ const getAllIncidents = async (
   next: NextFunction,
 ) => {
   try {
-    const { page, limit, status, nurseId, studentId } = req.query;
+    const { page, limit, severity, nurseId, studentId } = req.query;
 
     const result = await service.getAllIncidents({
       page: Number(page) || 1,
       limit: Number(limit) || 10,
-      status: status as string,
+      severity: severity as string,
       nurseId: nurseId as string,
       studentId: studentId as string,
     });
@@ -102,12 +102,12 @@ const getNurseIncidents = async (
       return;
     }
 
-    const { page, limit, status, studentId } = req.query;
+    const { page, limit, severity, studentId } = req.query;
 
     const result = await service.getAllIncidents({
       page: Number(page) || 1,
       limit: Number(limit) || 10,
-      status: status as string,
+      severity: severity as string,
       nurseId: nurseId.toString(),
       studentId: studentId as string,
     });
