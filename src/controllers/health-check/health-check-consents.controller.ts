@@ -136,10 +136,11 @@ const getHealthCheckConsentsByCampaignId = async (
     }
 
     const consents = await HealthCheckConsent.find({ campaignId })
-      .populate('studentId', 'fullName')
-      .populate('parentId', 'fullName')
-      .populate('classId', 'name')
-      .populate('nurseId', 'fullName')
+      .populate('campaignId')
+      .populate('studentId')
+      .populate('parentId')
+      .populate('classId')
+      .populate('nurseId')
       .sort({ createdAt: -1 });
 
     handleSuccessResponse(
@@ -161,7 +162,12 @@ const handleStatusConsent = async (req: Request, res: Response) => {
   const { consentId } = req.params;
   const { status } = req.body;
   try {
-    const consent = await HealthCheckConsent.findById(consentId);
+    const consent = await HealthCheckConsent.findById(consentId)
+      .populate('campaignId')
+      .populate('studentId')
+      .populate('parentId')
+      .populate('classId')
+      .populate('nurseId');
     if (!consent) {
       return res.status(404).json({
         success: false,
@@ -211,10 +217,11 @@ const handleStatusConsent = async (req: Request, res: Response) => {
 const getAllConsents = async (req: Request, res: Response) => {
   try {
     const consents = await HealthCheckConsent.find({})
-      .populate('studentId', 'fullName')
-      .populate('parentId', 'fullName')
-      .populate('classId', 'name')
-      .populate('nurseId', 'fullName')
+      .populate('studentId')
+      .populate('parentId')
+      .populate('classId')
+      .populate('nurseId')
+      .populate('campaignId')
       .sort({ createdAt: -1 });
 
     handleSuccessResponse(
