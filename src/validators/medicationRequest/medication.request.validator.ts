@@ -29,13 +29,13 @@ const validate =
 
 const requestSchema = Joi.object({
   parentId: objectIdValidator.required(),
+  studentId: objectIdValidator.required(),
   startDate: Joi.date().iso().required(),
   endDate: Joi.date().iso().greater(Joi.ref('startDate')).required(),
   prescriptionFile: Joi.string().uri().required().messages({
     'string.uri': 'Prescription file must be a valid URL.',
     'any.required': 'Prescription file is required.',
   }),
-  status: Joi.string().valid('pending', 'in_progress', 'done').required(),
   items: Joi.array()
     .items(
       Joi.object({

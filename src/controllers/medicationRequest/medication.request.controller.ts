@@ -9,7 +9,9 @@ const createMedicationRequest = async (
   next: NextFunction,
 ) => {
   try {
-    const data = await service.createRequest(req.body);
+    const cleanBody = Object.fromEntries(Object.entries(req.body));
+
+    const data = await service.createRequest(cleanBody);
     res.status(201).json({ message: 'Yêu cầu uống thuốc thành công', data });
   } catch (err) {
     next(err);
