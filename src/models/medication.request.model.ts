@@ -2,6 +2,7 @@ import {
   IMedicationRequest,
   IRequestItem,
 } from '@/interfaces/medication.request.interface';
+import { MedicationRequestEnum } from '@/enums/MedicationEnum';
 import mongoose, { Schema } from 'mongoose';
 
 const MedicationRequestSchema = new Schema<IMedicationRequest>({
@@ -29,6 +30,8 @@ const MedicationRequestSchema = new Schema<IMedicationRequest>({
   },
   status: {
     type: String,
+    enum: Object.values(MedicationRequestEnum),
+    default: MedicationRequestEnum.Pending,
     required: true,
   },
 });
