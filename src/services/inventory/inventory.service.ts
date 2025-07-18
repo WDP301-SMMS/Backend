@@ -279,44 +279,13 @@ class InventoryService {
 
   public async getDispenseHistory(filters: any): Promise<any[]> {
     const pipeline: any[] = [
-      {
-        $match: {
-          typeLog: InventoryLogType.WITHDRAWAL_FOR_INCIDENT,
-          incidentId: { $ne: null },
-        },
-      },
-      { $sort: { createdAt: -1 } },
-      {
-        $lookup: {
-          from: 'medicalinventories',
-          localField: 'inventoryId',
-          foreignField: '_id',
-          as: 'itemInfo',
-        },
-      },
+      { $match: { typeLog: InventoryLogType.WITHDRAWAL_FOR_INCIDENT, incidentId: { $ne: null } } },
+      // { $sort: { createdAt: -1 } },
+      { $lookup: { from: 'medicalinventories', localField: 'inventoryId', foreignField: '_id', as: 'itemInfo' } },
       { $unwind: '$itemInfo' },
-      {
-        $group: {
-          _id: '$incidentId',
-          dispensedItems: {
-            $push: {
-              itemName: '$itemInfo.itemName',
-              quantity: { $abs: '$quantityChanged' },
-              unit: '$itemInfo.unit',
-              usageInstructions: '$usageInstructions',
-            },
-          },
-          dispensedAt: { $first: '$createdAt' },
-        },
-      },
-      {
-        $lookup: {
-          from: 'medicalincidents',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'incidentInfo',
-        },
-      },
+        { $sort: { createdAt: -1 } },
+      { $group: { _id: "$incidentId", dispensedItems: { $push: { itemName: '$itemInfo.itemName', quantity: { $abs: '$quantityChanged' }, unit: '$itemInfo.unit', usageInstructions: '$usageInstructions' } }, dispensedAt: { $first: "$createdAt" } } },
+      { $lookup: { from: 'medicalincidents', localField: '_id', foreignField: '_id', as: 'incidentInfo' } },
       { $unwind: '$incidentInfo' },
       {
         $lookup: {

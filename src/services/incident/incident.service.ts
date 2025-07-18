@@ -1,5 +1,6 @@
 import { MedicalIncidentModel } from '@/models/medical.incident.model';
 import { AppError } from '@/utils/globalErrorHandler';
+import { sendIncidentNotificationToParent } from '@/utils/notification.helper';
 
 const createAppError = (status: number, message: string): AppError => {
   const error: AppError = new Error(message);
@@ -8,8 +9,12 @@ const createAppError = (status: number, message: string): AppError => {
 };
 
 class MedicalIncidentService {
-  public async createIncident(data: any) {
-    return await MedicalIncidentModel.create(data);
+   public async createIncident(data: any) {
+    const newIncident = await MedicalIncidentModel.create(data);
+    if (newIncident) {
+      sendIncidentNotificationToParent(newIncident);
+    }
+    return newIncident;
   }
 
   public async getAllIncidents(query: {

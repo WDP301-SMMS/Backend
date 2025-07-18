@@ -25,7 +25,6 @@ const HealthCheckConsentSchema = new Schema<IHealthCheckConsent>({
   },
   nurseId: {
     type: Schema.Types.ObjectId,
-    required: true,
     ref: 'User',
   },
   status: {

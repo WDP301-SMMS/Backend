@@ -1,9 +1,96 @@
+import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
 import { HealthCheckRecordModel } from '@/models/healthcheck.record.model';
+import { HealthCheckResult } from '@/models/healthcheck.result.model';
 import { handleSuccessResponse } from '@/utils/responseHandler';
 import { Request, Response } from 'express';
 
+const createHealthCheckResultBaseOnTemplate = async (
+  req: Request,
+  res: Response,
+) => {
+  const body = req.body;
+  
+  // Input validation
+  if (!body.campaignId || !body.nurseId || !body.studentId || !body.resultsData) {
+    res.status(400).json({ message: 'Missing required fields: campaignId, nurseId, studentId, and resultsData are required' });
+    return;
+  }
+
+  try {
+    // Find and validate campaign
+    const campaign = await HealthCheckCampaign.findById(body.campaignId);
+    if (!campaign || !campaign.templateId) {
+      res.status(404).json({ message: 'Campaign not found or has no template' });
+      return;
+    }
+
+    const healthCheckResult = await HealthCheckResult.create({
+      campaignId: body.campaignId,
+      nurseId: body.nurseId,
+      studentId: body.studentId,
+      checkupDate: body.checkupDate || new Date(),
+      isAbnormal: body.isAbnormal || false,
+      recommendations: body.recommendations || '',
+      overallConclusion: body.overallConclusion || '',
+      resultsData: body.resultsData,
+    });
+
+    // Create or update health check record
+    const existingRecord = await HealthCheckRecordModel.findOne({
+      studentId: body.studentId,
+    });
+
+    if (existingRecord) {
+      // Update existing record's latest result
+      existingRecord.latestResultId = healthCheckResult._id;
+      await existingRecord.save();
+    } else {
+      // Create new record - both resultId and latestResultId should point to the same result initially
+      await HealthCheckRecordModel.create({
+        resultId: healthCheckResult._id,
+        studentId: body.studentId,
+        latestResultId: healthCheckResult._id,
+      });
+    }
+
+    handleSuccessResponse(
+      res,
+      201,
+      'Health check result created successfully',
+      healthCheckResult,
+    );
+  } catch (error) {
+    console.error('Error creating health check result:', error);
+    
+    // Handle specific MongoDB validation errors
+    if (error instanceof Error) {
+      if (error.name === 'ValidationError') {
+        res.status(400).json({ 
+          message: 'Validation error', 
+          details: error.message 
+        });
+      } else if (error.name === 'CastError') {
+        res.status(400).json({ 
+          message: 'Invalid ID format' 
+        });
+      } else {
+        res.status(500).json({ message: 'Internal server error' });
+      }
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+    return;
+  }
+};
+
 const getStudentHealthCheckRecord = async (req: Request, res: Response) => {
   const { id } = req.params;
+
+  // Input validation
+  if (!id) {
+    res.status(400).json({ message: 'Student ID is required' });
+    return;
+  }
 
   try {
     const records = await HealthCheckRecordModel.find({
@@ -23,7 +110,12 @@ const getStudentHealthCheckRecord = async (req: Request, res: Response) => {
     );
   } catch (error) {
     console.error('Error fetching health check record:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    
+    if (error instanceof Error && error.name === 'CastError') {
+      res.status(400).json({ message: 'Invalid student ID format' });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
     return;
   }
 };
@@ -33,6 +125,12 @@ const getStudentLatestHealthCheckRecord = async (
   res: Response,
 ) => {
   const { id } = req.params;
+
+  // Input validation
+  if (!id) {
+    res.status(400).json({ message: 'Student ID is required' });
+    return;
+  }
 
   try {
     const record = await HealthCheckRecordModel.findOne({
@@ -54,12 +152,88 @@ const getStudentLatestHealthCheckRecord = async (
     );
   } catch (error) {
     console.error('Error fetching latest health check record:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    
+    if (error instanceof Error && error.name === 'CastError') {
+      res.status(400).json({ message: 'Invalid student ID format' });
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
+    return;
+  }
+};
+
+const updateHealthCheckResult = async (req: Request, res: Response) => {
+  const { resultId } = req.params;
+  const body = req.body;
+
+  // Input validation
+  if (!resultId) {
+    res.status(400).json({ message: 'Result ID is required' });
+    return;
+  }
+
+  try {
+    const healthCheckResult = await HealthCheckResult.findById(resultId);
+    if (!healthCheckResult) {
+      res.status(404).json({ message: 'Health check result not found' });
+      return;
+    }
+
+    // Update the result data
+    const updatedData = {
+      resultsData: body.resultsData || healthCheckResult.resultsData,
+      isAbnormal: body.isAbnormal ?? healthCheckResult.isAbnormal,
+      recommendations:
+        body.recommendations || healthCheckResult.recommendations,
+      overallConclusion:
+        body.overallConclusion || healthCheckResult.overallConclusion,
+      checkupDate: body.checkupDate || healthCheckResult.checkupDate,
+    };
+
+    const updatedResult = await HealthCheckResult.findByIdAndUpdate(
+      resultId,
+      updatedData,
+      { new: true, runValidators: true },
+    );
+
+    // Update the latest result in the record
+    await HealthCheckRecordModel.findOneAndUpdate(
+      { studentId: healthCheckResult.studentId },
+      { latestResultId: resultId },
+    );
+
+    handleSuccessResponse(
+      res,
+      200,
+      'Health check result updated successfully',
+      updatedResult,
+    );
+  } catch (error) {
+    console.error('Error updating health check result:', error);
+    
+    if (error instanceof Error) {
+      if (error.name === 'ValidationError') {
+        res.status(400).json({ 
+          message: 'Validation error', 
+          details: error.message 
+        });
+      } else if (error.name === 'CastError') {
+        res.status(400).json({ 
+          message: 'Invalid ID format' 
+        });
+      } else {
+        res.status(500).json({ message: 'Internal server error' });
+      }
+    } else {
+      res.status(500).json({ message: 'Internal server error' });
+    }
     return;
   }
 };
 
 export {
+  createHealthCheckResultBaseOnTemplate,
   getStudentHealthCheckRecord,
   getStudentLatestHealthCheckRecord,
+  updateHealthCheckResult,
 };

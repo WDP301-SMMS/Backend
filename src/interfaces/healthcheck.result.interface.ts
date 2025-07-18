@@ -6,6 +6,7 @@ export interface IResultData {
   unit?: string | null;
   isAbnormal: boolean;
   notes?: string;
+  guideline?: string;
 }
 
 export interface IHealthCheckResult {
