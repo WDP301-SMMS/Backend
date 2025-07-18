@@ -1,14 +1,31 @@
 import { addMessageAfterUserDisconnected } from '@/controllers/message/message.controller';
-import { IMessage, MessageType } from '@/interfaces/message.interface';
+import {
+  IMessage,
+  MessageType,
+  IFileData,
+} from '@/interfaces/message.interface';
 import { uploadToFirebase } from '@/services/upload.service';
 import { getPrivateRoom } from '@/utils/room';
 import { Socket } from 'socket.io';
+
+// Helper function to convert file data to Multer file format
+const createMulterFileFromData = (fileData: IFileData): Express.Multer.File => {
+  const buffer = Buffer.from(fileData.data, 'base64');
+  return {
+    fieldname: 'file',
+    originalname: fileData.filename,
+    encoding: '7bit',
+    mimetype: fileData.mimetype,
+    buffer: buffer,
+    size: buffer.length,
+  } as Express.Multer.File;
+};
 
 export const handleSocketConnection = (socket: Socket) => {
   console.log(`Socket connected: ${socket.id}`);
   let messages: IMessage[] = [];
 
-  socket.on('joinRoom', (data) => {
+  socket.on('joinRoom', (data: IMessage) => {
     try {
       if (!data.senderId || !data.receiverId) {
         socket.emit('error', {
@@ -32,7 +49,7 @@ export const handleSocketConnection = (socket: Socket) => {
     }
   });
 
-  socket.on('sendMessage', async (data) => {
+  socket.on('sendMessage', async (data: IMessage) => {
     try {
       // Validate message data
       if (!data.roomId || !data.senderId || !data.receiverId || !data.content) {
@@ -43,13 +60,31 @@ export const handleSocketConnection = (socket: Socket) => {
         return;
       }
 
-      if (data.type === MessageType.IMAGE) {
+      if (data.type === MessageType.IMAGE || data.type === MessageType.FILE) {
         try {
-          const url = await uploadToFirebase(data.content);
+          if (typeof data.content === 'string') {
+            socket.emit('error', {
+              message:
+                'Invalid file data. Expected file object with data, filename, and mimetype',
+            });
+            return;
+          }
+
+          const fileData = data.content as IFileData;
+          if (!fileData.data || !fileData.filename || !fileData.mimetype) {
+            socket.emit('error', {
+              message:
+                'Invalid file data. Missing required fields: data, filename, or mimetype',
+            });
+            return;
+          }
+
+          const multerFile = createMulterFileFromData(fileData);
+          const url = await uploadToFirebase(multerFile);
           data.content = url;
         } catch (error) {
-          console.error('Error uploading image:', error);
-          socket.emit('error', { message: 'Failed to upload image' });
+          console.error('Error uploading file:', error);
+          socket.emit('error', { message: 'Failed to upload file' });
           return;
         }
       }
@@ -116,7 +151,7 @@ export const handleSocketConnection = (socket: Socket) => {
   }, 10000);
 
   // Handle socket errors
-  socket.on('error', (error) => {
+  socket.on('error', (error: Error) => {
     console.error(`Socket error for ${socket.id}:`, error);
   });
 };
