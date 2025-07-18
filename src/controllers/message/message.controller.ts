@@ -19,7 +19,7 @@ const getAllMessagesByRoomId = async (req: Request, res: Response) => {
   const { roomId } = req.params;
 
   try {
-    const messages = await Message.find({ roomId }).sort({ createdAt: 1 });
+    const messages = await Message.find({ roomId }).sort({ createdAt: 1 }).limit(50);
     if (!messages || messages.length === 0) {
       res.status(404).json({
         success: false,
@@ -44,6 +44,43 @@ const getAllMessagesByRoomId = async (req: Request, res: Response) => {
   }
 };
 
+const getRoomsByUserId = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+  if (!userId) {
+    res.status(400).json({
+      success: false,
+      error: 'User ID is required',
+    });
+    return;
+  }
+
+  try {
+    const messages = await Message.find({ userId }).sort({ createdAt: -1 });
+    if (!messages || messages.length === 0) {
+      res.status(404).json({
+        success: false,
+        error: 'No messages found for this user',
+      });
+      return;
+    }
+
+    const rooms = messages.map((message) => message.roomId);
+    handleSuccessResponse(
+      res,
+      200,
+      'Rooms retrieved successfully',
+      Array.from(new Set(rooms)),
+    );
+  } catch (error) {
+    console.error('Error retrieving messages:', error);
+    res.status(500).json({
+      success: false,
+      error: (error as Error).message,
+    });
+    return;
+  }
+};
+
 const addMessageAfterUserDisconnected = async (body: IMessage[]) => {
   try {
     const newMessage = await Message.insertMany(body);
@@ -55,4 +92,8 @@ const addMessageAfterUserDisconnected = async (body: IMessage[]) => {
   }
 };
 
-export { getAllMessagesByRoomId, addMessageAfterUserDisconnected };
+export {
+  getAllMessagesByRoomId,
+  getRoomsByUserId,
+  addMessageAfterUserDisconnected,
+};

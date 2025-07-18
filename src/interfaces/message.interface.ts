@@ -1,8 +1,9 @@
 import { Document } from "mongoose";
 
 export enum MessageType {
-    TEXT = 'text',
-    IMAGE = 'image',
+    TEXT = 'TEXT',
+    IMAGE = 'IMAGE',
+    FILE = 'FILE',
 }
 
 export interface IMessage extends Document{

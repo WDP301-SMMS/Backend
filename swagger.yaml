@@ -2892,6 +2892,84 @@ paths:
                     type: string
                     example: "Internal server error"
 
+  /messages/user/{userId}:
+    get:
+      tags:
+        - Messages
+      summary: Get all rooms by user ID
+      description: Retrieves all unique room IDs for a specific user based on their messages
+      operationId: getRoomsByUserId
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user to get rooms for
+          schema:
+            type: string
+            example: "507f1f77bcf86cd799439011"
+      responses:
+        '200':
+          description: Rooms retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Rooms retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      type: string
+                    example: ["private-user1-user2", "private-user1-user3"]
+        '400':
+          description: User ID is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "User ID is required"
+        '404':
+          description: No messages found for this user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "No messages found for this user"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "Internal server error"
+
 components:
   schemas:
     User:
