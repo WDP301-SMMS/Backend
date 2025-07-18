@@ -11,7 +11,9 @@
     "db:seed": "ts-node -r tsconfig-paths/register src/scripts/seed.ts",
     "tunnel": "ngrok http 3000",
     "tunnel:delayed": "npx wait-on tcp:3000 && npx ngrok http 3000",
-    "dev:tunnel": "concurrently --names \"NODE,NGROK\" --prefix \"[{name}]\" --prefix-colors \"cyan,green\" --raw \"npm run dev\" \"npm run tunnel:delayed\""
+    "dev:tunnel": "concurrently --names \"NODE,NGROK\" --prefix \"[{name}]\" --prefix-colors \"cyan,green\" --raw \"npm run dev\" \"npm run tunnel:delayed\"",
+    "worker:start": "node dist/workers/notification.worker.js",
+    "worker:dev": "ts-node-dev -r dotenv/config -r tsconfig-paths/register src/workers/notification.worker.ts"
   },
   "repository": {
     "type": "git",
@@ -41,6 +43,7 @@
     "npm": "^11.4.1",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3",
     "wait-on": "^8.0.3"
@@ -55,6 +58,7 @@
     "@types/yamljs": "^0.2.34",
     "axios": "^1.9.0",
     "bcrypt": "^6.0.0",
+    "bullmq": "^5.56.4",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
@@ -62,6 +66,7 @@
     "express-validator": "^7.2.1",
     "firebase-admin": "^13.4.0",
     "google-auth-library": "^9.15.1",
+    "ioredis": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
     "module-alias": "^2.2.3",
     "mongoose": "^8.15.1",
@@ -80,6 +85,9 @@
     "@models": "./src/models",
     "@config": "./src/config",
     "@enums": "./src/enums",
-    "@interfaces": "./src/interfaces"
+    "@interfaces": "./src/interfaces",
+    "@workers": "./src/workers",
+    "@queues": "./src/queues",
+    "@services": "./src/services"
   }
 }

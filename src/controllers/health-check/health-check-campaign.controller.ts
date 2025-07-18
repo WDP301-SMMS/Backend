@@ -6,6 +6,7 @@ import {
 } from '@/interfaces/healthcheck.campaign.interface';
 import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
 import { getSchoolYear } from '@/utils/date-handle';
+import { sendHealthCheckAnnounceNotification } from '@/utils/notification.helper';
 import { handleSuccessResponse } from '@/utils/responseHandler';
 import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
@@ -310,6 +311,11 @@ const updateCampaignStatus = async (req: Request, res: Response) => {
       updateData,
       { new: true },
     );
+
+    if (updatedCampaign && updatedCampaign.status === CampaignStatus.ANNOUNCED) {
+      // Gọi hàm mới, chuyên dụng cho Health Check
+      sendHealthCheckAnnounceNotification(updatedCampaign);
+    }
 
     handleSuccessResponse(
       res,
