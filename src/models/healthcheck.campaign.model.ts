@@ -36,8 +36,9 @@ const HealthCheckCampaignSchema = new Schema<IHealthCheckCampaign>({
     default: null,
   },
   participatingStaffs: {
-    type: [String],
+    type: [Schema.Types.ObjectId],
     default: [],
+    ref: 'User',
   },
   assignments: {
     type: [

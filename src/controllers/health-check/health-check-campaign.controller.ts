@@ -46,6 +46,7 @@ const getHealthCheckCampaignDetail = async (req: Request, res: Response) => {
   try {
     const healthCheckCampaign = await HealthCheckCampaign.findById(id)
       .populate('templateId')
+      .populate('participatingStaffs')
       .populate('assignments.classId')
       .populate('assignments.nurseId')
       .populate('createdBy');
@@ -172,6 +173,7 @@ const getAllHealthCheckCampaigns = async (req: Request, res: Response) => {
     const [campaigns, totalCount] = await Promise.all([
       HealthCheckCampaign.find(filter)
         .populate('templateId')
+        .populate('participatingStaffs')
         .populate('assignments.classId')
         .populate('assignments.nurseId')
         .populate('createdBy')
