@@ -30,6 +30,7 @@ import { VaccinationConsentModel } from '../models/vaccination.consent.model';
 import { VaccinationCampaignModel } from '../models/vaccination.campaign.model';
 import { BlogPostModel } from '../models/blog.post.model';
 
+import { IncidentSeverity } from '@/enums/IncidentEnum';
 import { RoleEnum } from '../enums/RoleEnum';
 import { ConsentStatus } from '../enums/ConsentsEnum';
 import { CampaignStatus } from '../enums/CampaignEnum';
@@ -596,8 +597,7 @@ const seedDatabase = async () => {
         nurseId: nurses[0]._id,
         incidentType: 'Chấn thương nhẹ',
         description: 'Trầy xước đầu gối do ngã ở sân chơi.',
-        severity: 'Nhẹ',
-        status: 'Đã xử lý',
+        severity: IncidentSeverity.Mild,
         actionsTaken: 'Rửa sạch vết thương, dán băng gạc cá nhân.',
         incidentTime: new Date('2024-09-15T10:00:00Z'),
       },
