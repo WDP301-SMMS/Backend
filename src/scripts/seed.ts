@@ -382,7 +382,7 @@ const seedDatabase = async () => {
         startDate: new Date('2024-10-01T00:00:00Z'),
         endDate: new Date('2024-10-15T00:00:00Z'),
         templateId: createdHealthCheckTemplates[0]._id,
-        participatingStaffs: [nurses[0].username!, nurses[1].username!],
+        participatingStaffs: [nurses[0]._id, nurses[1]._id],
         assignments: [
           {
             classId: createdClasses[0]._id,
