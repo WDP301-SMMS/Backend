@@ -55,7 +55,7 @@ const updateRequestSchema = Joi.object({
   endDate: Joi.date().iso().greater(Joi.ref('startDate')).optional(),
   prescriptionFile: Joi.string().uri().optional(),
   status: Joi.string()
-    .valid('Pending', 'Scheduled', 'Completed', 'Rejected')
+    .valid('Pending', 'Scheduled', 'In progress', 'Completed', 'Cancelled')
     .optional(),
 });
 
