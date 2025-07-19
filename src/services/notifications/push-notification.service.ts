@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin';
 import { UserModel } from '@/models/user.model';
-import schoolHealthApp from '@/config/firebase-school-health'; 
+import schoolHealthApp from '@/config/firebase-school-health';
 
 class PushNotificationService {
   public async sendPushNotification(
@@ -9,7 +9,6 @@ class PushNotificationService {
     body: string,
     data?: { [key: string]: string },
   ): Promise<void> {
-    
     if (!schoolHealthApp) {
       console.error('School Health Firebase App is not initialized. Cannot send push notification.');
       return;
@@ -17,18 +16,20 @@ class PushNotificationService {
 
     const user = await UserModel.findById(userId).select('pushTokens').lean();
 
-    if (!user || !user.pushTokens ) {
-      console.log(`User ${userId} has no push tokens. Skipping.`);
+    const validTokens = user?.pushTokens?.filter(token => token && typeof token === 'string');
+
+    if (!validTokens || validTokens.length === 0) {
+      console.log(`User ${userId} has no valid push tokens. Skipping.`);
       return;
     }
-
-    const tokens = user.pushTokens;
 
     const message: admin.messaging.MulticastMessage = {
       notification: { title, body },
       data: data || {},
-      tokens: tokens,
-      android: { priority: 'high' },
+      tokens: validTokens,
+      android: {
+        priority: 'high',
+      },
       apns: {
         payload: {
           aps: {
@@ -52,7 +53,7 @@ class PushNotificationService {
             errorCode === 'messaging/invalid-registration-token' ||
             errorCode === 'messaging/registration-token-not-registered'
           ) {
-            tokensToRemove.push(tokens[index]);
+            tokensToRemove.push(validTokens[index]);
           }
         }
       });
