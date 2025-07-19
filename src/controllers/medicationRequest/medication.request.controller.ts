@@ -111,10 +111,30 @@ const updateMedicationRequest = async (
   }
 };
 
+const updateRequestItems = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const { items } = req.body;
+
+    const result = await service.updateRequestItems(id, items);
+    res.status(200).json({
+      message: 'Cập nhật danh sách thuốc thành công',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const RequestController = {
   createMedicationRequest,
   getAllRequest,
   getMedicationRequestById,
   getMedicationRequestByParentId,
   updateMedicationRequest,
+  updateRequestItems,
 };
