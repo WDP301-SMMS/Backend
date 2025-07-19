@@ -176,26 +176,14 @@ class MedicationRequestService {
 
   public async updateRequestById(
     id: string,
-    updateData: Partial<IMedicationRequest> & { requestItems?: IRequestItem[] },
+    updateData: Partial<IMedicationRequest>,
   ) {
-    // Lọc ra các field cần cập nhật thực sự (patch đúng bản chất)
-    const {
-      parentId,
-      studentId,
-      startDate,
-      endDate,
-      prescriptionFile,
-      status,
-      requestItems,
-    } = updateData;
+    const { startDate, endDate, prescriptionFile } = updateData;
 
     const updateFields: Partial<IMedicationRequest> = {};
-    if (parentId) updateFields.parentId = parentId;
-    if (studentId) updateFields.studentId = studentId;
     if (startDate) updateFields.startDate = startDate;
     if (endDate) updateFields.endDate = endDate;
     if (prescriptionFile) updateFields.prescriptionFile = prescriptionFile;
-    if (status) updateFields.status = status;
 
     const updatedRequest = await MedicationRequestModel.findByIdAndUpdate(
       id,
@@ -207,19 +195,49 @@ class MedicationRequestService {
       throw createAppError(404, 'Không tìm thấy yêu cầu nào.');
     }
 
-    // Cập nhật request items nếu có
-    if (Array.isArray(requestItems)) {
-      await RequestItemModel.deleteMany({ medicationRequestId: id });
+    return updatedRequest;
+  }
 
-      const newItems = requestItems.map((item) => ({
-        ...item,
-        medicationRequestId: updatedRequest._id,
-      }));
+  public async updateRequestItems(
+    requestId: string,
+    items: {
+      _id?: string;
+      medicationName: string;
+      dosage: string;
+      instruction: string;
+    }[],
+  ) {
+    const request = await MedicationRequestModel.findById(requestId);
+    if (!request) throw createAppError(404, 'Không tìm thấy yêu cầu.');
 
-      await RequestItemModel.insertMany(newItems);
+    const updatedItems: IRequestItem[] = [];
+
+    for (const item of items) {
+      if (item._id) {
+        // Cập nhật item cũ
+        const updated = await RequestItemModel.findOneAndUpdate(
+          { _id: item._id, medicationRequestId: requestId },
+          {
+            medicationName: item.medicationName,
+            dosage: item.dosage,
+            instruction: item.instruction,
+          },
+          { new: true },
+        );
+        if (updated) updatedItems.push(updated);
+      } else {
+        // Thêm mới
+        const created = await RequestItemModel.create({
+          medicationRequestId: requestId,
+          medicationName: item.medicationName,
+          dosage: item.dosage,
+          instruction: item.instruction,
+        });
+        updatedItems.push(created);
+      }
     }
 
-    return updatedRequest;
+    return updatedItems;
   }
 }
 

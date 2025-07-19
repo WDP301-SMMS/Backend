@@ -9,7 +9,14 @@ const createSchedules = async (
   next: NextFunction,
 ) => {
   try {
-    const schedules = await service.createSchedules(req.body);
+    const createdByNurse = req.user?._id;
+
+    if (!createdByNurse) {
+      res.status(401).json({ message: 'Không xác định được y tá từ token' });
+      return;
+    }
+
+    const schedules = await service.createSchedules(req.body, createdByNurse);
     res
       .status(201)
       .json({ message: 'Tạo lịch uống thành công', data: schedules });
@@ -25,16 +32,23 @@ const updateScheduleStatus = async (
 ) => {
   try {
     const { scheduleId } = req.params;
-    const { nurseId, status, reason } = req.body;
+    const updatedByNurse = req.user?._id;
+    const { status, reason } = req.body;
+
+    if (!updatedByNurse) {
+      res.status(401).json({ message: 'Không xác định được y tá từ token' });
+      return;
+    }
 
     const updated = await service.updateScheduleStatus(
       scheduleId,
       status,
-      nurseId,
+      updatedByNurse,
       reason,
     );
-
-    res.status(200).json({ message: 'Schedule status updated', data: updated });
+    res
+      .status(200)
+      .json({ message: 'Cập nhật trạng thái thành công', data: updated });
   } catch (err) {
     next(err);
   }
@@ -56,7 +70,7 @@ const getSchedulesByRequestId = async (
     );
 
     res.status(200).json({
-      message: 'Lấy danh sách lịch theo requestId thành công',
+      message: 'Lấy danh sách lịch theo yêu cầu thành công',
       data: schedules,
     });
   } catch (err) {
@@ -80,7 +94,7 @@ const getSchedulesByStudentId = async (
     );
 
     res.status(200).json({
-      message: 'Lấy danh sách lịch theo studentId thành công',
+      message: 'Lấy danh sách lịch theo học sinh thành công',
       data: schedules,
     });
   } catch (err) {

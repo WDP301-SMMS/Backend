@@ -655,7 +655,8 @@ const seedDatabase = async () => {
       {
         medicationRequestId: createdMedicationRequests[0]._id,
         studentId: createdStudents[1]._id,
-        nurseId: nurses[0]._id,
+        createdByNurse: nurses[0]._id,
+        updatedByNurse: nurses[0]._id,
         sessionSlots: SlotEnum.Morning,
         status: MedicationScheduleEnum.Done,
         date: new Date('2024-10-02T08:00:00Z'),
@@ -663,7 +664,8 @@ const seedDatabase = async () => {
       {
         medicationRequestId: createdMedicationRequests[0]._id,
         studentId: createdStudents[1]._id,
-        nurseId: nurses[0]._id,
+        createdByNurse: nurses[0]._id,
+        updatedByNurse: nurses[0]._id,
         sessionSlots: SlotEnum.Afternoon,
         status: MedicationScheduleEnum.Not_taken,
         date: new Date('2024-10-02T14:00:00Z'),
