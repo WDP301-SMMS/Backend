@@ -48,7 +48,7 @@ class MedicalIncidentService {
         })
         .populate({
           path: 'nurseId',
-          select: 'fullName username',
+          select: 'username',
         }),
       MedicalIncidentModel.countDocuments(filters),
     ]);
@@ -68,7 +68,7 @@ class MedicalIncidentService {
         },
         nurseId: {
           _id: nurse?._id,
-          fullName: nurse?.username,
+          userName: nurse?.username,
         },
       };
     });
@@ -94,7 +94,7 @@ class MedicalIncidentService {
       })
       .populate({
         path: 'nurseId',
-        select: 'fullName username',
+        select: 'username',
       });
 
     if (!incident) {
@@ -114,7 +114,7 @@ class MedicalIncidentService {
       },
       nurseId: {
         _id: nurse?._id,
-        fullName: nurse?.fullName || nurse?.username || null,
+        userName: nurse?.username || null,
       },
     };
   }
