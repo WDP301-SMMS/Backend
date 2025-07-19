@@ -2,6 +2,11 @@ import {
   MedicationRequestModel,
   RequestItemModel,
 } from '@/models/medication.request.model';
+import { MedicationScheduleModel } from '@/models/medication.schedule.model';
+import {
+  MedicationRequestEnum,
+  MedicationScheduleEnum,
+} from '@/enums/MedicationEnum';
 import { AppError } from '@/utils/globalErrorHandler';
 import {
   IMedicationRequest,
@@ -178,12 +183,13 @@ class MedicationRequestService {
     id: string,
     updateData: Partial<IMedicationRequest>,
   ) {
-    const { startDate, endDate, prescriptionFile } = updateData;
+    const { startDate, endDate, prescriptionFile, status } = updateData;
 
     const updateFields: Partial<IMedicationRequest> = {};
     if (startDate) updateFields.startDate = startDate;
     if (endDate) updateFields.endDate = endDate;
     if (prescriptionFile) updateFields.prescriptionFile = prescriptionFile;
+    if (status) updateFields.status = status;
 
     const updatedRequest = await MedicationRequestModel.findByIdAndUpdate(
       id,
@@ -193,6 +199,17 @@ class MedicationRequestService {
 
     if (!updatedRequest) {
       throw createAppError(404, 'Không tìm thấy yêu cầu nào.');
+    }
+
+    // 👉 Nếu trạng thái cập nhật là "Cancelled", cập nhật luôn các schedule liên quan
+    if (status === MedicationRequestEnum.Cancelled) {
+      await MedicationScheduleModel.updateMany(
+        {
+          medicationRequestId: updatedRequest._id,
+          status: MedicationScheduleEnum.Pending,
+        },
+        { $set: { status: MedicationScheduleEnum.Cancelled } },
+      );
     }
 
     return updatedRequest;
