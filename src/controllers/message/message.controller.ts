@@ -19,7 +19,10 @@ const getAllMessagesByRoomId = async (req: Request, res: Response) => {
   const { roomId } = req.params;
 
   try {
-    const messages = await Message.find({ roomId }).sort({ createdAt: 1 }).limit(50);
+    const messages = await Message.find({ roomId })
+      .populate('senderId receiverId')
+      .sort({ createdAt: 1 })
+      .limit(50);
     if (!messages || messages.length === 0) {
       res.status(404).json({
         success: false,
@@ -55,7 +58,13 @@ const getRoomsByUserId = async (req: Request, res: Response) => {
   }
 
   try {
-    const messages = await Message.find({ userId }).sort({ createdAt: -1 });
+    // Find messages where user is either sender or receiver
+    const messages = await Message.find({
+      $or: [{ senderId: userId }, { receiverId: userId }],
+    })
+      .populate('senderId receiverId')
+      .sort({ createdAt: -1 });
+
     if (!messages || messages.length === 0) {
       res.status(404).json({
         success: false,
@@ -64,13 +73,27 @@ const getRoomsByUserId = async (req: Request, res: Response) => {
       return;
     }
 
-    const rooms = messages.map((message) => message.roomId);
-    handleSuccessResponse(
-      res,
-      200,
-      'Rooms retrieved successfully',
-      Array.from(new Set(rooms)),
-    );
+    // Extract unique rooms with latest message info
+    const roomMap = new Map();
+    messages.forEach((message) => {
+      const roomId = message.roomId;
+      if (!roomMap.has(roomId)) {
+        roomMap.set(roomId, {
+          roomId: message.roomId,
+          senderId: message.senderId,
+          receiverId: message.receiverId,
+          lastMessage: {
+            type: message.type,
+            content: message.content,
+            createdAt: message.createdAt,
+          },
+          participants: [message.senderId, message.receiverId],
+        });
+      }
+    });
+
+    const rooms = Array.from(roomMap.values());
+    handleSuccessResponse(res, 200, 'Rooms retrieved successfully', rooms);
   } catch (error) {
     console.error('Error retrieving messages:', error);
     res.status(500).json({

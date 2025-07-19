@@ -1,5 +1,5 @@
 import { getAllMessagesByRoomId, getRoomsByUserId } from '@/controllers/message/message.controller';
-import { validateRoomId } from '@/validators/message/message.validator';
+import { validateRoomId, validateUserId } from '@/validators/message/message.validator';
 import { Router } from 'express';
 
 const router = Router();
@@ -16,6 +16,6 @@ router.get('/:roomId', validateRoomId, getAllMessagesByRoomId);
  * @desc Get all rooms by user ID
  * @access Private (authenticated users)
  */
-router.get('/user/:userId', getRoomsByUserId);
+router.get('/user/:userId', validateUserId, getRoomsByUserId);
 
 export default router;

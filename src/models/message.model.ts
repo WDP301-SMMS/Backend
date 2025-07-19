@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+import mongoose, { Schema, Types } from 'mongoose';
 import { MessageType, IMessage } from '@/interfaces/message.interface';
 
 const messageSchema = new Schema<IMessage>(
@@ -9,13 +9,15 @@ const messageSchema = new Schema<IMessage>(
       trim: true,
     },
     senderId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
+      ref: 'User',
       trim: true,
     },
     receiverId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
+      ref: 'User',  
       trim: true,
     },
     type: {

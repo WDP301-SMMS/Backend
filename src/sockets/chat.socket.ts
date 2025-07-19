@@ -21,26 +21,21 @@ const createMulterFileFromData = (fileData: IFileData): Express.Multer.File => {
   } as Express.Multer.File;
 };
 
-export const handleSocketConnection = (socket: Socket) => {
-  console.log(`Socket connected: ${socket.id}`);
+import { Server } from 'socket.io';
+
+export const handleSocketConnection = (socket: Socket, io: Server) => {
   let messages: IMessage[] = [];
+  let messageInterval: NodeJS.Timeout | null = null;
+  console.log(`Socket connected: ${socket.id}`);
 
-  socket.on('joinRoom', (data: IMessage) => {
+  socket.on('joinRoom', (data: string) => {
     try {
-      if (!data.senderId || !data.receiverId) {
-        socket.emit('error', {
-          message: 'Sender ID and Receiver ID are required to join room',
-        });
-        return;
-      }
-
-      const roomId = getPrivateRoom(data.senderId, data.receiverId);
-      socket.join(roomId);
-      console.log(`Socket ${socket.id} joined room: ${roomId}`);
+      socket.join(data);
+      console.log(`Socket ${socket.id} joined room: ${data}`);
 
       // Confirm room join to client
       socket.emit('roomJoined', {
-        roomId,
+        data,
         message: 'Successfully joined room',
       });
     } catch (error) {
@@ -50,6 +45,7 @@ export const handleSocketConnection = (socket: Socket) => {
   });
 
   socket.on('sendMessage', async (data: IMessage) => {
+    console.log(`Socket ${socket.id} sending message:`, data);
     try {
       // Validate message data
       if (!data.roomId || !data.senderId || !data.receiverId || !data.content) {
@@ -101,14 +97,7 @@ export const handleSocketConnection = (socket: Socket) => {
       messages.push(messageData as IMessage);
 
       // Emit to the specific room
-      socket.to(data.roomId).emit('receiveMessage', {
-        roomId: messageData.roomId,
-        senderId: messageData.senderId,
-        receiverId: messageData.receiverId,
-        type: messageData.type,
-        content: messageData.content,
-        createdAt: messageData.createdAt,
-      });
+      io.to(data.roomId).emit('receiveMessage', messageData);
 
       // Confirm message sent to sender
       socket.emit('messageSent', {
@@ -117,7 +106,9 @@ export const handleSocketConnection = (socket: Socket) => {
         data: messageData,
       });
 
-      console.log(`Message sent in room ${data.roomId} by ${data.senderId}`);
+      console.log(
+        `Message sent in room ${data.roomId} by ${data.senderId._id}`,
+      );
     } catch (error) {
       console.error(`Error sending message for socket ${socket.id}:`, error);
       socket.emit('error', { message: 'Failed to send message' });
@@ -126,6 +117,12 @@ export const handleSocketConnection = (socket: Socket) => {
 
   socket.on('disconnect', async () => {
     try {
+      // Clear the interval to prevent memory leaks
+      if (messageInterval) {
+        clearInterval(messageInterval);
+        messageInterval = null;
+      }
+
       if (messages.length > 0) {
         await addMessageAfterUserDisconnected(messages);
       }
@@ -138,10 +135,9 @@ export const handleSocketConnection = (socket: Socket) => {
     }
   });
 
-  // Save messages every 10 seconds or when reaching 50 messages
-  setInterval(async () => {
+  messageInterval = setInterval(async () => {
     try {
-      if (messages.length >= 50) {
+      if (messages.length >= 1) {
         await addMessageAfterUserDisconnected([...messages]);
         messages = [];
       }

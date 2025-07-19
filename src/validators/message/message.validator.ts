@@ -11,3 +11,11 @@ export const validateRoomId = [
     .matches(/^[a-zA-Z0-9-_]+$/)
     .withMessage('Room ID can only contain letters, numbers, hyphens, and underscores'),
 ];
+
+export const validateUserId = [
+  param('userId')
+    .notEmpty()
+    .withMessage('User ID is required')
+    .isMongoId()
+    .withMessage('User ID must be a valid MongoDB ObjectId'),
+];

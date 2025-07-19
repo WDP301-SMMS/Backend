@@ -13,6 +13,6 @@ export const setupSocket = (httpServer: httpServer) => {
   });
 
   io.on('connection', (socket: Socket) => {
-    handleSocketConnection(socket);
+    handleSocketConnection(socket, io);
   });
 };
