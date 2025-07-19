@@ -17,8 +17,8 @@ import {
 import { RoleEnum } from '@/enums/RoleEnum';
 import userRouter from './user/user';
 import healthCheckRouter from './health-check';
-import notificationRouter from './notifications/notifications'
-import tokenNotificationRouter from './notifications/token.notification'
+import notificationRouter from './notifications/notifications';
+import tokenNotificationRouter from './notifications/token.notification';
 const router = express.Router();
 
 router.use('/auth', authRouter);
@@ -45,6 +45,6 @@ router.use('/health-check', handleToken, healthCheckRouter);
 router.use('/inventory', handleToken, inventoryRouter);
 router.use('/appointments', handleToken, appointmentRouter);
 router.use('/notifications', notificationRouter);
-router.use('/token-notifications', tokenNotificationRouter);
+router.use('/token-notifications', handleToken, tokenNotificationRouter);
 
 export default router;
