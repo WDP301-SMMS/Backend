@@ -17,10 +17,8 @@ export class NotificationController {
   public getNotifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = req.user!._id!.toString();
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
-      const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 15;
 
-      const notifications = await this.notificationService.getNotificationsForUser(userId, limit, page);
+      const notifications = await this.notificationService.getNotificationsForUser(userId);
       res.status(200).json({ data: notifications, message: 'Notifications retrieved successfully' });
     } catch (error) {
       next(error);
