@@ -28,6 +28,40 @@ const createHealthCheckResultBaseOnTemplate = async (
 
   try {
     // Find and validate campaign
+
+    const healthCheckConsent = await HealthCheckConsent.findOne({
+      studentId: body.studentId,
+      campaignId: body.campaignId,
+    });
+    if (!healthCheckConsent) {
+      res
+        .status(404)
+        .json({ message: 'Student is not enrolled in this campaign' });
+      return;
+    }
+    switch (healthCheckConsent.status) {
+      case ConsentStatus.PENDING:
+        res.status(400).json({
+          message: 'Health check consent is still pending',
+        });
+        return;
+      case ConsentStatus.DECLINED:
+        res.status(403).json({
+          message: 'Health check consent has been declined',
+        });
+        return;
+      case ConsentStatus.APPROVED:
+        break;
+      case ConsentStatus.COMPLETED:
+        res.status(400).json({
+          message: 'Health check consent has been completed',
+        });
+        return;
+      default:
+        res.status(400).json({ message: 'Invalid consent status' });
+        return;
+    }
+
     const campaign = await HealthCheckCampaign.findById(body.campaignId);
     if (!campaign || !campaign.templateId) {
       res
@@ -53,26 +87,14 @@ const createHealthCheckResultBaseOnTemplate = async (
     });
 
     if (existingRecord) {
-      // Update existing record's latest result
       existingRecord.latestResultId = healthCheckResult._id;
       await existingRecord.save();
     } else {
-      // Create new record - both resultId and latestResultId should point to the same result initially
       await HealthCheckRecordModel.create({
         resultId: healthCheckResult._id,
         studentId: body.studentId,
         latestResultId: healthCheckResult._id,
       });
-    }
-
-    const healthCheckConsent = await HealthCheckConsent.findOne({
-      studentId: body.studentId,
-      campaignId: body.campaignId,
-    });
-
-    if (!healthCheckConsent) {
-      res.status(404).json({ message: 'Health check consent not found' });
-      return;
     }
 
     healthCheckConsent.status = ConsentStatus.COMPLETED;
