@@ -774,26 +774,51 @@ const seedDatabase = async () => {
     ];
     await MeetingScheduleModel.insertMany(meetingSchedules);
 
-    console.log('Seeding BlogPost data...');
-    const blogPosts = [
-      {
-        authorId: admin._id,
-        title: '5 Lời khuyên để Giữ gìn Sức khỏe cho Học sinh',
-        content:
-          'Duy trì sức khỏe học sinh bao gồm dinh dưỡng hợp lý, tập thể dục và khám sức khỏe định kỳ...',
-        publishedAt: new Date('2025-01-15T10:00:00Z'),
-      },
-      {
-        authorId: admin._id,
-        title: 'Tầm quan trọng của việc Tiêm chủng',
-        content:
-          'Tiêm chủng là biện pháp quan trọng để ngăn ngừa dịch bệnh trong môi trường học đường...',
-        publishedAt: new Date('2025-02-20T12:00:00Z'),
-      },
-    ];
-    await BlogPostModel.insertMany(blogPosts);
 
-    console.log('Seeding completed successfully!');
+console.log('Seeding BlogPost data...');
+
+// Lấy thông tin chi tiết của người dùng có vai trò Manager để nhúng
+const blogAuthor = createdUsers.find(u => u.role === RoleEnum.Manager);
+if (!blogAuthor) {
+  console.warn('Warning: No manager user found to be the author of blog posts.');
+} else {
+  // Tạo một object authorInfo để tái sử dụng
+  const authorInfoForBlog = {
+    _id: blogAuthor._id,
+    fullName: (blogAuthor as any).fullName || 'School Health Manager',
+    avatarUrl: (blogAuthor as any).avatarUrl || '', // Cần có URL avatar mặc định
+    bio: (blogAuthor as any).bio || 'Quản lý hệ thống y tế học đường.'
+  };
+
+    const blogPosts = [
+    {
+      authorInfo: authorInfoForBlog,
+      title: '5 Lời khuyên để Giữ gìn Sức khỏe cho Học sinh trong Mùa tựu trường',
+      coverImageUrl: 'https://placehold.co/1200x600/DDE3F0/333333?text=Suc+Khoe+Hoc+Duong', // <-- THÊM VÀO ĐÂY
+      content: '<h1>Dinh dưỡng Cân bằng là Chìa khóa</h1><p>...</p>',
+      publishedAt: new Date('2025-01-15T10:00:00Z'),
+    },
+    {
+      authorInfo: authorInfoForBlog,
+      title: 'Hiểu đúng về Vắc-xin: Tại sao Tiêm chủng lại Quan trọng?',
+      coverImageUrl: 'https://placehold.co/1200x600/AEC6CF/333333?text=Tiem+Chung', // <-- THÊM VÀO ĐÂY
+      content: '<h1>Vắc-xin hoạt động như thế nào?</h1><p>...</p>',
+      publishedAt: new Date('2025-02-20T12:00:00Z'),
+    },
+    {
+      authorInfo: authorInfoForBlog,
+      title: 'Phòng chống Bệnh tay chân miệng tại Trường học',
+      coverImageUrl: 'https://placehold.co/1200x600/FFD1DC/333333?text=Benh+Hoc+Duong', // <-- THÊM VÀO ĐÂY
+      content: '<h1>Dấu hiệu nhận biết</h1><p>...</p>',
+      publishedAt: new Date('2025-03-10T09:00:00Z'),
+    },
+  ];
+
+  await BlogPostModel.insertMany(blogPosts);
+}
+
+console.log('Seeding completed successfully!');
+
   } catch (error) {
     console.error('Error seeding database:', error);
   } finally {

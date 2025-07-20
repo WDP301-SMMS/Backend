@@ -2828,6 +2828,148 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /messages/{roomId}:
+    get:
+      tags:
+        - Messages
+      summary: Get all messages by room ID
+      description: Retrieves all messages in a specific chat room, sorted by creation time
+      operationId: getAllMessagesByRoomId
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: roomId
+          in: path
+          required: true
+          description: The unique identifier of the chat room
+          schema:
+            type: string
+            example: "private-user1-user2"
+      responses:
+        '200':
+          description: Messages retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Messages retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+        '400':
+          description: Invalid room ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "Room ID is required and must be a valid string"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "Internal server error"
+
+  /messages/user/{userId}:
+    get:
+      tags:
+        - Messages
+      summary: Get all rooms by user ID
+      description: Retrieves all unique room IDs for a specific user based on their messages
+      operationId: getRoomsByUserId
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: The ID of the user to get rooms for
+          schema:
+            type: string
+            example: "507f1f77bcf86cd799439011"
+      responses:
+        '200':
+          description: Rooms retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "Rooms retrieved successfully"
+                  data:
+                    type: array
+                    items:
+                      type: string
+                    example: ["private-user1-user2", "private-user1-user3"]
+        '400':
+          description: User ID is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "User ID is required"
+        '404':
+          description: No messages found for this user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "No messages found for this user"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "Internal server error"
+
 components:
   schemas:
     User:
@@ -3543,6 +3685,49 @@ components:
           description: Notes to add after the meeting
           example: "Discussed student's vision issue with parent. Recommended consultation with ophthalmologist. Parent agreed to schedule appointment within 2 weeks."
 
+
+    Message:
+      type: object
+      description: A message in the chat system
+      properties:
+        _id:
+          type: string
+          description: Unique identifier for the message
+        roomId:
+          type: string
+          description: The room/conversation this message belongs to
+          example: "private-user1-user2"
+        senderId:
+          type: string
+          description: ID of the user who sent the message
+          example: "60f1a5c8e4b0d5c8e4b0d5c8"
+        receiverId:
+          type: string
+          description: ID of the user who should receive the message
+          example: "60f1a5c8e4b0d5c8e4b0d5c9"
+        type:
+          type: string
+          enum: [text, image]
+          description: Type of message content
+          example: "text"
+        content:
+          type: string
+          description: The message content
+          example: "Hello, how are you?"
+        createdAt:
+          type: string
+          format: date-time
+          description: When the message was created
+        updatedAt:
+          type: string
+          format: date-time
+          description: When the message was last updated
+      required:
+        - roomId
+        - senderId
+        - receiverId
+        - type
+        - content
     HealthCheckCampaign:
       type: object
       properties:
@@ -4116,3 +4301,40 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+
+# Socket.IO Events Documentation
+# Real-time chat functionality using Socket.IO
+# 
+# Connection: Connect to the socket server with authentication
+# 
+# Events:
+# 
+# 1. joinRoom - Join a chat room
+#    Client emits: { senderId: string, receiverId: string }
+#    Server responds: 'roomJoined' event with { roomId: string, message: string }
+#    Error: 'error' event with { message: string }
+# 
+# 2. sendMessage - Send a message to a room
+#    Client emits: { 
+#      roomId: string, 
+#      senderId: string, 
+#      receiverId: string, 
+#      content: string, 
+#      type?: 'text' | 'image' 
+#    }
+#    Server responds: 'messageSent' event with { success: boolean, message: string, data: object }
+#    Room receives: 'receiveMessage' event with message data
+#    Error: 'error' event with { message: string }
+# 
+# 3. disconnect - User disconnects
+#    Server automatically saves any unsaved messages to database
+# 
+# Example Usage:
+# socket.emit('joinRoom', { senderId: 'user1', receiverId: 'user2' })
+# socket.emit('sendMessage', { 
+#   roomId: 'private-user1-user2', 
+#   senderId: 'user1', 
+#   receiverId: 'user2', 
+#   content: 'Hello!',
+#   type: 'text'
+# })
