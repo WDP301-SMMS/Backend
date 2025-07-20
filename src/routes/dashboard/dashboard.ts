@@ -5,6 +5,8 @@ import { AdminPartnerController } from "@/controllers/dashboard/admin.partners.c
 import AdminUserStudentController from "@/controllers/dashboard/admin.users.controller";
 import { AdminVaccineSuggestionController } from "@/controllers/dashboard/admin.vaccine.suggestion.controller";
 import { DashboardController } from "@/controllers/dashboard/dashboard.controller";
+import { RoleEnum } from "@/enums/RoleEnum";
+import { roleBaseAccess } from "@/middlewares/security/authorization";
 
 const express = require('express');
 
@@ -21,6 +23,7 @@ router.get('/dashboard', DashboardController.getAdminDashboard);
 router.get(
     '/users',
     // authMiddleware, adminOnlyMiddleware,
+    roleBaseAccess([RoleEnum.Manager, RoleEnum.Nurse, RoleEnum.Parent]),
     adminController.getUsers
 );
 router.patch(

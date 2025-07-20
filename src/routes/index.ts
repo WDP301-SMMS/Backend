@@ -20,6 +20,7 @@ import healthCheckRouter from './health-check';
 import notificationRouter from './notifications/notifications'
 import tokenNotificationRouter from './notifications/token.notification'
 import messageRouter from './message/message';
+import blogRouter from './blog/blog'
 const router = express.Router();
 
 router.use('/auth', authRouter);
@@ -46,7 +47,8 @@ router.use('/health-check', handleToken, healthCheckRouter);
 router.use('/inventory', handleToken, inventoryRouter);
 router.use('/messages', handleToken, messageRouter);
 router.use('/appointments', handleToken, appointmentRouter);
-router.use('/notifications', notificationRouter);
-router.use('/token-notifications', tokenNotificationRouter);
+router.use('/notifications', handleToken, notificationRouter);
+router.use('/token-notifications',handleToken, tokenNotificationRouter);
+router.use('/blogs', blogRouter)
 
 export default router;
