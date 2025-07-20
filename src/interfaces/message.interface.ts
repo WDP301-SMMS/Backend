@@ -11,13 +11,7 @@ export interface IMessage extends Document {
   senderId: Types.ObjectId;
   receiverId: Types.ObjectId;
   type: MessageType;
-  content: string | IFileData;
+  content: string;
   createdAt?: Date;
   updatedAt?: Date;
-}
-
-export interface IFileData {
-  data: string; // base64 encoded file data
-  filename: string;
-  mimetype: string;
 }
