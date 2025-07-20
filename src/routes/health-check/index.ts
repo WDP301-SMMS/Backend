@@ -25,7 +25,6 @@ healthCheckRouter.use(
 );
 healthCheckRouter.use(
   '/record',
-  roleBaseAccess([RoleEnum.Parent]),
   recordRouter,
 );
 

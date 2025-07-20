@@ -3,11 +3,15 @@ import { RequestController } from '@/controllers/medicationRequest/medication.re
 import { ScheduleController } from '@/controllers/medicationRequest/medication.schedule.controller';
 import { handleUploadFile } from '@/middlewares/upload/uploadToFirebase';
 
-import { validateMedicationRequest } from '@/validators/medicationRequest/medication.request.validator';
+import {
+  validateMedicationRequest,
+  validateUpdateRequest,
+  validateUpdateRequestItems,
+} from '@/validators/medicationRequest/medication.request.validator';
 
 import {
-  validateScheduleArray,
-  validateUpdateStatus,
+  validateCreateSchedule,
+  validateUpdateScheduleStatus,
 } from '@/validators/medicationRequest/medication.schedule.validator';
 
 const router = express.Router();
@@ -41,21 +45,41 @@ router.get(
   RequestController.getMedicationRequestByParentId,
 );
 
-//Update Request
-router.patch('/requests/:id', RequestController.updateMedicationRequest);
+//Update Request (không đụng item)
+router.patch(
+  '/requests/:id',
+  ...handleUploadFile('prescriptionFile'),
+  (req, _res, next) => {
+    try {
+      if (req.body.startDate) req.body.startDate = new Date(req.body.startDate);
+      if (req.body.endDate) req.body.endDate = new Date(req.body.endDate);
+      if (req.file?.path) req.body.prescriptionFile = req.file.path;
+    } catch {}
+    next();
+  },
+  validateUpdateRequest,
+  RequestController.updateMedicationRequest,
+);
+
+// Update request items riêng
+router.patch(
+  '/requests/:id/items',
+  validateUpdateRequestItems,
+  RequestController.updateRequestItems,
+);
 
 //SCHEDULE
 //Tạo schedule theo request
 router.post(
   '/schedules',
-  validateScheduleArray,
+  validateCreateSchedule,
   ScheduleController.createSchedules,
 );
 
 //Cập nhật status cho schedule
 router.patch(
   '/schedules/update/:scheduleId',
-  validateUpdateStatus,
+  validateUpdateScheduleStatus,
   ScheduleController.updateScheduleStatus,
 );
 

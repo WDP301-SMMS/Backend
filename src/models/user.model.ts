@@ -74,6 +74,10 @@ const UserSchema = new Schema<IUser>({
     required: true,
     default: 'local',
   },
+    pushTokens: {
+    type: [String],
+    default: [],
+  },
 });
 
 export const UserModel = mongoose.model<IUser>('User', UserSchema);

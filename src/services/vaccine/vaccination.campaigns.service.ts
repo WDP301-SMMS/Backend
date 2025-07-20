@@ -8,6 +8,7 @@ import { VaccinationCampaignModel } from '@/models/vaccination.campaign.model';
 import { VaccinationConsentModel } from '@/models/vaccination.consent.model';
 import { AppError } from '@/utils/globalErrorHandler';
 import { ConsentStatus } from '@/enums/ConsentsEnum';
+import { sendAnnounceNotification } from '@/utils/notification.helper';
 
 
 type CreateCampaignInput = Pick<
@@ -39,68 +40,121 @@ export class VaccinationCampaignService {
     return newCampaign.populate([{ path: 'partnerId', select: 'name' }, { path: 'createdBy', select: 'username email' }]);
   }
 
-  public async dispatchCampaign(campaignId: string): Promise<{ message: string }> {
-    // const session = await mongoose.startSession();
-    // session.startTransaction();
-    try {
-      const campaign = await VaccinationCampaignModel.findById(campaignId)
-      // .session(session);
-      if (!campaign) {
-        const error: AppError = new Error('Campaign not found.');
-        error.status = 404;
-        throw error;
-      }
-      if (campaign.status !== CampaignStatus.DRAFT) {
-        const error: AppError = new Error('Only DRAFT campaigns can be dispatched.');
-        error.status = 409;
-        throw error;
-      }
+  // public async dispatchCampaign(campaignId: string): Promise<{ message: string }> {
+  //   try {
+  //     const campaign = await VaccinationCampaignModel.findById(campaignId)
+  //     if (!campaign) {
+  //       const error: AppError = new Error('Campaign not found.');
+  //       error.status = 404;
+  //       throw error;
+  //     }
+  //     if (campaign.status !== CampaignStatus.DRAFT) {
+  //       const error: AppError = new Error('Only DRAFT campaigns can be dispatched.');
+  //       error.status = 409;
+  //       throw error;
+  //     }
 
-      const targetClasses = await Class.find({ gradeLevel: { $in: campaign.targetGradeLevels } }).select('_id')
-      // .session(session);
-      if (targetClasses.length === 0) {
-        const error: AppError = new Error(`No classes found for the target grade levels [${campaign.targetGradeLevels.join(', ')}]. Please check campaign settings or class data.`);
-        error.status = 404; // Not Found
-        throw error;
-      }
-      const targetClassIds = targetClasses.map(c => c._id);
-      const students = await StudentModel.find({ classId: { $in: targetClassIds } }).select('parentId')
-      // .session(session);
+  //     const targetClasses = await Class.find({ gradeLevel: { $in: campaign.targetGradeLevels } }).select('_id')
+  //     if (targetClasses.length === 0) {
+  //       const error: AppError = new Error(`No classes found for the target grade levels [${campaign.targetGradeLevels.join(', ')}]. Please check campaign settings or class data.`);
+  //       error.status = 404; 
+  //       throw error;
+  //     }
+  //     const targetClassIds = targetClasses.map(c => c._id);
+  //     const students = await StudentModel.find({ classId: { $in: targetClassIds } }).select('parentId')
 
-       if (students.length === 0) {
-        const error: AppError = new Error('No students found for the target classes. Consent forms were not created.');
-        error.status = 404; // Not Found
-        throw error;
-      }
+  //      if (students.length === 0) {
+  //       const error: AppError = new Error('No students found for the target classes. Consent forms were not created.');
+  //       error.status = 404; 
+  //       throw error;
+  //     }
       
-      let createdCount = 0;
-      if (students.length > 0) {
-        const consentsToCreate = students.map(student => ({
-          campaignId: campaign._id, studentId: student._id, parentId: student.parentId, status: 'PENDING',
-        }));
-        // const result = await VaccinationConsentModel.insertMany(consentsToCreate, { session });
-        const result = await VaccinationConsentModel.insertMany(consentsToCreate);
-        createdCount = result.length;
-      }
+  //     let createdCount = 0;
+  //     if (students.length > 0) {
+  //       const consentsToCreate = students.map(student => ({
+  //         campaignId: campaign._id, studentId: student._id, parentId: student.parentId, status: 'PENDING',
+  //       }));
+  //       const result = await VaccinationConsentModel.insertMany(consentsToCreate);
+  //       createdCount = result.length;
+  //     }
 
-      campaign.status = CampaignStatus.ANNOUNCED;
-      campaign.dispatchedAt = new Date();
-      campaign.summary.totalStudents = students.length;
-      campaign.summary.totalConsents = createdCount;
+  //     campaign.status = CampaignStatus.ANNOUNCED;
+  //     campaign.dispatchedAt = new Date();
+  //     campaign.summary.totalStudents = students.length;
+  //     campaign.summary.totalConsents = createdCount;
 
-      await campaign.save();
-      // await campaign.save({ session });
-      // await session.commitTransaction();
+  //     await campaign.save();
 
-      return { message: `Campaign dispatched successfully. ${createdCount} consent forms created.` };
-    } catch (error) {
-      // await session.abortTransaction();
+  //     sendAnnounceNotification(campaign)
+
+
+  //     return { message: `Campaign dispatched successfully. ${createdCount} consent forms created.` };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
+
+  public async dispatchCampaign(campaignId: string): Promise<{ message: string }> {
+  try {
+    const campaign = await VaccinationCampaignModel.findById(campaignId);
+    if (!campaign) {
+      const error: AppError = new Error('Campaign not found.');
+      error.status = 404;
       throw error;
     }
-    // } finally {
-    //   session.endSession();
-    // }
+
+    if (campaign.status !== CampaignStatus.DRAFT) {
+      const error: AppError = new Error('Only DRAFT campaigns can be dispatched.');
+      error.status = 409;
+      throw error;
+    }
+
+    const targetClasses = await Class.find({ gradeLevel: { $in: campaign.targetGradeLevels } }).select('_id');
+    if (targetClasses.length === 0) {
+      const error: AppError = new Error(`No classes found for the target grade levels [${campaign.targetGradeLevels.join(', ')}]. Please check campaign settings or class data.`);
+      error.status = 404;
+      throw error;
+    }
+
+    const targetClassIds = targetClasses.map(c => c._id);
+
+    const allStudents = await StudentModel.find({ classId: { $in: targetClassIds } }).select('parentId');
+    const validStudents = allStudents.filter(s => s.parentId);
+    
+    if (validStudents.length === 0) {
+      const error: AppError = new Error('No students with linked parents found. Consent forms were not created.');
+      error.status = 404;
+      throw error;
+    }
+
+    const consentsToCreate = validStudents.map(student => ({
+      campaignId: campaign._id,
+      studentId: student._id,
+      parentId: student.parentId,
+      status: 'PENDING',
+    }));
+    const result = await VaccinationConsentModel.insertMany(consentsToCreate);
+    const createdCount = result.length;
+
+    const skippedCount = allStudents.length - validStudents.length;
+
+    campaign.status = CampaignStatus.ANNOUNCED;
+    campaign.dispatchedAt = new Date();
+    campaign.summary.totalStudents = allStudents.length;
+    campaign.summary.totalConsents = createdCount;
+
+    await campaign.save();
+
+    sendAnnounceNotification(campaign);
+
+    return {
+      message: `Campaign dispatched successfully. ${createdCount} consent forms created. ${skippedCount} students were skipped due to missing parent links.`
+    };
+  } catch (error) {
+    throw error;
   }
+}
+
 
   public async updateCampaign(campaignId: string, updateData: UpdateCampaignInput, userId: string): Promise<IVaccinationCampaign> {
     const campaign = await VaccinationCampaignModel.findById(campaignId);

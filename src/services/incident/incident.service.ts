@@ -1,5 +1,6 @@
 import { MedicalIncidentModel } from '@/models/medical.incident.model';
 import { AppError } from '@/utils/globalErrorHandler';
+import { sendIncidentNotificationToParent } from '@/utils/notification.helper';
 
 const createAppError = (status: number, message: string): AppError => {
   const error: AppError = new Error(message);
@@ -9,21 +10,24 @@ const createAppError = (status: number, message: string): AppError => {
 
 class MedicalIncidentService {
   public async createIncident(data: any) {
-    return await MedicalIncidentModel.create(data);
+    const newIncident = await MedicalIncidentModel.create(data);
+    if (newIncident) {
+      sendIncidentNotificationToParent(newIncident);
+    }
+    return newIncident;
   }
 
   public async getAllIncidents(query: {
     page?: number;
     limit?: number;
-    status?: string;
+    severity?: string;
     nurseId?: string;
     studentId?: string;
   }) {
-    const { page = 1, limit = 10, status, nurseId, studentId } = query;
+    const { page = 1, limit = 10, severity, nurseId, studentId } = query;
 
     const filters: Record<string, any> = {};
-
-    if (status) filters.status = status;
+    if (severity) filters.severity = severity;
     if (nurseId) filters.nurseId = nurseId;
     if (studentId) filters.studentId = studentId;
 
@@ -33,23 +37,86 @@ class MedicalIncidentService {
       MedicalIncidentModel.find(filters)
         .sort({ incidentTime: -1 })
         .skip(skip)
-        .limit(limit),
+        .limit(limit)
+        .populate({
+          path: 'studentId',
+          select: 'fullName classId',
+          populate: {
+            path: 'classId',
+            select: 'className',
+          },
+        })
+        .populate({
+          path: 'nurseId',
+          select: 'username',
+        }),
       MedicalIncidentModel.countDocuments(filters),
     ]);
+
+    const formattedIncidents = incidents.map((incident) => {
+      const i = incident.toObject();
+
+      const student = i.studentId as any;
+      const nurse = i.nurseId as any;
+
+      return {
+        ...i,
+        studentId: {
+          _id: student?._id,
+          fullName: student?.fullName,
+          className: student?.classId?.className,
+        },
+        nurseId: {
+          _id: nurse?._id,
+          userName: nurse?.username,
+        },
+      };
+    });
 
     return {
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-      data: incidents,
+      data: formattedIncidents,
     };
   }
 
   public async getIncidentById(id: string) {
-    const incident = await MedicalIncidentModel.findById(id);
-    if (!incident) throw createAppError(404, 'Không tìm thấy sự cố y tế');
-    return incident;
+    const incident = await MedicalIncidentModel.findById(id)
+      .populate({
+        path: 'studentId',
+        select: 'fullName classId',
+        populate: {
+          path: 'classId',
+          select: 'className',
+        },
+      })
+      .populate({
+        path: 'nurseId',
+        select: 'username',
+      });
+
+    if (!incident) {
+      throw createAppError(404, 'Không tìm thấy sự cố y tế');
+    }
+
+    const i = incident.toObject();
+    const student = i.studentId as any;
+    const nurse = i.nurseId as any;
+
+    return {
+      ...i,
+      studentId: {
+        _id: student?._id,
+        fullName: student?.fullName,
+        className: student?.classId?.className || null,
+      },
+      nurseId: {
+        _id: nurse?._id,
+        userName: nurse?.username || null,
+      },
+    };
   }
 
   public async updateIncident(id: string, update: any) {

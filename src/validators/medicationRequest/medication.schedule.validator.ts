@@ -1,12 +1,17 @@
-import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { MedicationScheduleEnum } from '@/enums/MedicationEnum';
+import Joi, { ObjectSchema, ArraySchema, Schema } from 'joi';
 import { SlotEnum } from '@/enums/SlotEnum';
-import Joi from 'joi';
+import { MedicationScheduleEnum } from '@/enums/MedicationEnum';
+import { Request, Response, NextFunction } from 'express';
 
-const objectIdValidator = Joi.string().hex().length(24);
+// Validator cho MongoDB ObjectId
+const objectIdValidator = Joi.string().hex().length(24).required();
 
-const validate = (schema: Joi.ObjectSchema): RequestHandler => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+// Middleware chung cho cả ObjectSchema và ArraySchema
+const validate =
+  (
+    schema: Schema, // dùng Schema để chấp nhận cả object & array
+  ) =>
+  (req: Request, res: Response, next: NextFunction) => {
     const { error, value } = schema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true,
@@ -17,46 +22,51 @@ const validate = (schema: Joi.ObjectSchema): RequestHandler => {
         field: d.path.join('.'),
         message: d.message,
       }));
-      res.status(400).json({ message: 'Validation failed', errors: details });
-      return;
+      return res
+        .status(400)
+        .json({ message: 'Validation failed', errors: details });
     }
 
     req.body = value;
     next();
   };
-};
 
-const scheduleArraySchema = Joi.object({
-  schedules: Joi.array()
-    .items(
-      Joi.object({
-        medicationRequestId: objectIdValidator.required(),
-        studentId: objectIdValidator.required(),
-        nurseId: objectIdValidator.required(),
-        sessionSlots: Joi.string()
-          .valid(...Object.values(SlotEnum))
-          .required(),
-        status: Joi.string()
-          .valid(...Object.values(MedicationScheduleEnum))
-          .default(MedicationScheduleEnum.Pending),
-      }),
-    )
+// Schema cho tạo lịch uống thuốc
+const createScheduleSchema = Joi.object({
+  medicationRequestId: objectIdValidator,
+  sessionSlots: Joi.string()
+    .valid(...Object.values(SlotEnum))
     .required(),
+  date: Joi.date().iso().required(),
 });
 
-const updateStatusSchema = Joi.object({
-  nurseId: objectIdValidator.required(),
+// Schema cho cập nhật trạng thái lịch uống thuốc
+const updateScheduleStatusSchema = Joi.object({
   status: Joi.string()
-    .valid(...Object.values(MedicationScheduleEnum))
+    .valid(
+      MedicationScheduleEnum.Done,
+      MedicationScheduleEnum.Not_taken,
+      MedicationScheduleEnum.Cancelled,
+    )
     .required(),
   reason: Joi.when('status', {
-    is: Joi.valid('cancelled', 'skipped'),
+    is: Joi.valid(
+      MedicationScheduleEnum.Not_taken,
+      MedicationScheduleEnum.Cancelled,
+    ),
     then: Joi.string().required().messages({
-      'any.required': 'Reason is required when status is cancelled or skipped.',
+      'any.required':
+        'Reason is required when status is NotTaken or Cancelled.',
     }),
     otherwise: Joi.forbidden(),
   }),
 });
 
-export const validateUpdateStatus = validate(updateStatusSchema);
-export const validateScheduleArray = validate(scheduleArraySchema);
+// Export middleware đã gắn schema
+export const validateCreateSchedule = validate(
+  Joi.array().items(createScheduleSchema).min(1),
+);
+
+export const validateUpdateScheduleStatus = validate(
+  updateScheduleStatusSchema,
+);

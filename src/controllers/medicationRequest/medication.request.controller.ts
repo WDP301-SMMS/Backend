@@ -9,7 +9,9 @@ const createMedicationRequest = async (
   next: NextFunction,
 ) => {
   try {
-    const data = await service.createRequest(req.body);
+    const cleanBody = Object.fromEntries(Object.entries(req.body));
+
+    const data = await service.createRequest(cleanBody);
     res.status(201).json({ message: 'Yêu cầu uống thuốc thành công', data });
   } catch (err) {
     next(err);
@@ -109,10 +111,30 @@ const updateMedicationRequest = async (
   }
 };
 
+const updateRequestItems = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { id } = req.params;
+    const { items } = req.body;
+
+    const result = await service.updateRequestItems(id, items);
+    res.status(200).json({
+      message: 'Cập nhật danh sách thuốc thành công',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const RequestController = {
   createMedicationRequest,
   getAllRequest,
   getMedicationRequestById,
   getMedicationRequestByParentId,
   updateMedicationRequest,
+  updateRequestItems,
 };

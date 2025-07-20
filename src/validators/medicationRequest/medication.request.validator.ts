@@ -29,13 +29,13 @@ const validate =
 
 const requestSchema = Joi.object({
   parentId: objectIdValidator.required(),
+  studentId: objectIdValidator.required(),
   startDate: Joi.date().iso().required(),
   endDate: Joi.date().iso().greater(Joi.ref('startDate')).required(),
   prescriptionFile: Joi.string().uri().required().messages({
     'string.uri': 'Prescription file must be a valid URL.',
     'any.required': 'Prescription file is required.',
   }),
-  status: Joi.string().valid('pending', 'in_progress', 'done').required(),
   items: Joi.array()
     .items(
       Joi.object({
@@ -48,4 +48,31 @@ const requestSchema = Joi.object({
     .required(),
 });
 
+const updateRequestSchema = Joi.object({
+  parentId: objectIdValidator.optional(),
+  studentId: objectIdValidator.optional(),
+  startDate: Joi.date().iso().optional(),
+  endDate: Joi.date().iso().greater(Joi.ref('startDate')).optional(),
+  prescriptionFile: Joi.string().uri().optional(),
+  status: Joi.string()
+    .valid('Pending', 'Scheduled', 'In progress', 'Completed', 'Cancelled')
+    .optional(),
+});
+
+const updateItemsSchema = Joi.object({
+  items: Joi.array()
+    .items(
+      Joi.object({
+        _id: Joi.string().hex().length(24), // optional – nếu có thì update, không có thì thêm mới
+        medicationName: Joi.string().required(),
+        dosage: Joi.string().required(),
+        instruction: Joi.string().required(),
+      }),
+    )
+    .min(1)
+    .required(),
+});
+
+export const validateUpdateRequestItems = validate(updateItemsSchema);
+export const validateUpdateRequest = validate(updateRequestSchema);
 export const validateMedicationRequest = validate(requestSchema);

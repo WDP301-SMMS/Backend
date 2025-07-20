@@ -1,3 +1,4 @@
+import { IncidentSeverity } from '@/enums/IncidentEnum';
 import { IMedicalIncident } from '@/interfaces/medical.incident.interface';
 import mongoose, { Schema } from 'mongoose';
 
@@ -16,8 +17,11 @@ const MedicalIncidentSchema: Schema = new Schema<IMedicalIncident>({
   }, // Foreign key
   incidentType: { type: String, required: true },
   description: { type: String, required: true },
-  severity: { type: String, required: true },
-  status: { type: String, required: true },
+  severity: {
+    type: String,
+    required: true,
+    enum: Object.values(IncidentSeverity),
+  },
   actionsTaken: { type: String, required: true },
   note: {
     type: String,

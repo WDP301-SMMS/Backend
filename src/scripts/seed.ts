@@ -30,6 +30,7 @@ import { VaccinationConsentModel } from '../models/vaccination.consent.model';
 import { VaccinationCampaignModel } from '../models/vaccination.campaign.model';
 import { BlogPostModel } from '../models/blog.post.model';
 
+import { IncidentSeverity } from '@/enums/IncidentEnum';
 import { RoleEnum } from '../enums/RoleEnum';
 import { ConsentStatus } from '../enums/ConsentsEnum';
 import { CampaignStatus } from '../enums/CampaignEnum';
@@ -95,6 +96,7 @@ const seedDatabase = async () => {
         email: 'parent1@example.com',
         role: RoleEnum.Parent,
         dob: new Date('1980-01-01T00:00:00Z'),
+        gender: StudentGender.MALE,
         phone: '0123456789',
         isActive: true,
         authProvider: 'local',
@@ -106,6 +108,7 @@ const seedDatabase = async () => {
         email: 'parent2@example.com',
         role: RoleEnum.Parent,
         dob: new Date('1982-02-02T00:00:00Z'),
+        gender: StudentGender.FEMALE,
         phone: '0987654321',
         isActive: true,
         authProvider: 'local',
@@ -117,6 +120,7 @@ const seedDatabase = async () => {
         email: 'nurse1@example.com',
         role: RoleEnum.Nurse,
         dob: new Date('1975-03-03T00:00:00Z'),
+        gender: StudentGender.FEMALE,
         phone: '0123987654',
         isActive: true,
         authProvider: 'local',
@@ -128,6 +132,7 @@ const seedDatabase = async () => {
         email: 'nurse2@example.com',
         role: RoleEnum.Nurse,
         dob: new Date('1975-01-03T00:00:00Z'),
+        gender: StudentGender.FEMALE,
         phone: '0123987000',
         isActive: true,
         authProvider: 'local',
@@ -139,6 +144,7 @@ const seedDatabase = async () => {
         email: 'admin1@example.com',
         role: RoleEnum.Admin,
         dob: new Date('1970-04-04T00:00:00Z'),
+        gender: StudentGender.MALE,
         phone: '0111222333',
         isActive: true,
         authProvider: 'local',
@@ -150,6 +156,7 @@ const seedDatabase = async () => {
         email: 'manager1@example.com',
         role: RoleEnum.Manager,
         dob: new Date('1978-05-05T00:00:00Z'),
+        gender: StudentGender.FEMALE,
         phone: '0999888777',
         isActive: true,
         authProvider: 'local',
@@ -381,7 +388,7 @@ const seedDatabase = async () => {
         startDate: new Date('2024-10-01T00:00:00Z'),
         endDate: new Date('2024-10-15T00:00:00Z'),
         templateId: createdHealthCheckTemplates[0]._id,
-        participatingStaffs: [nurses[0].username!, nurses[1].username!],
+        participatingStaffs: [nurses[0]._id, nurses[1]._id],
         assignments: [
           {
             classId: createdClasses[0]._id,
@@ -596,8 +603,7 @@ const seedDatabase = async () => {
         nurseId: nurses[0]._id,
         incidentType: 'Chấn thương nhẹ',
         description: 'Trầy xước đầu gối do ngã ở sân chơi.',
-        severity: 'Nhẹ',
-        status: 'Đã xử lý',
+        severity: IncidentSeverity.Mild,
         actionsTaken: 'Rửa sạch vết thương, dán băng gạc cá nhân.',
         incidentTime: new Date('2024-09-15T10:00:00Z'),
       },
@@ -655,7 +661,8 @@ const seedDatabase = async () => {
       {
         medicationRequestId: createdMedicationRequests[0]._id,
         studentId: createdStudents[1]._id,
-        nurseId: nurses[0]._id,
+        createdByNurse: nurses[0]._id,
+        updatedByNurse: nurses[0]._id,
         sessionSlots: SlotEnum.Morning,
         status: MedicationScheduleEnum.Done,
         date: new Date('2024-10-02T08:00:00Z'),
@@ -663,7 +670,8 @@ const seedDatabase = async () => {
       {
         medicationRequestId: createdMedicationRequests[0]._id,
         studentId: createdStudents[1]._id,
-        nurseId: nurses[0]._id,
+        createdByNurse: nurses[0]._id,
+        updatedByNurse: nurses[0]._id,
         sessionSlots: SlotEnum.Afternoon,
         status: MedicationScheduleEnum.Not_taken,
         date: new Date('2024-10-02T14:00:00Z'),

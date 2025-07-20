@@ -43,50 +43,50 @@ const claimStudentSchema = Joi.object({
 
 
 const allergySchema = Joi.object({
-  type: Joi.string().optional(),
-  reaction: Joi.string().optional(),
-  severity: Joi.string().valid(...Object.values(EAllergySeverity)).optional(),
-  notes: Joi.string().optional(),
+  type: Joi.string().optional().allow(''),
+  reaction: Joi.string().optional().allow(''),
+  severity: Joi.string().valid(...Object.values(EAllergySeverity)).optional().allow(''),
+  notes: Joi.string().optional().allow(''),
 });
 
 const chronicConditionSchema = Joi.object({
-  conditionName: Joi.string().optional(),
-  diagnosedDate: Joi.date().iso().optional(),
-  medication: Joi.string().optional(),
-  notes: Joi.string().optional(),
+  conditionName: Joi.string().optional().allow(''),
+  diagnosedDate: Joi.date().iso().optional().allow(null),
+  medication: Joi.string().optional().allow(''),
+  notes: Joi.string().optional().allow(''),
 });
 
 const medicalHistoryEventSchema = Joi.object({
-  condition: Joi.string().optional(),
-  facility: Joi.string().optional(),
-  treatmentDate: Joi.date().iso().optional(),
-  method: Joi.string().optional(),
-  notes: Joi.string().allow('').optional(),
+  condition: Joi.string().optional().allow(''),
+  facility: Joi.string().optional().allow(''),
+  treatmentDate: Joi.date().iso().optional().allow(null),
+  method: Joi.string().optional().allow(''),
+  notes: Joi.string().allow('').optional().allow(''),
 });
 
 const visionCheckupSchema = Joi.object({
-  checkupDate: Joi.date().iso().optional(),
-  rightEyeVision: Joi.string().optional(),
-  leftEyeVision: Joi.string().optional(),
-  wearsGlasses: Joi.boolean().optional(),
-  isColorblind: Joi.boolean().optional(),
+  checkupDate: Joi.date().iso().optional().allow(null),
+  rightEyeVision: Joi.string().optional().allow(''),
+  leftEyeVision: Joi.string().optional().allow(''),
+  wearsGlasses: Joi.boolean().optional().allow(null),
+  isColorblind: Joi.boolean().optional().allow(null),
   notes: Joi.string().allow('').optional(),
 });
 
 const hearingCheckupSchema = Joi.object({
-  checkupDate: Joi.date().iso().optional(),
-  rightEarStatus: Joi.string().optional(),
-  leftEarStatus: Joi.string().optional(),
-  usesHearingAid: Joi.boolean().optional(),
+  checkupDate: Joi.date().iso().optional().allow(null),
+  rightEarStatus: Joi.string().optional().allow(''),
+  leftEarStatus: Joi.string().optional().allow(''),
+  usesHearingAid: Joi.boolean().optional().allow(null),
   notes: Joi.string().allow('').optional(),
 });
 
 const injectedVaccineSchema = Joi.object({
-  vaccineName: Joi.string().optional(),
-  doseNumber: Joi.number().integer().min(1).optional(),
-  note: Joi.string().optional(),
-  dateInjected: Joi.date().iso().optional(),
-  locationInjected: Joi.string().optional(),
+  vaccineName: Joi.string().optional().allow(''),
+  doseNumber: Joi.number().integer().min(1).optional().allow(null),
+  note: Joi.string().optional().allow(''),
+  dateInjected: Joi.date().iso().optional().allow(null),
+  locationInjected: Joi.string().optional().allow(''),
 });
 
 
