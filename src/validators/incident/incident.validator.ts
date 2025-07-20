@@ -29,7 +29,6 @@ const incidentSchema = Joi.object({
   incidentType: Joi.string().required(),
   description: Joi.string().required(),
   severity: Joi.string().required(),
-  status: Joi.string().required(),
   actionsTaken: Joi.string().required(),
   note: Joi.string().optional().allow(null, ''),
   incidentTime: Joi.date().required(),
