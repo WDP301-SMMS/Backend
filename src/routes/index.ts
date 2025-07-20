@@ -44,7 +44,7 @@ router.use(
 router.use('/health-check', handleToken, healthCheckRouter);
 router.use('/inventory', handleToken, inventoryRouter);
 router.use('/appointments', handleToken, appointmentRouter);
-router.use('/notifications', notificationRouter);
+router.use('/notifications', handleToken, notificationRouter);
 router.use('/token-notifications', handleToken, tokenNotificationRouter);
 
 export default router;
