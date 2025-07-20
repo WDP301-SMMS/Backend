@@ -1,4 +1,6 @@
+import { ConsentStatus } from '@/enums/ConsentsEnum';
 import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
+import { HealthCheckConsent } from '@/models/healthcheck.consents.model';
 import { HealthCheckRecordModel } from '@/models/healthcheck.record.model';
 import { HealthCheckResult } from '@/models/healthcheck.result.model';
 import { handleSuccessResponse } from '@/utils/responseHandler';
@@ -9,10 +11,18 @@ const createHealthCheckResultBaseOnTemplate = async (
   res: Response,
 ) => {
   const body = req.body;
-  
+
   // Input validation
-  if (!body.campaignId || !body.nurseId || !body.studentId || !body.resultsData) {
-    res.status(400).json({ message: 'Missing required fields: campaignId, nurseId, studentId, and resultsData are required' });
+  if (
+    !body.campaignId ||
+    !body.nurseId ||
+    !body.studentId ||
+    !body.resultsData
+  ) {
+    res.status(400).json({
+      message:
+        'Missing required fields: campaignId, nurseId, studentId, and resultsData are required',
+    });
     return;
   }
 
@@ -20,7 +30,9 @@ const createHealthCheckResultBaseOnTemplate = async (
     // Find and validate campaign
     const campaign = await HealthCheckCampaign.findById(body.campaignId);
     if (!campaign || !campaign.templateId) {
-      res.status(404).json({ message: 'Campaign not found or has no template' });
+      res
+        .status(404)
+        .json({ message: 'Campaign not found or has no template' });
       return;
     }
 
@@ -53,6 +65,19 @@ const createHealthCheckResultBaseOnTemplate = async (
       });
     }
 
+    const healthCheckConsent = await HealthCheckConsent.findOne({
+      studentId: body.studentId,
+      campaignId: body.campaignId,
+    });
+
+    if (!healthCheckConsent) {
+      res.status(404).json({ message: 'Health check consent not found' });
+      return;
+    }
+
+    healthCheckConsent.status = ConsentStatus.COMPLETED;
+    healthCheckConsent.save();
+
     handleSuccessResponse(
       res,
       201,
@@ -61,17 +86,17 @@ const createHealthCheckResultBaseOnTemplate = async (
     );
   } catch (error) {
     console.error('Error creating health check result:', error);
-    
+
     // Handle specific MongoDB validation errors
     if (error instanceof Error) {
       if (error.name === 'ValidationError') {
-        res.status(400).json({ 
-          message: 'Validation error', 
-          details: error.message 
+        res.status(400).json({
+          message: 'Validation error',
+          details: error.message,
         });
       } else if (error.name === 'CastError') {
-        res.status(400).json({ 
-          message: 'Invalid ID format' 
+        res.status(400).json({
+          message: 'Invalid ID format',
         });
       } else {
         res.status(500).json({ message: 'Internal server error' });
@@ -110,7 +135,7 @@ const getStudentHealthCheckRecord = async (req: Request, res: Response) => {
     );
   } catch (error) {
     console.error('Error fetching health check record:', error);
-    
+
     if (error instanceof Error && error.name === 'CastError') {
       res.status(400).json({ message: 'Invalid student ID format' });
     } else {
@@ -152,7 +177,7 @@ const getStudentLatestHealthCheckRecord = async (
     );
   } catch (error) {
     console.error('Error fetching latest health check record:', error);
-    
+
     if (error instanceof Error && error.name === 'CastError') {
       res.status(400).json({ message: 'Invalid student ID format' });
     } else {
@@ -210,16 +235,16 @@ const updateHealthCheckResult = async (req: Request, res: Response) => {
     );
   } catch (error) {
     console.error('Error updating health check result:', error);
-    
+
     if (error instanceof Error) {
       if (error.name === 'ValidationError') {
-        res.status(400).json({ 
-          message: 'Validation error', 
-          details: error.message 
+        res.status(400).json({
+          message: 'Validation error',
+          details: error.message,
         });
       } else if (error.name === 'CastError') {
-        res.status(400).json({ 
-          message: 'Invalid ID format' 
+        res.status(400).json({
+          message: 'Invalid ID format',
         });
       } else {
         res.status(500).json({ message: 'Internal server error' });
