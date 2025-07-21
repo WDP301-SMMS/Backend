@@ -23,7 +23,7 @@ router.get('/dashboard', DashboardController.getAdminDashboard);
 router.get(
     '/users',
     // authMiddleware, adminOnlyMiddleware,
-    roleBaseAccess([RoleEnum.Manager, RoleEnum.Nurse, RoleEnum.Parent]),
+    roleBaseAccess([RoleEnum.Manager, RoleEnum.Nurse, RoleEnum.Parent, RoleEnum.Admin]),
     adminController.getUsers
 );
 router.patch(
