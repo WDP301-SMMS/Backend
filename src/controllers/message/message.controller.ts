@@ -125,7 +125,7 @@ const createRoom = async (
       roomId,
       senderId,
       receiverId,
-      type: 'text',
+      type: 'TEXT',
       content: 'Hi',
     });
   } catch (error) {
