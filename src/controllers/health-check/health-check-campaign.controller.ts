@@ -312,7 +312,10 @@ const updateCampaignStatus = async (req: Request, res: Response) => {
       { new: true },
     );
 
-    if (updatedCampaign && updatedCampaign.status === CampaignStatus.ANNOUNCED) {
+    if (
+      updatedCampaign &&
+      updatedCampaign.status === CampaignStatus.ANNOUNCED
+    ) {
       // Gọi hàm mới, chuyên dụng cho Health Check
       sendHealthCheckAnnounceNotification(updatedCampaign);
     }
@@ -369,6 +372,13 @@ const assignStaffToHealthCheckCampaign = async (
       res.status(404).json({
         success: false,
         message: 'Health Check Campaign not found',
+      });
+      return;
+    }
+    if (healthCheckCampaign.status !== CampaignStatus.DRAFT) {
+      res.status(400).json({
+        success: false,
+        message: 'Campaign can only be updated when it is in DRAFT status',
       });
       return;
     }
@@ -547,54 +557,6 @@ const getCampaignStats = async (req: Request, res: Response) => {
     console.error('Error in getCampaignStats:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
-};
-
-// Helper function to build advanced filters
-const buildAdvancedFilters = (query: IHealthCheckCampaignQuery) => {
-  const filter: any = {};
-
-  if (query.search) {
-    filter.$or = [
-      { name: { $regex: query.search, $options: 'i' } },
-      { schoolYear: { $regex: query.search, $options: 'i' } },
-    ];
-  }
-
-  if (query.status) {
-    filter.status = Array.isArray(query.status)
-      ? { $in: query.status }
-      : query.status;
-  }
-
-  if (query.schoolYear) {
-    filter.schoolYear = Array.isArray(query.schoolYear)
-      ? { $in: query.schoolYear }
-      : query.schoolYear;
-  }
-
-  if (query.startDate) {
-    filter.startDate = {};
-    if (query.startDate.from) filter.startDate.$gte = query.startDate.from;
-    if (query.startDate.to) filter.startDate.$lte = query.startDate.to;
-  }
-
-  if (query.endDate) {
-    filter.endDate = {};
-    if (query.endDate.from) filter.endDate.$gte = query.endDate.from;
-    if (query.endDate.to) filter.endDate.$lte = query.endDate.to;
-  }
-
-  if (query.createdBy) {
-    filter.createdBy = Array.isArray(query.createdBy)
-      ? { $in: query.createdBy }
-      : query.createdBy;
-  }
-
-  if (query.participatingStaff) {
-    filter.participatingStaffs = { $in: [query.participatingStaff] };
-  }
-
-  return filter;
 };
 
 export {
