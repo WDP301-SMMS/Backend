@@ -14,28 +14,64 @@ declare global {
 export class NotificationController {
   public notificationService = new NotificationService();
 
-  public getNotifications = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getNotifications = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userId = req.user!._id!.toString();
 
-      const notifications = await this.notificationService.getNotificationsForUser(userId);
-      res.status(200).json({ data: notifications, message: 'Notifications retrieved successfully' });
+      const notifications =
+        await this.notificationService.getNotificationsForUser(userId);
+      res.status(200).json({
+        data: notifications,
+        message: 'Notifications retrieved successfully',
+      });
     } catch (error) {
       next(error);
     }
   };
 
-  public getUnreadCount = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getAttentionNotifications = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
+    try {
+      const userId = req.user!._id!.toString();
+      const notifications =
+        await this.notificationService.getAttentionNotifications(userId);
+      res.status(200).json({
+        data: notifications,
+        message: 'Important notifications retrieved',
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public getUnreadCount = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userId = req.user!._id!.toString();
       const count = await this.notificationService.getUnreadCount(userId);
-      res.status(200).json({ data: { count }, message: 'Unread count retrieved' });
+      res
+        .status(200)
+        .json({ data: { count }, message: 'Unread count retrieved' });
     } catch (error) {
       next(error);
     }
   };
 
-  public markAsRead = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public markAsRead = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userId = req.user!._id!.toString();
       const { notificationId } = req.params;
@@ -45,8 +81,12 @@ export class NotificationController {
       next(error);
     }
   };
-  
-  public markAllAsRead = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+  public markAllAsRead = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const userId = req.user!._id!.toString();
       await this.notificationService.markAllAsRead(userId);
