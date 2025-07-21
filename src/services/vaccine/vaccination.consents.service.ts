@@ -18,18 +18,31 @@ type PopulatedConsent = IVaccinationConsent & {
 };
 
 export class VaccinationConsentService {
-  public async getMyConsents(parentId: string): Promise<any> {
+  public async getMyConsents(parentId: string, status?: string): Promise<any> {
     const students = await StudentModel.find({ parentId: parentId }).select(
       '_id fullName',
     );
     if (students.length === 0) {
       return [];
     }
+
     const studentIds = students.map((s) => s._id);
 
-    const consents = await VaccinationConsentModel.find({
+    // Filter by status if valid
+    const filter: any = {
       studentId: { $in: studentIds },
-    })
+    };
+
+    if (
+      status &&
+      Object.values(ConsentStatus).includes(
+        status.toUpperCase() as ConsentStatus,
+      )
+    ) {
+      filter.status = status.toUpperCase();
+    }
+
+    const consents = await VaccinationConsentModel.find(filter)
       .populate<{ campaignId: IVaccinationCampaign }>({
         path: 'campaignId',
         select: 'name vaccineName doseNumber startDate endDate description',
@@ -56,8 +69,9 @@ export class VaccinationConsentService {
     }
 
     for (const consent of consents) {
-      if (consent.studentId && resultsByStudent[consent.studentId.toString()]) {
-        resultsByStudent[consent.studentId.toString()].consents.push(consent);
+      const studentId = consent.studentId?.toString();
+      if (studentId && resultsByStudent[studentId]) {
+        resultsByStudent[studentId].consents.push(consent);
       }
     }
 

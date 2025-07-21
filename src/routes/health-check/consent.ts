@@ -13,6 +13,9 @@ const asyncHandler = (fn: Function) => {
 // Get all health check consents
 router.get('/', asyncHandler(consentController.getAllConsents));
 
+// Get detail health check consents
+router.get('/:consentId', asyncHandler(consentController.getConsentDetailById));
+              
 // Get health check consents by campaign ID
 router.get('/campaign/:campaignId', asyncHandler(consentController.getHealthCheckConsentsByCampaignId));
 
