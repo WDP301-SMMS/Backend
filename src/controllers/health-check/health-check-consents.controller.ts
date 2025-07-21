@@ -216,22 +216,105 @@ const handleStatusConsent = async (req: Request, res: Response) => {
 
 const getAllConsents = async (req: Request, res: Response) => {
   try {
-    const consents = await HealthCheckConsent.find({})
-      .populate('studentId')
-      .populate('parentId')
-      .populate('classId')
-      .populate('nurseId')
-      .populate('campaignId')
+    const parentId = req.user?._id;
+    if (!parentId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized: Parent ID missing',
+      });
+    }
+
+    const { status } = req.query;
+    const filter: any = { parentId };
+
+    if (status && typeof status === 'string') {
+      const upperStatus = status.toUpperCase();
+      if (Object.values(ConsentStatus).includes(upperStatus as ConsentStatus)) {
+        filter.status = upperStatus;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid status value. Allowed: ${Object.values(ConsentStatus).join(', ')}`,
+        });
+      }
+    }
+
+    const consents = await HealthCheckConsent.find(filter)
+      .populate({
+        path: 'studentId',
+        select: 'fullName dateOfBirth gender',
+      })
+      .populate({
+        path: 'campaignId',
+        select: 'name startDate endDate schoolYear',
+      })
+      .populate({
+        path: 'classId',
+        select: 'className gradeLevel schoolYear',
+      })
+      .populate({
+        path: 'nurseId',
+        select: 'username email phone',
+      })
       .sort({ createdAt: -1 });
 
-    handleSuccessResponse(
-      res,
-      200,
-      'All health check consents retrieved successfully',
-      consents,
-    );
+    return res.status(200).json({
+      success: true,
+      message: 'Health check consents retrieved successfully',
+      data: consents,
+    });
   } catch (error) {
     console.error('Error in getAllConsents:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
+const getConsentDetailById = async (req: Request, res: Response) => {
+  try {
+    const { consentId } = req.params;
+
+    if (!consentId || !Types.ObjectId.isValid(consentId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid consent ID is required',
+      });
+    }
+
+    const consent = await HealthCheckConsent.findById(consentId)
+      .populate({
+        path: 'studentId',
+        select: 'fullName dateOfBirth gender',
+      })
+      .populate({
+        path: 'campaignId',
+        select: 'name startDate endDate schoolYear',
+      })
+      .populate({
+        path: 'classId',
+        select: 'className gradeLevel schoolYear',
+      })
+      .populate({
+        path: 'nurseId',
+        select: 'username email phone',
+      });
+
+    if (!consent) {
+      return res.status(404).json({
+        success: false,
+        message: 'Consent not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Consent detail retrieved successfully',
+      data: consent,
+    });
+  } catch (error) {
+    console.error('Error in getConsentDetailById:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal Server Error',
@@ -265,6 +348,7 @@ const validateStatusTransition = (
 export default {
   getHealthCheckConsentsByCampaignId,
   getAllConsents,
+  getConsentDetailById,
   addAllStudentToConsentByCampaignId,
   handleStatusConsent,
 };
