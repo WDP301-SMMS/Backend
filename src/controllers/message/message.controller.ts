@@ -26,7 +26,8 @@ const getAllMessagesByRoomId = async (req: Request, res: Response) => {
     if (!messages || messages.length === 0) {
       res.status(404).json({
         success: false,
-        error: 'No messages found for this room',
+        message:
+          'No messages found for this room, please check the room ID \n or create a new room if it does not exist',
       });
       return;
     }
@@ -68,7 +69,7 @@ const getRoomsByUserId = async (req: Request, res: Response) => {
     if (!messages || messages.length === 0) {
       res.status(404).json({
         success: false,
-        error: 'No messages found for this user',
+        message: 'No messages found for this user',
       });
       return;
     }
@@ -104,6 +105,35 @@ const getRoomsByUserId = async (req: Request, res: Response) => {
   }
 };
 
+const checkRoomExists = async (roomId: string): Promise<boolean> => {
+  try {
+    const existingMessage = await Message.findOne({ roomId });
+    return !!existingMessage;
+  } catch (error) {
+    console.error(`Error checking room existence: ${(error as Error).message}`);
+    return false;
+  }
+};
+
+const createRoom = async (
+  roomId: string,
+  senderId: string,
+  receiverId: string,
+) => {
+  try {
+    await Message.create({
+      roomId,
+      senderId,
+      receiverId,
+      type: 'text',
+      content: 'Hi',
+    });
+  } catch (error) {
+    console.error(`Error creating room: ${(error as Error).message}`);
+    throw new Error('Failed to create room');
+  }
+};
+
 const addMessageAfterUserDisconnected = async (body: IMessage[]) => {
   try {
     const newMessage = await Message.insertMany(body);
@@ -115,8 +145,165 @@ const addMessageAfterUserDisconnected = async (body: IMessage[]) => {
   }
 };
 
+const createOrFindDirectRoom = async (req: Request, res: Response) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.status(400).json({
+      success: false,
+      error: 'Validation failed',
+      details: errors.array(),
+    });
+    return;
+  }
+
+  const { participantId } = req.body;
+  const currentUserId = req.user?._id;
+
+  if (!currentUserId || !participantId) {
+    res.status(400).json({
+      success: false,
+      error: 'Current user ID and participant ID are required',
+    });
+    return;
+  }
+
+  if (currentUserId === participantId) {
+    res.status(400).json({
+      success: false,
+      error: 'Cannot create a room with yourself',
+    });
+    return;
+  }
+
+  try {
+    // Check if a room already exists between these two users (bi-directional)
+    const existingRoom = await Message.findOne({
+      $or: [
+        { senderId: currentUserId, receiverId: participantId },
+        { senderId: participantId, receiverId: currentUserId }
+      ]
+    }).populate('senderId receiverId');
+
+    if (existingRoom) {
+      // Room already exists, return it
+      handleSuccessResponse(
+        res,
+        200,
+        'Room already exists',
+        {
+          roomId: existingRoom.roomId,
+          isNew: false,
+          room: existingRoom
+        }
+      );
+      return;
+    }
+
+    // Generate room ID using the utility function
+    const { getPrivateRoom } = await import('@/utils/room');
+    const roomId = getPrivateRoom(currentUserId, participantId);
+
+    // Create a new room with an initial message
+    const newMessage = await Message.create({
+      roomId,
+      senderId: currentUserId,
+      receiverId: participantId,
+      type: 'TEXT',
+      content: 'Chat room created',
+    });
+
+    const populatedMessage = await Message.findById(newMessage._id)
+      .populate('senderId receiverId');
+
+    handleSuccessResponse(
+      res,
+      201,
+      'Room created successfully',
+      {
+        roomId,
+        isNew: true,
+        room: populatedMessage
+      }
+    );
+  } catch (error) {
+    console.error('Error creating/finding room:', error);
+    res.status(500).json({
+      success: false,
+      error: (error as Error).message,
+    });
+    return;
+  }
+};
+
+const getAvailableUsersForChat = async (req: Request, res: Response) => {
+  const currentUserId = req.user?._id;
+
+  if (!currentUserId) {
+    res.status(400).json({
+      success: false,
+      error: 'Current user ID is required',
+    });
+    return;
+  }
+
+  try {
+    // Import User model
+    const { UserModel } = await import('@/models/user.model');
+    
+    // Get all users that the current user already has rooms with
+    const existingMessages = await Message.find({
+      $or: [
+        { senderId: currentUserId },
+        { receiverId: currentUserId }
+      ]
+    });
+
+    // Flatten and get unique user IDs
+    const existingChatUserIds = new Set<string>();
+    existingMessages.forEach(message => {
+      const senderIdStr = message.senderId.toString();
+      const receiverIdStr = message.receiverId.toString();
+      const currentUserIdStr = currentUserId.toString();
+      
+      if (senderIdStr !== currentUserIdStr) {
+        existingChatUserIds.add(senderIdStr);
+      }
+      if (receiverIdStr !== currentUserIdStr) {
+        existingChatUserIds.add(receiverIdStr);
+      }
+    });
+
+    // Get all active users except current user and users already in chat
+    const availableUsers = await UserModel.find({
+      _id: { 
+        $ne: currentUserId,
+        $nin: Array.from(existingChatUserIds)
+      },
+      isActive: true
+    }).select('_id username email role');
+
+    handleSuccessResponse(
+      res,
+      200,
+      'Available users retrieved successfully',
+      availableUsers
+    );
+  } catch (error) {
+    console.error('Error getting available users:', error);
+    res.status(500).json({
+      success: false,
+      error: (error as Error).message,
+    });
+    return;
+  }
+};
+
 export {
   getAllMessagesByRoomId,
   getRoomsByUserId,
   addMessageAfterUserDisconnected,
+  createRoom,
+  checkRoomExists,
+  createOrFindDirectRoom,
+  getAvailableUsersForChat,
 };
