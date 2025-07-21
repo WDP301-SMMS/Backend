@@ -1,9 +1,10 @@
-import { addMessageAfterUserDisconnected } from '@/controllers/message/message.controller';
 import {
-  IMessage,
-  MessageType,
-  
-} from '@/interfaces/message.interface';
+  addMessageAfterUserDisconnected,
+  createRoom,
+  checkRoomExists,
+} from '@/controllers/message/message.controller';
+import { IMessage, MessageType } from '@/interfaces/message.interface';
+import { getPrivateRoom } from '@/utils/room';
 import { Socket } from 'socket.io';
 
 import { Server } from 'socket.io';
@@ -13,14 +14,26 @@ export const handleSocketConnection = (socket: Socket, io: Server) => {
   let messageInterval: NodeJS.Timeout | null = null;
   console.log(`Socket connected: ${socket.id}`);
 
-  socket.on('joinRoom', (data: string) => {
+  socket.on('joinRoom', async (senderId: string, receiverId: string) => {
     try {
-      socket.join(data);
-      console.log(`Socket ${socket.id} joined room: ${data}`);
+      const roomId = getPrivateRoom(senderId, receiverId);
+      socket.join(roomId);
+      console.log(`Socket ${socket.id} joined room: ${roomId}`);
+      
+      // Check if room exists
+      const roomExists = await checkRoomExists(roomId);
+      
+      if (!roomExists) {
+        // Create room if it doesn't exist
+        await createRoom(roomId, senderId, receiverId);
+        console.log(`Created new room: ${roomId}`);
+      } else {
+        console.log(`Room already exists: ${roomId}`);
+      }
 
       // Confirm room join to client
       socket.emit('roomJoined', {
-        data,
+        data: { roomId, roomExists },
         message: 'Successfully joined room',
       });
     } catch (error) {

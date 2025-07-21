@@ -1,4 +1,4 @@
-import { param } from 'express-validator';
+import { param, body } from 'express-validator';
 
 export const validateRoomId = [
   param('roomId')
@@ -18,4 +18,12 @@ export const validateUserId = [
     .withMessage('User ID is required')
     .isMongoId()
     .withMessage('User ID must be a valid MongoDB ObjectId'),
+];
+
+export const validateCreateRoom = [
+  body('participantId')
+    .notEmpty()
+    .withMessage('Participant ID is required')
+    .isMongoId()
+    .withMessage('Participant ID must be a valid MongoDB ObjectId'),
 ];
