@@ -74,7 +74,7 @@ export class VaccinationRecordService {
             {
                 $match: {
                     campaignId: new mongoose.Types.ObjectId(campaignId),
-                    status: { $in: [ConsentStatus.APPROVED, ConsentStatus.COMPLETED, ConsentStatus.UNDER_OBSERVATION, ConsentStatus.REVOKED] }
+                    status: { $in: [ConsentStatus.APPROVED, ConsentStatus.COMPLETED, ConsentStatus.UNDER_OBSERVATION, ConsentStatus.ADVERSE_REACTION, ConsentStatus.REVOKED] }
                 }
             },
             {
