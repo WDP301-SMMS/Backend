@@ -29,7 +29,7 @@ export class AppointmentService {
   // Check if student has abnormal health results and create appointment
   static async createAppointmentForAbnormalResult(
     nurseId: string,
-    appointmentData: CreateAppointmentRequest
+    appointmentData: CreateAppointmentRequest,
   ): Promise<IMeetingSchedule> {
     // Verify nurse has permission
     const nurse = await UserModel.findById(nurseId);
@@ -56,11 +56,13 @@ export class AppointmentService {
     // Check if student has abnormal health results
     let hasAbnormalResults = false;
     if (appointmentData.resultId) {
-      const healthResult = await HealthCheckResult.findById(appointmentData.resultId);
+      const healthResult = await HealthCheckResult.findById(
+        appointmentData.resultId,
+      );
       if (!healthResult) {
         throw new Error('Health check result not found');
       }
-      
+
       if (healthResult.studentId.toString() !== appointmentData.studentId) {
         throw new Error('Health result does not belong to this student');
       }
@@ -70,20 +72,22 @@ export class AppointmentService {
       // Check for any abnormal results for this student
       const abnormalResults = await HealthCheckResult.findOne({
         studentId: appointmentData.studentId,
-        isAbnormal: true
+        isAbnormal: true,
       });
-      
+
       hasAbnormalResults = !!abnormalResults;
     }
 
     if (!hasAbnormalResults) {
-      throw new Error('Appointment can only be created for students with abnormal health results');
+      throw new Error(
+        'Appointment can only be created for students with abnormal health results',
+      );
     }
 
     // Check for existing pending appointments
     const existingAppointment = await Appointment.findOne({
       studentId: appointmentData.studentId,
-      status: AppointmentStatus.SCHEDULED
+      status: AppointmentStatus.SCHEDULED,
     });
 
     if (existingAppointment) {
@@ -99,7 +103,7 @@ export class AppointmentService {
       location: appointmentData.location,
       status: AppointmentStatus.SCHEDULED,
       notes: appointmentData.notes || '',
-      afterMeetingNotes: ''
+      afterMeetingNotes: '',
     });
 
     await appointment.save();
@@ -110,7 +114,7 @@ export class AppointmentService {
   static async respondToAppointment(
     parentId: string,
     appointmentId: string,
-    response: RespondToAppointmentRequest
+    response: RespondToAppointmentRequest,
   ): Promise<IMeetingSchedule> {
     // Verify parent exists
     const parent = await UserModel.findById(parentId);
@@ -142,14 +146,10 @@ export class AppointmentService {
     // Update appointment based on response
     if (response.action === 'accept') {
       // Keep status as SCHEDULED when accepted
-      appointment.notes = appointment.notes + 
-        (appointment.notes ? '\n' : '') + 
-        `Parent accepted appointment on ${new Date().toISOString()}`;
+      appointment.notes = appointment.notes;
     } else if (response.action === 'decline') {
       appointment.status = AppointmentStatus.CANCELLED;
-      appointment.notes = appointment.notes + 
-        (appointment.notes ? '\n' : '') + 
-        `Parent declined appointment on ${new Date().toISOString()}. Reason: ${response.reason}`;
+      appointment.notes = appointment.notes;
     }
 
     await appointment.save();
@@ -165,7 +165,7 @@ export class AppointmentService {
       limit?: number;
       status?: AppointmentStatus;
       studentId?: string;
-    } = {}
+    } = {},
   ) {
     const page = filters.page || 1;
     const limit = Math.min(filters.limit || 10, 100);
@@ -199,7 +199,7 @@ export class AppointmentService {
         .sort({ meetingTime: -1 })
         .skip(skip)
         .limit(limit),
-      Appointment.countDocuments(query)
+      Appointment.countDocuments(query),
     ]);
 
     return {
@@ -208,8 +208,8 @@ export class AppointmentService {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -217,7 +217,7 @@ export class AppointmentService {
   static async updateAppointmentStatus(
     nurseId: string,
     appointmentId: string,
-    updateData: UpdateAppointmentStatusRequest
+    updateData: UpdateAppointmentStatusRequest,
   ): Promise<IMeetingSchedule> {
     // Verify nurse exists
     const nurse = await UserModel.findById(nurseId);
@@ -233,11 +233,9 @@ export class AppointmentService {
 
     // Update status
     appointment.status = updateData.status;
-    
+
     if (updateData.reason) {
-      appointment.notes = appointment.notes + 
-        (appointment.notes ? '\n' : '') + 
-        `Status updated to ${updateData.status} by nurse on ${new Date().toISOString()}. Reason: ${updateData.reason}`;
+      appointment.notes = appointment.notes;
     }
 
     await appointment.save();
@@ -248,7 +246,7 @@ export class AppointmentService {
   static async addAfterMeetingNotes(
     nurseId: string,
     appointmentId: string,
-    notes: string
+    notes: string,
   ): Promise<IMeetingSchedule> {
     // Verify nurse exists
     const nurse = await UserModel.findById(nurseId);
@@ -288,29 +286,29 @@ export class AppointmentService {
     // Find students with abnormal health results who don't have pending appointments
     const studentsWithAbnormalResults = await HealthCheckResult.aggregate([
       {
-        $match: { isAbnormal: true }
+        $match: { isAbnormal: true },
       },
       {
         $lookup: {
           from: 'students',
           localField: 'studentId',
           foreignField: '_id',
-          as: 'student'
-        }
+          as: 'student',
+        },
       },
       {
-        $unwind: '$student'
+        $unwind: '$student',
       },
       {
         $lookup: {
           from: 'users',
           localField: 'student.parentId',
           foreignField: '_id',
-          as: 'parent'
-        }
+          as: 'parent',
+        },
       },
       {
-        $unwind: { path: '$parent', preserveNullAndEmptyArrays: true }
+        $unwind: { path: '$parent', preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
@@ -322,20 +320,20 @@ export class AppointmentService {
                 $expr: {
                   $and: [
                     { $eq: ['$studentId', '$$studentId'] },
-                    { $eq: ['$status', AppointmentStatus.SCHEDULED] }
-                  ]
-                }
-              }
-            }
+                    { $eq: ['$status', AppointmentStatus.SCHEDULED] },
+                  ],
+                },
+              },
+            },
           ],
-          as: 'pendingAppointments'
-        }
+          as: 'pendingAppointments',
+        },
       },
       {
         $match: {
-          'pendingAppointments': { $size: 0 }, // No pending appointments
-          'parent': { $exists: true } // Has a parent linked
-        }
+          pendingAppointments: { $size: 0 }, // No pending appointments
+          parent: { $exists: true }, // Has a parent linked
+        },
       },
       {
         $group: {
@@ -343,8 +341,8 @@ export class AppointmentService {
           student: { $first: '$student' },
           parent: { $first: '$parent' },
           latestResult: { $first: '$$ROOT' },
-          abnormalResultsCount: { $sum: 1 }
-        }
+          abnormalResultsCount: { $sum: 1 },
+        },
       },
       {
         $project: {
@@ -359,12 +357,12 @@ export class AppointmentService {
           parentPhone: '$parent.phone',
           latestCheckupDate: '$latestResult.checkupDate',
           latestResultId: '$latestResult._id',
-          abnormalResultsCount: 1
-        }
+          abnormalResultsCount: 1,
+        },
       },
       {
-        $sort: { latestCheckupDate: -1 }
-      }
+        $sort: { latestCheckupDate: -1 },
+      },
     ]);
 
     return studentsWithAbnormalResults;
