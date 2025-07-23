@@ -123,3 +123,65 @@ export const sendIncidentNotificationToParent = async (incident: any): Promise<v
     console.error(`[Notification Helper] Failed to send notification for new incident ${incident._id}:`, error);
   }
 }
+
+export const sendHealthCheckResultNotification = async (result: any): Promise<void> => {
+  try {
+    if (!result.studentId) {
+      console.warn(`[Notification Helper] Health check result ${result._id} has no studentId.`);
+      return;
+    }
+    const student = await StudentModel.findById(result.studentId).select('parentId').lean();
+    if (!student || !student.parentId) {
+      console.warn(`[Notification Helper] Student ${result.studentId} for result ${result._id} not found or has no parent.`);
+      return;
+    }
+    const parentId = student.parentId.toString();
+    await addNotificationJob({
+      recipientIds: [parentId],
+      type: NotificationType.HEALTH_CHECK_RESULT_READY,
+      entityId: result._id.toString(),
+      entityModel: 'HealthCheckResult'
+    });
+    console.log(`[Notification Helper] Job added for health check result ${result._id}.`);
+  } catch (error) {
+    console.error(`[Notification Helper] Failed to send notification for health check result ${result._id}:`, error);
+  }
+}
+
+export const sendMedicationRequestStatusUpdateNotification = async (request: any, notificationType: NotificationType): Promise<void> => {
+  try {
+    if (!request.parentId) {
+      console.warn(`[Notification Helper] Medication request ${request._id} has no parentId.`);
+      return;
+    }
+    const parentId = request.parentId.toString();
+    await addNotificationJob({
+      recipientIds: [parentId],
+      type: notificationType,
+      entityId: request._id.toString(),
+      entityModel: 'MedicationRequest'
+    });
+    console.log(`[Notification Helper] Job added for medication request ${request._id} with status update.`);
+  } catch (error) {
+    console.error(`[Notification Helper] Failed to send notification for medication request ${request._id}:`, error);
+  }
+}
+
+export const sendMeetingScheduleNotification = async (schedule: any, notificationType: NotificationType): Promise<void> => {
+  try {
+    if (!schedule.parentId) {
+      console.warn(`[Notification Helper] Meeting schedule ${schedule._id} has no parentId.`);
+      return;
+    }
+    const parentId = schedule.parentId.toString();
+    await addNotificationJob({
+      recipientIds: [parentId],
+      type: notificationType,
+      entityId: schedule._id.toString(),
+      entityModel: 'Appointment'
+    });
+    console.log(`[Notification Helper] Job added for meeting schedule ${schedule._id}.`);
+  } catch (error) {
+    console.error(`[Notification Helper] Failed to send notification for meeting schedule ${schedule._id}:`, error);
+  }
+}
