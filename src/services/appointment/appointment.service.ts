@@ -194,7 +194,7 @@ export class AppointmentService {
     const [appointments, total] = await Promise.all([
       Appointment.find(query)
         .populate('studentId', 'fullName dateOfBirth gender')
-        .populate('parentId', 'fullName email phone')
+        .populate('parentId', 'username email phone')
         .populate('resultId', 'checkupDate isAbnormal overallConclusion')
         .sort({ meetingTime: -1 })
         .skip(skip)
