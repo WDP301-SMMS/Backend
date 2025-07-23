@@ -11,6 +11,7 @@ import { AppError } from '@/utils/globalErrorHandler';
 import { VaccinationRecordModel } from '@/models/vacination.record.model';
 import { sendVaccinationRecordNotification } from '@/utils/notification.helper';
 import MedicalIncidentService from '../incident/incident.service';
+import { IncidentSeverity } from '@/enums/IncidentEnum';
 
 interface ICreateRecordPayload {
   consentId: string;
@@ -191,10 +192,6 @@ export class VaccinationRecordService {
         { $inc: { 'summary.administered': 1 } },
       );
 
-      if (newRecord) {
-        sendVaccinationRecordNotification(newRecord);
-      }
-
       return newRecord;
     } catch (error) {
       if (
@@ -241,10 +238,10 @@ export class VaccinationRecordService {
 
   //   return updatedRecord;
   // }
-   public async addObservation(
+  public async addObservation(
     consentId: string,
     observationData: IObservation,
-    nurseId: string, 
+    nurseId: string,
   ): Promise<IVaccinationRecord> {
     const updatedRecord = await VaccinationRecordModel.findOneAndUpdate(
       { consentId: consentId },
@@ -267,25 +264,30 @@ export class VaccinationRecordService {
     await VaccinationConsentModel.findByIdAndUpdate(consentId, {
       status: newStatus,
     });
-    
+
+
     if (newStatus === ConsentStatus.ADVERSE_REACTION) {
       console.log(`[Event] Adverse reaction detected for consent ${consentId}. Creating medical incident.`);
-      
+
       const incidentService = new MedicalIncidentService();
-      
+
       const incidentPayload = {
         studentId: updatedRecord.studentId,
-        nurseId: nurseId, 
-        incidentType: 'Phản ứng sau tiêm', 
+        nurseId: nurseId,
+        incidentType: 'Phản ứng sau tiêm',
         description: observationData.notes || 'Học sinh có phản ứng bất lợi sau khi tiêm chủng.',
-        severity: 'Critical', // Mặc định
+        severity: IncidentSeverity.Critical, // Mặc định
         actionsTaken: observationData.actionsTaken || 'Ghi nhận phản ứng và đang theo dõi.',
         incidentTime: observationData.observedAt,
       };
- 
+
       incidentService.createIncident(incidentPayload).catch(err => {
         console.error(`[Error] Failed to auto-create incident for consent ${consentId}:`, err);
       });
+    } else {
+      if (updatedRecord) {
+        sendVaccinationRecordNotification(updatedRecord);
+      }
     }
 
     return updatedRecord;
