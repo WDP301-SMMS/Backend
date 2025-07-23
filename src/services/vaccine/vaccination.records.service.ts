@@ -9,6 +9,8 @@ import { VaccinationCampaignModel } from '@/models/vaccination.campaign.model';
 import { VaccinationConsentModel } from '@/models/vaccination.consent.model';
 import { AppError } from '@/utils/globalErrorHandler';
 import { VaccinationRecordModel } from '@/models/vacination.record.model';
+import { sendVaccinationRecordNotification } from '@/utils/notification.helper';
+import MedicalIncidentService from '../incident/incident.service';
 
 interface ICreateRecordPayload {
   consentId: string;
@@ -153,7 +155,6 @@ export class VaccinationRecordService {
       const consent = await VaccinationConsentModel.findById(
         consentId,
       ).populate<{ campaignId: IVaccinationCampaign }>('campaignId');
-      // .session(session);
 
       if (!consent) {
         const error: AppError = new Error('Consent form not found.');
@@ -189,12 +190,13 @@ export class VaccinationRecordService {
         { _id: campaign._id },
         { $inc: { 'summary.administered': 1 } },
       );
-      // .session(session);
 
-      // await session.commitTransaction();
+      if (newRecord) {
+        sendVaccinationRecordNotification(newRecord);
+      }
+
       return newRecord;
     } catch (error) {
-      // await session.abortTransaction();
       if (
         error &&
         typeof error === 'object' &&
@@ -209,14 +211,40 @@ export class VaccinationRecordService {
       }
       throw error;
     }
-    //  finally {
-    //     session.endSession();
-    // }
   }
 
-  public async addObservation(
+  // public async addObservation(
+  //   consentId: string,
+  //   observationData: IObservation,
+  // ): Promise<IVaccinationRecord> {
+  //   const updatedRecord = await VaccinationRecordModel.findOneAndUpdate(
+  //     { consentId: consentId },
+  //     { $push: { postVaccinationChecks: observationData } },
+  //     { new: true, runValidators: true },
+  //   );
+
+  //   if (!updatedRecord) {
+  //     const error: AppError = new Error(
+  //       'Vaccination record associated with this consent ID not found.',
+  //     );
+  //     error.status = 404;
+  //     throw error;
+  //   }
+
+  //   const newStatus = observationData.isAbnormal
+  //     ? ConsentStatus.ADVERSE_REACTION
+  //     : ConsentStatus.COMPLETED;
+
+  //   await VaccinationConsentModel.findByIdAndUpdate(consentId, {
+  //     status: newStatus,
+  //   });
+
+  //   return updatedRecord;
+  // }
+   public async addObservation(
     consentId: string,
     observationData: IObservation,
+    nurseId: string, 
   ): Promise<IVaccinationRecord> {
     const updatedRecord = await VaccinationRecordModel.findOneAndUpdate(
       { consentId: consentId },
@@ -239,7 +267,28 @@ export class VaccinationRecordService {
     await VaccinationConsentModel.findByIdAndUpdate(consentId, {
       status: newStatus,
     });
+    
+    if (newStatus === ConsentStatus.ADVERSE_REACTION) {
+      console.log(`[Event] Adverse reaction detected for consent ${consentId}. Creating medical incident.`);
+      
+      const incidentService = new MedicalIncidentService();
+      
+      const incidentPayload = {
+        studentId: updatedRecord.studentId,
+        nurseId: nurseId, 
+        incidentType: 'Phản ứng sau tiêm', 
+        description: observationData.notes || 'Học sinh có phản ứng bất lợi sau khi tiêm chủng.',
+        severity: 'Critical', // Mặc định
+        actionsTaken: observationData.actionsTaken || 'Ghi nhận phản ứng và đang theo dõi.',
+        incidentTime: observationData.observedAt,
+      };
+ 
+      incidentService.createIncident(incidentPayload).catch(err => {
+        console.error(`[Error] Failed to auto-create incident for consent ${consentId}:`, err);
+      });
+    }
 
     return updatedRecord;
   }
 }
+

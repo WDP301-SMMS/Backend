@@ -1,7 +1,5 @@
 import { StudentModel } from '@/models/student.model';
-
 import { addNotificationJob } from '@/queues/notification.queue';
-
 import { Class } from '@/models/class.model';
 import { NotificationType } from '@/enums/NotificationEnums';
 
@@ -183,5 +181,38 @@ export const sendMeetingScheduleNotification = async (schedule: any, notificatio
     console.log(`[Notification Helper] Job added for meeting schedule ${schedule._id}.`);
   } catch (error) {
     console.error(`[Notification Helper] Failed to send notification for meeting schedule ${schedule._id}:`, error);
+  }
+}
+
+
+export const sendVaccinationRecordNotification = async (record: any): Promise<void> => {
+  try {
+    if (!record.studentId) {
+      console.warn(`[Notification Helper] Vaccination record ${record._id} has no studentId. Cannot notify parent.`);
+      return;
+    }
+    
+    console.log(`[Notification Helper] Preparing to notify parent about vaccination record: ${record._id}`);
+    const student = await StudentModel.findById(record.studentId).select('parentId').lean();
+
+    if (!student || !student.parentId) {
+      console.warn(`[Notification Helper] Student ${record.studentId} for record ${record._id} not found or has no parent.`);
+      return;
+    }
+
+    const parentId = student.parentId.toString();
+    console.log(`[Notification Helper] Found parent ${parentId} to notify for vaccination record ${record._id}.`);
+
+    await addNotificationJob({
+      recipientIds: [parentId],
+      type: NotificationType.VACCINATION_RECORD_CREATED,
+      entityId: record._id.toString(),
+      entityModel: 'VaccinationRecord'
+    });
+
+    console.log(`[Notification Helper] Job added for new vaccination record ${record._id}.`);
+
+  } catch (error) {
+    console.error(`[Notification Helper] Failed to send notification for new vaccination record ${record._id}:`, error);
   }
 }
