@@ -2,12 +2,12 @@ import { NotificationController } from '@/controllers/notifications/notification
 import { validateMarkAsRead } from '@/validators/notifications/notifications.validator';
 import { Router } from 'express';
 
-
 const router = Router();
 const controller = new NotificationController();
 
-
 router.get('/', controller.getNotifications);
+
+router.get('/attention', controller.getAttentionNotifications);
 
 router.get('/unread-count', controller.getUnreadCount);
 
@@ -16,7 +16,6 @@ router.patch(
   validateMarkAsRead,
   controller.markAsRead,
 );
-
 
 router.patch('/read-all', controller.markAllAsRead);
 

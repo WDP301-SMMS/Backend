@@ -24,7 +24,12 @@ export class VaccinationConsentController {
         throw new Error('User authentication error: User ID not found.');
       }
 
-      const consentsByStudent = await consentService.getMyConsents(parentId);
+      const status = req.query.status as string | undefined;
+
+      const consentsByStudent = await consentService.getMyConsents(
+        parentId,
+        status,
+      );
 
       res.status(200).json({
         success: true,
