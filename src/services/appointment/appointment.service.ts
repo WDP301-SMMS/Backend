@@ -1,10 +1,12 @@
 import { AppointmentStatus } from '@/enums/AppointmentEnums';
+import { NotificationType } from '@/enums/NotificationEnums';
 import { RoleEnum } from '@/enums/RoleEnum';
 import { IMeetingSchedule } from '@/interfaces/meeting.schedule.interface';
 import Appointment from '@/models/appointment.model';
 import { HealthCheckResult } from '@/models/healthcheck.result.model';
 import { StudentModel } from '@/models/student.model';
 import { UserModel } from '@/models/user.model';
+import { sendMeetingScheduleNotification } from '@/utils/notification.helper';
 
 export interface CreateAppointmentRequest {
   studentId: string;
@@ -103,6 +105,10 @@ export class AppointmentService {
     });
 
     await appointment.save();
+
+    if (appointment){
+      sendMeetingScheduleNotification(appointment, NotificationType.MEETING_SCHEDULE_NEW);
+    }
     return appointment.toObject();
   }
 
