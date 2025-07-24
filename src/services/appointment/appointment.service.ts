@@ -1,8 +1,10 @@
 import { AppointmentStatus } from '@/enums/AppointmentEnums';
 import { NotificationType } from '@/enums/NotificationEnums';
+import { CampaignStatus } from '@/enums/CampaignEnum';
 import { RoleEnum } from '@/enums/RoleEnum';
 import { IMeetingSchedule } from '@/interfaces/meeting.schedule.interface';
 import Appointment from '@/models/appointment.model';
+import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
 import { HealthCheckResult } from '@/models/healthcheck.result.model';
 import { StudentModel } from '@/models/student.model';
 import { UserModel } from '@/models/user.model';
@@ -282,17 +284,33 @@ export class AppointmentService {
   }
 
   // Get students with abnormal results (for nurses to create appointments)
-  static async getStudentsWithAbnormalResults(nurseId: string) {
+  static async getStudentsWithAbnormalResults(
+    nurseId: string,
+    campaignId: string,
+  ): Promise<any[]> {
     // Verify nurse exists
     const nurse = await UserModel.findById(nurseId);
     if (!nurse || nurse.role !== RoleEnum.Nurse) {
       throw new Error('Only nurses can view students with abnormal results');
     }
 
-    // Find students with abnormal health results who don't have pending appointments
+    const campaign = await HealthCheckCampaign.findById(campaignId);
+
+    if (!campaign) {
+      throw new Error('Health check campaign not found');
+    } else if (campaign.status !== CampaignStatus.COMPLETED) {
+      throw new Error('Health check campaign is not completed, so no results available');
+    }
+
+
+
+    // Find students with abnormal health results who don't have pending or completed appointments
     const studentsWithAbnormalResults = await HealthCheckResult.aggregate([
       {
-        $match: { isAbnormal: true },
+        $match: { 
+          isAbnormal: true,
+          campaignId: campaign._id
+        },
       },
       {
         $lookup: {
@@ -326,18 +344,23 @@ export class AppointmentService {
                 $expr: {
                   $and: [
                     { $eq: ['$studentId', '$$studentId'] },
-                    { $eq: ['$status', AppointmentStatus.SCHEDULED] },
+                    { 
+                      $or: [
+                        { $eq: ['$status', AppointmentStatus.SCHEDULED] },
+                        { $eq: ['$status', AppointmentStatus.COMPLETED] }
+                      ]
+                    },
                   ],
                 },
               },
             },
           ],
-          as: 'pendingAppointments',
+          as: 'existingAppointments',
         },
       },
       {
         $match: {
-          pendingAppointments: { $size: 0 }, // No pending appointments
+          existingAppointments: { $size: 0 }, // No pending or completed appointments
           parent: { $exists: true }, // Has a parent linked
         },
       },
