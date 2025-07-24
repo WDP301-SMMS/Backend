@@ -1,6 +1,8 @@
 
 import { HealthProfileController } from '@/controllers/health-profile/health.profile.controller';
 import { createProfileValidator, updateProfileValidator } from '@/validators/health-profile/health.profile.validator';
+import { RoleEnum } from '@/enums/RoleEnum';
+import { roleBaseAccess } from '@/middlewares/security/authorization';
 
 const express = require('express');
 const router = express.Router();
@@ -16,7 +18,7 @@ router.post(
 
 router.get(
     '/students/my-students',
-
+    roleBaseAccess([RoleEnum.Parent, RoleEnum.Manager]),
     healthProfile.getMyStudents
 );
 

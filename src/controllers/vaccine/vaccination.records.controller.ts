@@ -20,7 +20,7 @@ export class VaccinationRecordController {
     }
   };
 
-   public getMedicalChecklist = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getMedicalChecklist = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { campaignId } = req.params;
       const checklist = await recordService.getMedicalChecklist(campaignId);
@@ -52,7 +52,8 @@ export class VaccinationRecordController {
   public addObservation = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const { consentId } = req.params;
-      const updatedRecord = await recordService.addObservation(consentId, req.body);
+      const nurseId = req.user!._id!.toString();
+      const updatedRecord = await recordService.addObservation(consentId, req.body, nurseId);
 
       res.status(200).json({
         success: true,
