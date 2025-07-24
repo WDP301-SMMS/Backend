@@ -14,7 +14,7 @@ const router = Router();
 
 // Routes for nurses
 router.get(
-  '/students/abnormal-results',
+  '/students/abnormal-results/:campaignId',
   roleBaseAccess([RoleEnum.Nurse]),
   AppointmentController.getStudentsWithAbnormalResults
 );
