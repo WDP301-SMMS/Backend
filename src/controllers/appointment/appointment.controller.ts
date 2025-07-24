@@ -273,4 +273,44 @@ export class AppointmentController {
       });
     }
   }
+
+  // Get appointment by ID (for nurses and parents)
+  static async getAppointmentById(req: Request, res: Response) {
+    try {
+      const userId = req.user?._id;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required',
+        });
+      }
+
+      const appointmentId = req.params.appointmentId;
+
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      }
+
+      const appointment = await AppointmentService.getAppointmentById(
+        userId,
+        user.role,
+        appointmentId,
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: 'Appointment retrieved successfully',
+        data: appointment,
+      });
+    } catch (error: any) {
+      return res.status(400).json({
+        success: false,
+        message: error.message || 'Failed to retrieve appointment',
+      });
+    }
+  }
 }

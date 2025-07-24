@@ -7,18 +7,18 @@ export const createAppointmentValidator = [
     .withMessage('Student ID is required')
     .isMongoId()
     .withMessage('Student ID must be a valid MongoDB ObjectId'),
-  
+
   body('parentId')
     .notEmpty()
     .withMessage('Parent ID is required')
     .isMongoId()
     .withMessage('Parent ID must be a valid MongoDB ObjectId'),
-  
+
   body('resultId')
     .optional()
     .isMongoId()
     .withMessage('Result ID must be a valid MongoDB ObjectId'),
-  
+
   body('meetingTime')
     .notEmpty()
     .withMessage('Meeting time is required')
@@ -32,7 +32,7 @@ export const createAppointmentValidator = [
       }
       return true;
     }),
-  
+
   body('location')
     .notEmpty()
     .withMessage('Location is required')
@@ -41,7 +41,7 @@ export const createAppointmentValidator = [
     .trim()
     .isLength({ min: 3, max: 200 })
     .withMessage('Location must be between 3 and 200 characters'),
-  
+
   body('notes')
     .optional()
     .isString()
@@ -57,13 +57,15 @@ export const updateAppointmentStatusValidator = [
     .withMessage('Appointment ID is required')
     .isMongoId()
     .withMessage('Appointment ID must be a valid MongoDB ObjectId'),
-  
+
   body('status')
     .notEmpty()
     .withMessage('Status is required')
     .isIn(Object.values(AppointmentStatus))
-    .withMessage(`Status must be one of: ${Object.values(AppointmentStatus).join(', ')}`),
-  
+    .withMessage(
+      `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}`,
+    ),
+
   body('reason')
     .optional()
     .isString()
@@ -79,15 +81,15 @@ export const respondToAppointmentValidator = [
     .withMessage('Appointment ID is required')
     .isMongoId()
     .withMessage('Appointment ID must be a valid MongoDB ObjectId'),
-  
+
   body('action')
     .notEmpty()
     .withMessage('Action is required')
-    .isIn(['accept', 'decline'])
-    .withMessage('Action must be either "accept" or "decline"'),
-  
+    .isIn(['COMPLETED', 'CANCELLED'])
+    .withMessage('Action must be either "COMPLETED" or "CANCELLED"'),
+
   body('reason')
-    .if(body('action').equals('decline'))
+    .if(body('action').equals('CANCELLED'))
     .notEmpty()
     .withMessage('Reason is required when declining an appointment')
     .isString()
@@ -102,17 +104,19 @@ export const getAppointmentsValidator = [
     .optional()
     .isInt({ min: 1 })
     .withMessage('Page must be a positive integer'),
-  
+
   query('limit')
     .optional()
     .isInt({ min: 1, max: 100 })
     .withMessage('Limit must be between 1 and 100'),
-  
+
   query('status')
     .optional()
     .isIn(Object.values(AppointmentStatus))
-    .withMessage(`Status must be one of: ${Object.values(AppointmentStatus).join(', ')}`),
-  
+    .withMessage(
+      `Status must be one of: ${Object.values(AppointmentStatus).join(', ')}`,
+    ),
+
   query('studentId')
     .optional()
     .isMongoId()
@@ -125,7 +129,7 @@ export const updateAppointmentNotesValidator = [
     .withMessage('Appointment ID is required')
     .isMongoId()
     .withMessage('Appointment ID must be a valid MongoDB ObjectId'),
-  
+
   body('afterMeetingNotes')
     .notEmpty()
     .withMessage('After meeting notes are required')
