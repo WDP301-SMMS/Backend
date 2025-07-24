@@ -56,11 +56,11 @@ router.get(
   AppointmentController.getAppointments,
 );
 
-// Get Appointment Detail
-// router.get(
-//   '/:appointmentId',
-//   roleBaseAccess([RoleEnum.Nurse, RoleEnum.Parent]),
-//   AppointmentController.getAppointmentById
-// );
+// Get Appointment Detail (for nurses and parents)
+router.get(
+  '/:appointmentId',
+  roleBaseAccess([RoleEnum.Nurse, RoleEnum.Parent]),
+  AppointmentController.getAppointmentById,
+);
 
 export default router;

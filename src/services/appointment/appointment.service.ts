@@ -112,8 +112,11 @@ export class AppointmentService {
 
     await appointment.save();
 
-    if (appointment){
-      sendMeetingScheduleNotification(appointment, NotificationType.MEETING_SCHEDULE_NEW);
+    if (appointment) {
+      sendMeetingScheduleNotification(
+        appointment,
+        NotificationType.MEETING_SCHEDULE_NEW,
+      );
     }
     return appointment.toObject();
   }
@@ -299,17 +302,17 @@ export class AppointmentService {
     if (!campaign) {
       throw new Error('Health check campaign not found');
     } else if (campaign.status !== CampaignStatus.COMPLETED) {
-      throw new Error('Health check campaign is not completed, so no results available');
+      throw new Error(
+        'Health check campaign is not completed, so no results available',
+      );
     }
-
-
 
     // Find students with abnormal health results who don't have pending or completed appointments
     const studentsWithAbnormalResults = await HealthCheckResult.aggregate([
       {
-        $match: { 
+        $match: {
           isAbnormal: true,
-          campaignId: campaign._id
+          campaignId: campaign._id,
         },
       },
       {
@@ -344,11 +347,11 @@ export class AppointmentService {
                 $expr: {
                   $and: [
                     { $eq: ['$studentId', '$$studentId'] },
-                    { 
+                    {
                       $or: [
                         { $eq: ['$status', AppointmentStatus.SCHEDULED] },
-                        { $eq: ['$status', AppointmentStatus.COMPLETED] }
-                      ]
+                        { $eq: ['$status', AppointmentStatus.COMPLETED] },
+                      ],
                     },
                   ],
                 },
@@ -395,5 +398,34 @@ export class AppointmentService {
     ]);
 
     return studentsWithAbnormalResults;
+  }
+
+  // Get single appointment by ID
+  static async getAppointmentById(
+    userId: string,
+    role: RoleEnum,
+    appointmentId: string,
+  ): Promise<IMeetingSchedule> {
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('studentId', 'fullName dateOfBirth gender')
+      .populate('parentId', 'username email phone fullName')
+      .populate('resultId', 'checkupDate isAbnormal overallConclusion')
+      .lean();
+
+    if (!appointment) {
+      throw new Error('Appointment not found');
+    }
+
+    // Authorization: ensure user is allowed to see this appointment
+    if (
+      role === RoleEnum.Parent &&
+      appointment.parentId?._id?.toString() !== userId
+    ) {
+      throw new Error('Access denied: This appointment does not belong to you');
+    }
+
+    // Nurses can see all, no restriction needed
+
+    return appointment;
   }
 }
