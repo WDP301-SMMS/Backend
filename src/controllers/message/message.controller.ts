@@ -1,5 +1,5 @@
 import { IMessage } from '@/interfaces/message.interface';
-import Message from '@/models/message.model';
+import { Message } from '@/models/message.model';
 import { handleSuccessResponse } from '@/utils/responseHandler';
 import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';

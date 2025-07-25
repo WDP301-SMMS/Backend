@@ -3,7 +3,7 @@ import { NotificationType } from '@/enums/NotificationEnums';
 import { CampaignStatus } from '@/enums/CampaignEnum';
 import { RoleEnum } from '@/enums/RoleEnum';
 import { IMeetingSchedule } from '@/interfaces/meeting.schedule.interface';
-import Appointment from '@/models/appointment.model';
+import { Appointment } from '@/models/appointment.model';
 import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
 import { HealthCheckResult } from '@/models/healthcheck.result.model';
 import { StudentModel } from '@/models/student.model';
