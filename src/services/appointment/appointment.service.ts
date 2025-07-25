@@ -20,7 +20,7 @@ export interface CreateAppointmentRequest {
 }
 
 export interface RespondToAppointmentRequest {
-  action: 'accept' | 'decline';
+  action: 'APPROVED' | 'CANCELLED';
   reason?: string;
 }
 
@@ -155,10 +155,10 @@ export class AppointmentService {
     }
 
     // Update appointment based on response
-    if (response.action === 'accept') {
+    if (response.action === 'APPROVED') {
       // Keep status as SCHEDULED when accepted
       appointment.notes = appointment.notes;
-    } else if (response.action === 'decline') {
+    } else if (response.action === 'CANCELLED') {
       appointment.status = AppointmentStatus.CANCELLED;
       appointment.notes = appointment.notes;
     }
