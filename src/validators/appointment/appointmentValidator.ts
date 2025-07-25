@@ -85,8 +85,8 @@ export const respondToAppointmentValidator = [
   body('action')
     .notEmpty()
     .withMessage('Action is required')
-    .isIn(['COMPLETED', 'CANCELLED'])
-    .withMessage('Action must be either "COMPLETED" or "CANCELLED"'),
+    .isIn(['APPROVED', 'CANCELLED'])
+    .withMessage('Action must be either "APPROVED" or "CANCELLED"'),
 
   body('reason')
     .if(body('action').equals('CANCELLED'))
