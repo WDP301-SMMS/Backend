@@ -156,7 +156,7 @@ export class AppointmentService {
 
     // Update appointment based on response
     if (response.action === 'APPROVED') {
-      // Keep status as SCHEDULED when accepted
+      appointment.status = AppointmentStatus.APPROVED;
       appointment.notes = appointment.notes;
     } else if (response.action === 'CANCELLED') {
       appointment.status = AppointmentStatus.CANCELLED;
