@@ -23,6 +23,7 @@ const allowedOrigins = [
   process.env.BASE_URL,
   'https://backend-test-103x.onrender.com', // Your deployed server URL
   /^https:\/\/.*\.onrender\.com$/, // Allow any onrender.com subdomain
+  process.env.OLLAMA_BASE_URL,
 ].filter(Boolean); // Remove undefined values
 
 app.use(

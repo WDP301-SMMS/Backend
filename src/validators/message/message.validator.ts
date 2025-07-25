@@ -27,3 +27,14 @@ export const validateCreateRoom = [
     .isMongoId()
     .withMessage('Participant ID must be a valid MongoDB ObjectId'),
 ];
+
+export const validateChatProgress = [
+  body('prompt')
+    .notEmpty()
+    .withMessage('Prompt is required')
+    .isString()
+    .withMessage('Prompt must be a string')
+    .isLength({ min: 1, max: 1000 })
+    .withMessage('Prompt must be between 1 and 1000 characters')
+    .trim(),
+];

@@ -2990,6 +2990,157 @@ paths:
                     type: string
                     example: "Internal server error"
 
+  /messages/init-ai:
+    post:
+      tags:
+        - AI Chat
+      summary: Initialize AI chat session
+      description: Initializes a chat session with Ollama AI using student data. Only accessible by users with Parent role.
+      operationId: initializeAIChat
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: AI chat session initialized successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "AI chat initialized successfully"
+                  data:
+                    type: string
+                    description: Initial AI response based on student data
+                    example: "Hello! I'm your AI health assistant. I've reviewed your child's health profile and I'm ready to help answer any questions about their health status, medical history, or upcoming health check-ups."
+        '400':
+          description: Bad request - User ID is required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "User ID is required to retrieve student data"
+        '403':
+          description: Forbidden - Only parents can access AI chat
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "Access denied. Only parents can use AI chat feature."
+        '404':
+          description: No student data found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "No student data found"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "Failed to initial with Ollama"
+
+  /messages/chat-progress:
+    post:
+      tags:
+        - AI Chat
+      summary: Continue AI chat conversation
+      description: Continues an ongoing chat conversation with Ollama AI
+      operationId: continueAIChat
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prompt:
+                  type: string
+                  description: User's message/question to the AI
+                  example: "What should I know about my child's recent health check results?"
+              required:
+                - prompt
+      responses:
+        '200':
+          description: AI response generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "AI response generated successfully"
+                  data:
+                    type: string
+                    description: AI's response to the user's prompt
+                    example: "Based on your child's recent health check, everything looks normal. Their growth measurements are within the expected range for their age group. However, I noticed they're due for their vaccination updates. Would you like me to provide more details about the upcoming vaccines?"
+        '400':
+          description: Bad request - User ID and prompt are required
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "User ID and prompt are required"
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "Failed to chat with Ollama"
+
 components:
   schemas:
     User:

@@ -1,5 +1,18 @@
-import { getAllMessagesByRoomId, getRoomsByUserId, createOrFindDirectRoom, getAvailableUsersForChat } from '@/controllers/message/message.controller';
-import { validateRoomId, validateUserId, validateCreateRoom } from '@/validators/message/message.validator';
+import {
+  getAllMessagesByRoomId,
+  getRoomsByUserId,
+  createOrFindDirectRoom,
+  getAvailableUsersForChat,
+} from '@/controllers/message/message.controller';
+import { handleFirstChat, handleChatProgress } from '@/controllers/ollama.controller';
+import { RoleEnum } from '@/enums/RoleEnum';
+import { roleBaseAccess } from '@/middlewares/security/authorization';
+import {
+  validateRoomId,
+  validateUserId,
+  validateCreateRoom,
+  validateChatProgress,
+} from '@/validators/message/message.validator';
 import { Router } from 'express';
 
 const router = Router();
@@ -31,5 +44,29 @@ router.get('/:roomId', validateRoomId, getAllMessagesByRoomId);
  * @access Private (authenticated users)
  */
 router.get('/user/:userId', validateUserId, getRoomsByUserId);
+
+/**
+ * @route POST /api/messages/init-ai
+ * @desc Initialize chat with Ollama AI
+ * @access Private (Parent role only)
+ */
+router.post(
+  '/init-ai',
+  roleBaseAccess([RoleEnum.Parent]),
+  validateUserId,
+  handleFirstChat,
+);
+
+/**
+ * @route POST /api/messages/chat-progress
+ * @desc Continue conversation with Ollama AI
+ * @access Private (Parent role only)
+ */
+router.post(
+  '/chat-progress',
+  roleBaseAccess([RoleEnum.Parent]),
+  validateChatProgress,
+  handleChatProgress,
+);
 
 export default router;
