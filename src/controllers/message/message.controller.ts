@@ -208,7 +208,7 @@ const createOrFindDirectRoom = async (req: Request, res: Response) => {
       senderId: currentUserId,
       receiverId: participantId,
       type: 'TEXT',
-      content: 'Chat room created',
+      content: 'Chào bạn nhé!',
     });
 
     const populatedMessage = await Message.findById(newMessage._id).populate(
