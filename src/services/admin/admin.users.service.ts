@@ -53,7 +53,7 @@ class AdminUserStudentService {
     const [users, total] = await Promise.all([
       this.users
         .find(findQuery)
-        .select('-password')
+        .select('-password -__v -createdAt -authProvider -updatedAt -googleId -pushTokens')
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -156,7 +156,7 @@ class AdminUserStudentService {
             _id: '$parentInfo._id',
             username: '$parentInfo.username',
             email: '$parentInfo.email',
-            phone: '$parentInfo.phone'
+            phone: '$parentInfo.phone',
           },
           class: { _id: '$classInfo._id', className: '$classInfo.className' },
         },
@@ -190,7 +190,6 @@ class AdminUserStudentService {
     parentId: string;
     classId: string;
   }): Promise<IStudent> {
-
     const targetClass = await this.classes.findById(studentData.classId);
     if (!targetClass) {
       throw createAppError(404, 'Class not found');
