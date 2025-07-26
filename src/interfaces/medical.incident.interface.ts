@@ -9,5 +9,6 @@ export interface IMedicalIncident {
   severity: IncidentSeverity;
   actionsTaken: string;
   note?: string;
+  isDispensed?: boolean;
   incidentTime: Date;
 }
