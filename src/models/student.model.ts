@@ -8,7 +8,7 @@ const StudentSchema = new Schema<IStudent>(
     parentId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      default: null,
     },
     classId: {
       type: Schema.Types.ObjectId,
@@ -28,7 +28,7 @@ const StudentSchema = new Schema<IStudent>(
       enum: StudentGender,
       required: true,
     },
-     invitedCode: {
+    invitedCode: {
       type: {
         code: {
           type: String,
@@ -46,7 +46,7 @@ const StudentSchema = new Schema<IStudent>(
       default: () => ({
         code: generateOtp(),
       }),
-      _id: false, 
+      _id: false,
     },
     status: {
       type: String,
