@@ -11,7 +11,7 @@ const getUser = async (req: Request, res: Response) => {
   const decodedToken = decryptToken(token);
   try {
     const user = await UserModel.findById(decodedToken?._id).select(
-      '-password -googleId',
+      '-password -__v -createdAt -authProvider -updatedAt -googleId -pushTokens',
     );
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });

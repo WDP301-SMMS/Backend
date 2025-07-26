@@ -17,7 +17,7 @@ const messageSchema = new Schema<IMessage>(
     receiverId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'User',  
+      ref: 'User',
       trim: true,
     },
     type: {
@@ -36,6 +36,4 @@ const messageSchema = new Schema<IMessage>(
   },
 );
 
-const Message = mongoose.model<IMessage>('Message', messageSchema);
-
-export default Message;
+export const Message = mongoose.model<IMessage>('Message', messageSchema);

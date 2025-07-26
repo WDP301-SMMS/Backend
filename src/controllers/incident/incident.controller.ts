@@ -121,10 +121,45 @@ const getNurseIncidents = async (
   }
 };
 
+const getParentIncidents = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> => {
+  try {
+    const parentId = req.user?._id;
+
+    if (!parentId) {
+      res.status(401).json({
+        message: 'Không xác định được ID của phụ huynh từ token.',
+      });
+      return;
+    }
+
+    const { page, limit, severity, studentId } = req.query;
+
+    const result = await service.getAllIncidents({
+      page: Number(page) || 1,
+      limit: Number(limit) || 10,
+      severity: severity as string,
+      parentId: parentId.toString(),
+      studentId: studentId as string,
+    });
+
+    res.status(200).json({
+      message: 'Lấy các sự cố của phụ huynh hiện tại thành công',
+      ...result,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const MedicalIncidentController = {
   createIncident,
   getAllIncidents,
   getIncidentById,
   updateIncident,
   getNurseIncidents,
+  getParentIncidents,
 };

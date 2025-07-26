@@ -1,5 +1,5 @@
 import { IMessage } from '@/interfaces/message.interface';
-import Message from '@/models/message.model';
+import { Message } from '@/models/message.model';
 import { handleSuccessResponse } from '@/utils/responseHandler';
 import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
@@ -20,7 +20,8 @@ const getAllMessagesByRoomId = async (req: Request, res: Response) => {
 
   try {
     const messages = await Message.find({ roomId })
-      .populate('senderId receiverId')
+      .populate('senderId receiverId', 'username email role isActive phone dob') // Populate with specific fields
+      .select('-__v') // Exclude __v field
       .sort({ createdAt: 1 })
       .limit(50);
     if (!messages || messages.length === 0) {
@@ -63,7 +64,10 @@ const getRoomsByUserId = async (req: Request, res: Response) => {
     const messages = await Message.find({
       $or: [{ senderId: userId }, { receiverId: userId }],
     })
-      .populate('senderId receiverId')
+      .populate(
+        'senderId receiverId',
+        '-password -__v -createdAt -authProvider -updatedAt -googleId -pushTokens',
+      )
       .sort({ createdAt: -1 });
 
     if (!messages || messages.length === 0) {
@@ -180,22 +184,17 @@ const createOrFindDirectRoom = async (req: Request, res: Response) => {
     const existingRoom = await Message.findOne({
       $or: [
         { senderId: currentUserId, receiverId: participantId },
-        { senderId: participantId, receiverId: currentUserId }
-      ]
+        { senderId: participantId, receiverId: currentUserId },
+      ],
     }).populate('senderId receiverId');
 
     if (existingRoom) {
       // Room already exists, return it
-      handleSuccessResponse(
-        res,
-        200,
-        'Room already exists',
-        {
-          roomId: existingRoom.roomId,
-          isNew: false,
-          room: existingRoom
-        }
-      );
+      handleSuccessResponse(res, 200, 'Room already exists', {
+        roomId: existingRoom.roomId,
+        isNew: false,
+        room: existingRoom,
+      });
       return;
     }
 
@@ -212,19 +211,15 @@ const createOrFindDirectRoom = async (req: Request, res: Response) => {
       content: 'Chat room created',
     });
 
-    const populatedMessage = await Message.findById(newMessage._id)
-      .populate('senderId receiverId');
-
-    handleSuccessResponse(
-      res,
-      201,
-      'Room created successfully',
-      {
-        roomId,
-        isNew: true,
-        room: populatedMessage
-      }
+    const populatedMessage = await Message.findById(newMessage._id).populate(
+      'senderId receiverId',
     );
+
+    handleSuccessResponse(res, 201, 'Room created successfully', {
+      roomId,
+      isNew: true,
+      room: populatedMessage,
+    });
   } catch (error) {
     console.error('Error creating/finding room:', error);
     res.status(500).json({
@@ -237,34 +232,30 @@ const createOrFindDirectRoom = async (req: Request, res: Response) => {
 
 const getAvailableUsersForChat = async (req: Request, res: Response) => {
   const currentUserId = req.user?._id;
+  const currentUserRole = req.user?.role;
 
-  if (!currentUserId) {
-    res.status(400).json({
+  if (!currentUserId || !currentUserRole) {
+    return res.status(400).json({
       success: false,
-      error: 'Current user ID is required',
+      error: 'Current user ID and role are required',
     });
-    return;
   }
 
   try {
-    // Import User model
     const { UserModel } = await import('@/models/user.model');
-    
-    // Get all users that the current user already has rooms with
+
+    // Get all users that the current user already has messages with
     const existingMessages = await Message.find({
-      $or: [
-        { senderId: currentUserId },
-        { receiverId: currentUserId }
-      ]
+      $or: [{ senderId: currentUserId }, { receiverId: currentUserId }],
     });
 
-    // Flatten and get unique user IDs
     const existingChatUserIds = new Set<string>();
-    existingMessages.forEach(message => {
+    const currentUserIdStr = currentUserId.toString();
+
+    existingMessages.forEach((message) => {
       const senderIdStr = message.senderId.toString();
       const receiverIdStr = message.receiverId.toString();
-      const currentUserIdStr = currentUserId.toString();
-      
+
       if (senderIdStr !== currentUserIdStr) {
         existingChatUserIds.add(senderIdStr);
       }
@@ -273,20 +264,36 @@ const getAvailableUsersForChat = async (req: Request, res: Response) => {
       }
     });
 
-    // Get all active users except current user and users already in chat
+    // Determine target role to search for
+    let targetRole: string | undefined;
+
+    if (currentUserRole === 'Parent') {
+      targetRole = 'Nurse';
+    } else if (currentUserRole === 'Nurse') {
+      targetRole = 'Parent';
+    }
+
+    if (!targetRole) {
+      return res.status(403).json({
+        success: false,
+        error: 'Role not permitted to fetch chat users',
+      });
+    }
+
     const availableUsers = await UserModel.find({
-      _id: { 
+      _id: {
         $ne: currentUserId,
-        $nin: Array.from(existingChatUserIds)
+        $nin: Array.from(existingChatUserIds),
       },
-      isActive: true
+      isActive: true,
+      role: targetRole,
     }).select('_id username email role');
 
     handleSuccessResponse(
       res,
       200,
       'Available users retrieved successfully',
-      availableUsers
+      availableUsers,
     );
   } catch (error) {
     console.error('Error getting available users:', error);
@@ -294,7 +301,6 @@ const getAvailableUsersForChat = async (req: Request, res: Response) => {
       success: false,
       error: (error as Error).message,
     });
-    return;
   }
 };
 

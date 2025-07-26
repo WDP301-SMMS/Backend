@@ -2525,15 +2525,22 @@ paths:
           description: Internal server error
 
   # Appointment Management
-  /appointments/students/abnormal-results:
+  /appointments/students/abnormal-results/{campaignId}:
     get:
       tags:
         - Appointments
       summary: Get students with abnormal health results
-      description: Retrieves students who have abnormal health check results and are eligible for appointments (Nurse only)
+      description: Retrieves students who have abnormal health check results from a specific campaign and are eligible for appointments (excludes students with completed appointments) (Nurse only)
       operationId: getStudentsWithAbnormalResults
       security:
         - BearerAuth: []
+      parameters:
+        - name: campaignId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The ID of the health check campaign to filter results by
       responses:
         '200':
           description: Students with abnormal results retrieved successfully
@@ -2552,6 +2559,19 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/StudentWithAbnormalResult'
+        '400':
+          description: Bad request - Campaign not found or not completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Health check campaign not found"
         '401':
           $ref: '#/components/responses/UnauthorizedError'
         '403':

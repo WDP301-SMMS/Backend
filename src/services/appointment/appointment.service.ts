@@ -1,8 +1,10 @@
 import { AppointmentStatus } from '@/enums/AppointmentEnums';
 import { NotificationType } from '@/enums/NotificationEnums';
+import { CampaignStatus } from '@/enums/CampaignEnum';
 import { RoleEnum } from '@/enums/RoleEnum';
 import { IMeetingSchedule } from '@/interfaces/meeting.schedule.interface';
-import Appointment from '@/models/appointment.model';
+import { Appointment } from '@/models/appointment.model';
+import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
 import { HealthCheckResult } from '@/models/healthcheck.result.model';
 import { StudentModel } from '@/models/student.model';
 import { UserModel } from '@/models/user.model';
@@ -18,7 +20,7 @@ export interface CreateAppointmentRequest {
 }
 
 export interface RespondToAppointmentRequest {
-  action: 'accept' | 'decline';
+  action: 'APPROVED' | 'CANCELLED';
   reason?: string;
 }
 
@@ -110,8 +112,11 @@ export class AppointmentService {
 
     await appointment.save();
 
-    if (appointment){
-      sendMeetingScheduleNotification(appointment, NotificationType.MEETING_SCHEDULE_NEW);
+    if (appointment) {
+      sendMeetingScheduleNotification(
+        appointment,
+        NotificationType.MEETING_SCHEDULE_NEW,
+      );
     }
     return appointment.toObject();
   }
@@ -150,10 +155,10 @@ export class AppointmentService {
     }
 
     // Update appointment based on response
-    if (response.action === 'accept') {
-      // Keep status as SCHEDULED when accepted
+    if (response.action === 'APPROVED') {
+      appointment.status = AppointmentStatus.APPROVED;
       appointment.notes = appointment.notes;
-    } else if (response.action === 'decline') {
+    } else if (response.action === 'CANCELLED') {
       appointment.status = AppointmentStatus.CANCELLED;
       appointment.notes = appointment.notes;
     }
@@ -282,17 +287,33 @@ export class AppointmentService {
   }
 
   // Get students with abnormal results (for nurses to create appointments)
-  static async getStudentsWithAbnormalResults(nurseId: string) {
+  static async getStudentsWithAbnormalResults(
+    nurseId: string,
+    campaignId: string,
+  ): Promise<any[]> {
     // Verify nurse exists
     const nurse = await UserModel.findById(nurseId);
     if (!nurse || nurse.role !== RoleEnum.Nurse) {
       throw new Error('Only nurses can view students with abnormal results');
     }
 
-    // Find students with abnormal health results who don't have pending appointments
+    const campaign = await HealthCheckCampaign.findById(campaignId);
+
+    if (!campaign) {
+      throw new Error('Health check campaign not found');
+    } else if (campaign.status !== CampaignStatus.COMPLETED) {
+      throw new Error(
+        'Health check campaign is not completed, so no results available',
+      );
+    }
+
+    // Find students with abnormal health results who don't have pending or completed appointments
     const studentsWithAbnormalResults = await HealthCheckResult.aggregate([
       {
-        $match: { isAbnormal: true },
+        $match: {
+          isAbnormal: true,
+          campaignId: campaign._id,
+        },
       },
       {
         $lookup: {
@@ -326,18 +347,23 @@ export class AppointmentService {
                 $expr: {
                   $and: [
                     { $eq: ['$studentId', '$$studentId'] },
-                    { $eq: ['$status', AppointmentStatus.SCHEDULED] },
+                    {
+                      $or: [
+                        { $eq: ['$status', AppointmentStatus.SCHEDULED] },
+                        { $eq: ['$status', AppointmentStatus.COMPLETED] },
+                      ],
+                    },
                   ],
                 },
               },
             },
           ],
-          as: 'pendingAppointments',
+          as: 'existingAppointments',
         },
       },
       {
         $match: {
-          pendingAppointments: { $size: 0 }, // No pending appointments
+          existingAppointments: { $size: 0 }, // No pending or completed appointments
           parent: { $exists: true }, // Has a parent linked
         },
       },
@@ -372,5 +398,34 @@ export class AppointmentService {
     ]);
 
     return studentsWithAbnormalResults;
+  }
+
+  // Get single appointment by ID
+  static async getAppointmentById(
+    userId: string,
+    role: RoleEnum,
+    appointmentId: string,
+  ): Promise<IMeetingSchedule> {
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('studentId', 'fullName dateOfBirth gender')
+      .populate('parentId', 'username email phone fullName')
+      .populate('resultId', 'checkupDate isAbnormal overallConclusion')
+      .lean();
+
+    if (!appointment) {
+      throw new Error('Appointment not found');
+    }
+
+    // Authorization: ensure user is allowed to see this appointment
+    if (
+      role === RoleEnum.Parent &&
+      appointment.parentId?._id?.toString() !== userId
+    ) {
+      throw new Error('Access denied: This appointment does not belong to you');
+    }
+
+    // Nurses can see all, no restriction needed
+
+    return appointment;
   }
 }

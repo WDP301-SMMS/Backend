@@ -5,7 +5,7 @@ import {
   updateAppointmentStatusValidator,
   respondToAppointmentValidator,
   getAppointmentsValidator,
-  updateAppointmentNotesValidator
+  updateAppointmentNotesValidator,
 } from '@/validators/appointment/appointmentValidator';
 import { roleBaseAccess } from '@/middlewares/security/authorization';
 import { RoleEnum } from '@/enums/RoleEnum';
@@ -14,30 +14,30 @@ const router = Router();
 
 // Routes for nurses
 router.get(
-  '/students/abnormal-results',
+  '/students/abnormal-results/:campaignId',
   roleBaseAccess([RoleEnum.Nurse]),
-  AppointmentController.getStudentsWithAbnormalResults
+  AppointmentController.getStudentsWithAbnormalResults,
 );
 
 router.post(
   '/',
   roleBaseAccess([RoleEnum.Nurse]),
   createAppointmentValidator,
-  AppointmentController.createAppointment
+  AppointmentController.createAppointment,
 );
 
 router.patch(
   '/:appointmentId/status',
   roleBaseAccess([RoleEnum.Nurse]),
   updateAppointmentStatusValidator,
-  AppointmentController.updateAppointmentStatus
+  AppointmentController.updateAppointmentStatus,
 );
 
 router.patch(
   '/:appointmentId/notes',
   roleBaseAccess([RoleEnum.Nurse]),
   updateAppointmentNotesValidator,
-  AppointmentController.addAfterMeetingNotes
+  AppointmentController.addAfterMeetingNotes,
 );
 
 // Routes for parents
@@ -45,7 +45,7 @@ router.patch(
   '/:appointmentId/respond',
   roleBaseAccess([RoleEnum.Parent]),
   respondToAppointmentValidator,
-  AppointmentController.respondToAppointment
+  AppointmentController.respondToAppointment,
 );
 
 // Routes for both nurses and parents
@@ -53,7 +53,14 @@ router.get(
   '/',
   roleBaseAccess([RoleEnum.Nurse, RoleEnum.Parent]),
   getAppointmentsValidator,
-  AppointmentController.getAppointments
+  AppointmentController.getAppointments,
+);
+
+// Get Appointment Detail (for nurses and parents)
+router.get(
+  '/:appointmentId',
+  roleBaseAccess([RoleEnum.Nurse, RoleEnum.Parent]),
+  AppointmentController.getAppointmentById,
 );
 
 export default router;
