@@ -29,7 +29,7 @@ export class HealthProfileService {
       throw error;
     }
 
-    if (student.parentId) {
+    if (student.parentId !== null) {
       const error: AppError = new Error(
         'This student is already linked to another parent account.',
       );
