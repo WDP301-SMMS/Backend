@@ -324,7 +324,9 @@ const getConsentDetailById = async (req: Request, res: Response) => {
 
 const allowedStatusTransitions = (): Record<ConsentStatus, ConsentStatus[]> => {
   return {
-    [ConsentStatus.PENDING]: [ConsentStatus.APPROVED, ConsentStatus.DECLINED],
+    [ConsentStatus.PENDING]: [ConsentStatus.APPROVED, ConsentStatus.DECLINED, ConsentStatus.OVERDUE, ConsentStatus.NO_RESPONSE],
+    [ConsentStatus.OVERDUE]: [],
+    [ConsentStatus.NO_RESPONSE]: [],
     [ConsentStatus.APPROVED]: [ConsentStatus.REVOKED, ConsentStatus.COMPLETED],
     [ConsentStatus.COMPLETED]: [],
     [ConsentStatus.DECLINED]: [],
