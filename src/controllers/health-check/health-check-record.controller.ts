@@ -123,7 +123,7 @@ const getStudentHealthCheckRecord = async (req: Request, res: Response) => {
     })
       .populate('resultId')
       .populate('studentId');
-    if (!records || records.length === 0) {
+    if (!records) {
       res.status(404).json({ message: 'Record not found' });
       return;
     }

@@ -62,10 +62,6 @@ const createHealthCheckTemplate = async (req: Request, res: Response) => {
 const getAllHealthCheckTemplates = async (req: Request, res: Response) => {
   try {
     const templates = await HealthCheckTemplate.find();
-    if (!templates || templates.length === 0) {
-      res.status(404).json({ success: false, message: 'No templates found' });
-      return;
-    }
 
     handleSuccessResponse(
       res,

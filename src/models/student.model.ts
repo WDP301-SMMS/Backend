@@ -8,6 +8,7 @@ const StudentSchema = new Schema<IStudent>(
     parentId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
+      required: true,
     },
     classId: {
       type: Schema.Types.ObjectId,
