@@ -1,10 +1,12 @@
 import { CampaignStatus } from '@/enums/CampaignEnum';
+import { ConsentStatus } from '@/enums/ConsentsEnum';
 import {
   IHealthCheckCampaign,
   IHealthCheckCampaignQuery,
   CampaignSortField,
 } from '@/interfaces/healthcheck.campaign.interface';
 import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
+import { HealthCheckConsent } from '@/models/healthcheck.consents.model';
 import { getSchoolYear } from '@/utils/date-handle';
 import { sendHealthCheckAnnounceNotification } from '@/utils/notification.helper';
 import { handleSuccessResponse } from '@/utils/responseHandler';
@@ -288,17 +290,44 @@ const updateCampaignStatus = async (req: Request, res: Response) => {
       return;
     }
 
+    const healthCheckConsents = await HealthCheckConsent.find({
+      campaignId: id,
+    });
+
     const updateData: any = { status };
 
     // Set dates based on status
     switch (status) {
-      case CampaignStatus.ANNOUNCED:
-        // Campaign is announced, ready to start
-        break;
       case CampaignStatus.IN_PROGRESS:
+        if (healthCheckConsents.length === 0) {
+          res.status(400).json({
+            success: false,
+            message: 'Cannot start campaign without any consents',
+          });
+          return;
+        }
+
+        healthCheckConsents.forEach((consent) => {
+          if (consent.status === ConsentStatus.APPROVED) {
+            consent.status = ConsentStatus.PENDING;
+            consent.save();
+          } else if (consent.status === ConsentStatus.NO_RESPONSE) {
+            consent.status = ConsentStatus.OVERDUE;
+            consent.save();
+          }
+        });
+
         updateData.actualStartDate = new Date();
         break;
       case CampaignStatus.COMPLETED:
+        if (!campaign.actualStartDate) {
+          res.status(400).json({
+            success: false,
+            message: 'Campaign must be in progress before completing',
+          });
+          return;
+        }
+
         updateData.completedDate = new Date();
         break;
       case CampaignStatus.CANCELED:
@@ -316,7 +345,6 @@ const updateCampaignStatus = async (req: Request, res: Response) => {
       updatedCampaign &&
       updatedCampaign.status === CampaignStatus.ANNOUNCED
     ) {
-      // Gọi hàm mới, chuyên dụng cho Health Check
       sendHealthCheckAnnounceNotification(updatedCampaign);
     }
 
