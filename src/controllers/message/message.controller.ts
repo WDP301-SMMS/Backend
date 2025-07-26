@@ -24,19 +24,13 @@ const getAllMessagesByRoomId = async (req: Request, res: Response) => {
       .select('-__v') // Exclude __v field
       .sort({ createdAt: 1 })
       .limit(50);
-    if (!messages || messages.length === 0) {
-      res.status(404).json({
-        success: false,
-        message:
-          'No messages found for this room, please check the room ID \n or create a new room if it does not exist',
-      });
-      return;
-    }
 
     handleSuccessResponse(
       res,
       200,
-      'Messages retrieved successfully',
+      messages.length === 0
+        ? 'No messages found for this room'
+        : 'Messages retrieved successfully',
       messages,
     );
   } catch (error) {
@@ -70,14 +64,6 @@ const getRoomsByUserId = async (req: Request, res: Response) => {
       )
       .sort({ createdAt: -1 });
 
-    if (!messages || messages.length === 0) {
-      res.status(404).json({
-        success: false,
-        message: 'No messages found for this user',
-      });
-      return;
-    }
-
     // Extract unique rooms with latest message info
     const roomMap = new Map();
     messages.forEach((message) => {
@@ -98,7 +84,14 @@ const getRoomsByUserId = async (req: Request, res: Response) => {
     });
 
     const rooms = Array.from(roomMap.values());
-    handleSuccessResponse(res, 200, 'Rooms retrieved successfully', rooms);
+    handleSuccessResponse(
+      res,
+      200,
+      rooms.length === 0
+        ? 'No message rooms found for this user'
+        : 'Rooms retrieved successfully',
+      rooms,
+    );
   } catch (error) {
     console.error('Error retrieving messages:', error);
     res.status(500).json({
@@ -208,7 +201,7 @@ const createOrFindDirectRoom = async (req: Request, res: Response) => {
       senderId: currentUserId,
       receiverId: participantId,
       type: 'TEXT',
-      content: 'Chat room created',
+      content: 'Chào bạn nhé!',
     });
 
     const populatedMessage = await Message.findById(newMessage._id).populate(

@@ -27,7 +27,6 @@ const createHealthCheckResultBaseOnTemplate = async (
   }
 
   try {
-    // Find and validate campaign
 
     const healthCheckConsent = await HealthCheckConsent.findOne({
       studentId: body.studentId,
@@ -39,36 +38,15 @@ const createHealthCheckResultBaseOnTemplate = async (
         .json({ message: 'Student is not enrolled in this campaign' });
       return;
     }
-    switch (healthCheckConsent.status) {
-      case ConsentStatus.PENDING:
-        res.status(400).json({
-          message: 'Health check consent is still pending',
-        });
-        return;
-      case ConsentStatus.DECLINED:
-        res.status(403).json({
-          message: 'Health check consent has been declined',
-        });
-        return;
-      case ConsentStatus.APPROVED:
-        break;
-      case ConsentStatus.COMPLETED:
-        res.status(400).json({
-          message: 'Health check consent has been completed',
-        });
-        return;
-      default:
-        res.status(400).json({ message: 'Invalid consent status' });
-        return;
-    }
 
-    const campaign = await HealthCheckCampaign.findById(body.campaignId);
-    if (!campaign || !campaign.templateId) {
-      res
-        .status(404)
-        .json({ message: 'Campaign not found or has no template' });
+    if (healthCheckConsent.status !== ConsentStatus.PENDING) {
+      res.status(400).json({
+        message:
+          'Health check consent must be pending before creating a result',
+      });
       return;
     }
+
 
     const healthCheckResult = await HealthCheckResult.create({
       campaignId: body.campaignId,
@@ -145,7 +123,7 @@ const getStudentHealthCheckRecord = async (req: Request, res: Response) => {
     })
       .populate('resultId')
       .populate('studentId');
-    if (!records || records.length === 0) {
+    if (!records) {
       res.status(404).json({ message: 'Record not found' });
       return;
     }

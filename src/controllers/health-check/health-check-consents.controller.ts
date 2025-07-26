@@ -13,8 +13,6 @@ const addAllStudentToConsentByCampaignId = async (
 ) => {
   try {
     const { campaignId } = req.body;
-
-    // Validate campaignId
     if (!campaignId || !Types.ObjectId.isValid(campaignId)) {
       return res.status(400).json({
         success: false,
@@ -22,7 +20,7 @@ const addAllStudentToConsentByCampaignId = async (
       });
     }
 
-    // Find the campaign
+
     const campaign = await HealthCheckCampaign.findById(campaignId);
     if (!campaign) {
       return res.status(404).json({
@@ -94,7 +92,7 @@ const addAllStudentToConsentByCampaignId = async (
         classId: student.classId,
         parentId: student.parentId || new Types.ObjectId(),
         nurseId: nurseId ? new Types.ObjectId(nurseId) : null,
-        status: ConsentStatus.PENDING,
+        status: ConsentStatus.NO_RESPONSE,
         reasonForDeclining: null,
         confirmedAt: null,
       };
@@ -160,7 +158,7 @@ const getHealthCheckConsentsByCampaignId = async (
 
 const handleStatusConsent = async (req: Request, res: Response) => {
   const { consentId } = req.params;
-  const { status } = req.body;
+  const { status, reasonForDeclining } = req.body;
   try {
     const consent = await HealthCheckConsent.findById(consentId)
       .populate('campaignId')
@@ -175,28 +173,16 @@ const handleStatusConsent = async (req: Request, res: Response) => {
       });
     }
 
-    if (consent.status !== ConsentStatus.PENDING) {
-      return res.status(400).json({
-        success: false,
-        message: 'Consent is not in a pending state',
-      });
-    }
-
     if (validateStatusTransition(consent.status, status) === false) {
       return res.status(400).json({
         success: false,
         message: 'Invalid consent status',
       });
     }
+
     consent.status = status;
     consent.confirmedAt = new Date();
-
-    if (status === ConsentStatus.DECLINED) {
-      consent.reasonForDeclining = req.body.reasonForDeclining || null;
-    } else {
-      consent.reasonForDeclining = null;
-    }
-
+    consent.reasonForDeclining = status === ConsentStatus.DECLINED ? reasonForDeclining : null;
     await consent.save();
 
     handleSuccessResponse(
@@ -215,6 +201,7 @@ const handleStatusConsent = async (req: Request, res: Response) => {
 };
 
 const getAllConsents = async (req: Request, res: Response) => {
+  console.log('Fetching all health check consents for parent');
   try {
     const parentId = req.user?._id;
     if (!parentId) {
@@ -324,12 +311,16 @@ const getConsentDetailById = async (req: Request, res: Response) => {
 
 const allowedStatusTransitions = (): Record<ConsentStatus, ConsentStatus[]> => {
   return {
-    [ConsentStatus.PENDING]: [ConsentStatus.APPROVED, ConsentStatus.DECLINED, ConsentStatus.OVERDUE, ConsentStatus.NO_RESPONSE],
-    [ConsentStatus.OVERDUE]: [],
-    [ConsentStatus.NO_RESPONSE]: [],
-    [ConsentStatus.APPROVED]: [ConsentStatus.REVOKED, ConsentStatus.COMPLETED],
+    [ConsentStatus.PENDING]: [ConsentStatus.COMPLETED],
+    [ConsentStatus.APPROVED]: [ConsentStatus.REVOKED, ConsentStatus.PENDING],
     [ConsentStatus.COMPLETED]: [],
     [ConsentStatus.DECLINED]: [],
+    [ConsentStatus.OVERDUE]: [],
+    [ConsentStatus.NO_RESPONSE]: [
+      ConsentStatus.OVERDUE,
+      ConsentStatus.APPROVED,
+      ConsentStatus.DECLINED,
+    ],
     [ConsentStatus.REVOKED]: [],
     [ConsentStatus.UNDER_OBSERVATION]: [
       ConsentStatus.COMPLETED,

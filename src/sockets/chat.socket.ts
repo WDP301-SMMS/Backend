@@ -19,10 +19,10 @@ export const handleSocketConnection = (socket: Socket, io: Server) => {
       const roomId = getPrivateRoom(senderId, receiverId);
       socket.join(roomId);
       console.log(`Socket ${socket.id} joined room: ${roomId}`);
-      
+
       // Check if room exists
       const roomExists = await checkRoomExists(roomId);
-      
+
       if (!roomExists) {
         // Create room if it doesn't exist
         await createRoom(roomId, senderId, receiverId);
@@ -129,5 +129,14 @@ export const handleSocketConnection = (socket: Socket, io: Server) => {
   // Handle socket errors
   socket.on('error', (error: Error) => {
     console.error(`Socket error for ${socket.id}:`, error);
+  });
+
+  // Handle socket typing
+  socket.on('typing', ({ roomId, senderId }) => {
+    socket.to(roomId).emit('typing', { senderId });
+  });
+
+  socket.on('stopTyping', ({ roomId, senderId }) => {
+    socket.to(roomId).emit('stopTyping', { senderId });
   });
 };
