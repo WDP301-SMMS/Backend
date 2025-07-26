@@ -10,21 +10,22 @@ const healthCheckRouter = express.Router();
 
 healthCheckRouter.use(
   '/templates',
-  roleBaseAccess([RoleEnum.Admin, RoleEnum.Manager, RoleEnum.Nurse]),
+  roleBaseAccess([RoleEnum.Manager]),
   templateRouter,
 );
 healthCheckRouter.use(
   '/campaigns',
-  roleBaseAccess([RoleEnum.Admin, RoleEnum.Manager, RoleEnum.Nurse]),
+  roleBaseAccess([RoleEnum.Manager, RoleEnum.Nurse]),
   campaignRouter,
 );
 healthCheckRouter.use(
   '/consents',
-  roleBaseAccess([RoleEnum.Admin, RoleEnum.Manager, RoleEnum.Nurse, RoleEnum.Parent]),
+  roleBaseAccess([RoleEnum.Manager, RoleEnum.Nurse, RoleEnum.Parent]),
   consentRouter,
 );
 healthCheckRouter.use(
   '/record',
+  roleBaseAccess([RoleEnum.Manager, RoleEnum.Nurse, RoleEnum.Parent]),
   recordRouter,
 );
 
