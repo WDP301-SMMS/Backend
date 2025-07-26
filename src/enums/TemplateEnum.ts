@@ -21,4 +21,5 @@ export enum CheckupItemUnit {
   MG_DL = 'MG/DL',
   MM_HG = 'MM/HG',
   LITER = 'LITER',
+  DIOP = 'DIOP',
 }
