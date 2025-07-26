@@ -68,7 +68,7 @@ export class VaccinationCampaignService {
   //       error.status = 404; 
   //       throw error;
   //     }
-      
+
   //     let createdCount = 0;
   //     if (students.length > 0) {
   //       const consentsToCreate = students.map(student => ({
@@ -95,66 +95,120 @@ export class VaccinationCampaignService {
   // }
 
   public async dispatchCampaign(campaignId: string): Promise<{ message: string }> {
-  try {
-    const campaign = await VaccinationCampaignModel.findById(campaignId);
-    if (!campaign) {
-      const error: AppError = new Error('Campaign not found.');
-      error.status = 404;
+    try {
+      const campaign = await VaccinationCampaignModel.findById(campaignId);
+      if (!campaign) {
+        const error: AppError = new Error('Campaign not found.');
+        error.status = 404;
+        throw error;
+      }
+
+      if (campaign.status !== CampaignStatus.DRAFT) {
+        const error: AppError = new Error('Only DRAFT campaigns can be dispatched.');
+        error.status = 409;
+        throw error;
+      }
+
+      const targetClasses = await Class.find({ gradeLevel: { $in: campaign.targetGradeLevels } }).select('_id');
+      if (targetClasses.length === 0) {
+        const error: AppError = new Error(`No classes found for the target grade levels [${campaign.targetGradeLevels.join(', ')}]. Please check campaign settings or class data.`);
+        error.status = 404;
+        throw error;
+      }
+
+      const targetClassIds = targetClasses.map(c => c._id);
+
+      const allStudents = await StudentModel.find({ classId: { $in: targetClassIds } }).select('parentId');
+      const validStudents = allStudents.filter(s => s.parentId);
+
+      if (validStudents.length === 0) {
+        const error: AppError = new Error('No students with linked parents found. Consent forms were not created.');
+        error.status = 404;
+        throw error;
+      }
+
+      const consentsToCreate = validStudents.map(student => ({
+        campaignId: campaign._id,
+        studentId: student._id,
+        parentId: student.parentId,
+        status: 'PENDING',
+      }));
+      const result = await VaccinationConsentModel.insertMany(consentsToCreate);
+      const createdCount = result.length;
+
+      const skippedCount = allStudents.length - validStudents.length;
+
+      campaign.status = CampaignStatus.ANNOUNCED;
+      campaign.dispatchedAt = new Date();
+      campaign.summary.totalStudents = allStudents.length;
+      campaign.summary.totalConsents = createdCount;
+
+      await campaign.save();
+
+      sendAnnounceNotification(campaign);
+
+      return {
+        message: `Campaign dispatched successfully. ${createdCount} consent forms created. ${skippedCount} students were skipped due to missing parent links.`
+      };
+    } catch (error) {
       throw error;
     }
-
-    if (campaign.status !== CampaignStatus.DRAFT) {
-      const error: AppError = new Error('Only DRAFT campaigns can be dispatched.');
-      error.status = 409;
-      throw error;
-    }
-
-    const targetClasses = await Class.find({ gradeLevel: { $in: campaign.targetGradeLevels } }).select('_id');
-    if (targetClasses.length === 0) {
-      const error: AppError = new Error(`No classes found for the target grade levels [${campaign.targetGradeLevels.join(', ')}]. Please check campaign settings or class data.`);
-      error.status = 404;
-      throw error;
-    }
-
-    const targetClassIds = targetClasses.map(c => c._id);
-
-    const allStudents = await StudentModel.find({ classId: { $in: targetClassIds } }).select('parentId');
-    const validStudents = allStudents.filter(s => s.parentId);
-    
-    if (validStudents.length === 0) {
-      const error: AppError = new Error('No students with linked parents found. Consent forms were not created.');
-      error.status = 404;
-      throw error;
-    }
-
-    const consentsToCreate = validStudents.map(student => ({
-      campaignId: campaign._id,
-      studentId: student._id,
-      parentId: student.parentId,
-      status: 'PENDING',
-    }));
-    const result = await VaccinationConsentModel.insertMany(consentsToCreate);
-    const createdCount = result.length;
-
-    const skippedCount = allStudents.length - validStudents.length;
-
-    campaign.status = CampaignStatus.ANNOUNCED;
-    campaign.dispatchedAt = new Date();
-    campaign.summary.totalStudents = allStudents.length;
-    campaign.summary.totalConsents = createdCount;
-
-    await campaign.save();
-
-    sendAnnounceNotification(campaign);
-
-    return {
-      message: `Campaign dispatched successfully. ${createdCount} consent forms created. ${skippedCount} students were skipped due to missing parent links.`
-    };
-  } catch (error) {
-    throw error;
   }
-}
 
+
+  // public async updateCampaign(campaignId: string, updateData: UpdateCampaignInput, userId: string): Promise<IVaccinationCampaign> {
+  //   const campaign = await VaccinationCampaignModel.findById(campaignId);
+  //   if (!campaign) {
+  //     const error: AppError = new Error('Campaign not found.');
+  //     error.status = 404;
+  //     throw error;
+  //   }
+
+  //   const currentStatus = campaign.status as CampaignStatus;
+  //   const newStatus = updateData.status;
+
+  //   if (newStatus && newStatus !== currentStatus) {
+  //     this.validateStateTransition(currentStatus, newStatus);
+  //     if (newStatus === CampaignStatus.CANCELED) {
+  //       if (!updateData.cancellationReason) {
+  //         const error: AppError = new Error('Cancellation reason is required.');
+  //         error.status = 400;
+  //         throw error;
+  //       }
+
+  //       campaign.cancellationReason = updateData.cancellationReason;
+  //       campaign.canceledBy = new mongoose.Types.ObjectId(userId);
+  //       campaign.cancellationDate = new Date();
+
+  //       if (currentStatus === CampaignStatus.ANNOUNCED || currentStatus === CampaignStatus.IN_PROGRESS) {
+  //         await VaccinationConsentModel.updateMany(
+  //           { campaignId: campaign._id },
+  //           { $set: { status: ConsentStatus.DECLINED } }
+  //         );
+  //       }
+  //     }
+
+  //     if (newStatus === CampaignStatus.COMPLETED) {
+  //       campaign.completedAt = new Date();
+  //     }
+
+
+  //     campaign.status = newStatus;
+  //   }
+  //   if (currentStatus === CampaignStatus.DRAFT) {
+  //     if (updateData.name) campaign.name = updateData.name;
+  //     if (updateData.description) campaign.description = updateData.description;
+  //     if (updateData.actualStartDate) campaign.actualStartDate = updateData.actualStartDate;
+  //     if (updateData.destination) campaign.destination = updateData.destination;
+  //   } else if (updateData.name || updateData.description || updateData.actualStartDate) {
+  //     const error: AppError = new Error(`Cannot update campaign details with status ${currentStatus}.`);
+  //     error.status = 409;
+  //     throw error;
+  //   }
+
+  //   await campaign.save();
+  //   return campaign;
+  // }
 
   public async updateCampaign(campaignId: string, updateData: UpdateCampaignInput, userId: string): Promise<IVaccinationCampaign> {
     const campaign = await VaccinationCampaignModel.findById(campaignId);
@@ -169,32 +223,42 @@ export class VaccinationCampaignService {
 
     if (newStatus && newStatus !== currentStatus) {
       this.validateStateTransition(currentStatus, newStatus);
+
       if (newStatus === CampaignStatus.CANCELED) {
         if (!updateData.cancellationReason) {
           const error: AppError = new Error('Cancellation reason is required.');
           error.status = 400;
           throw error;
         }
-
         campaign.cancellationReason = updateData.cancellationReason;
         campaign.canceledBy = new mongoose.Types.ObjectId(userId);
         campaign.cancellationDate = new Date();
-
         if (currentStatus === CampaignStatus.ANNOUNCED || currentStatus === CampaignStatus.IN_PROGRESS) {
           await VaccinationConsentModel.updateMany(
-            { campaignId: campaign._id },
-            { $set: { status: ConsentStatus.DECLINED } }
+            { campaignId: campaign._id, status: { $in: [ConsentStatus.PENDING, ConsentStatus.APPROVED] } },
+            { $set: { status: ConsentStatus.REVOKED, reasonForDeclining: 'Chiến dịch đã bị hủy.' } }
           );
         }
-      }
+      } else if (newStatus === CampaignStatus.IN_PROGRESS) {
+        campaign.actualStartDate = new Date();
+        await VaccinationConsentModel.updateMany(
+          { campaignId: campaign._id, status: ConsentStatus.PENDING },
+          {
+            $set: {
+              status: ConsentStatus.NO_RESPONSE,
+              reasonForDeclining: 'Không phản hồi trước khi chiến dịch bắt đầu.',
+              confirmedAt: new Date()
+            }
+          }
+        );
 
-      if (newStatus === CampaignStatus.COMPLETED) {
+      } else if (newStatus === CampaignStatus.COMPLETED) {
         campaign.completedAt = new Date();
       }
 
-
       campaign.status = newStatus;
     }
+
     if (currentStatus === CampaignStatus.DRAFT) {
       if (updateData.name) campaign.name = updateData.name;
       if (updateData.description) campaign.description = updateData.description;
