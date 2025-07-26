@@ -1,10 +1,14 @@
 import { AppointmentStatus } from '@/enums/AppointmentEnums';
+import { NotificationType } from '@/enums/NotificationEnums';
+import { CampaignStatus } from '@/enums/CampaignEnum';
 import { RoleEnum } from '@/enums/RoleEnum';
 import { IMeetingSchedule } from '@/interfaces/meeting.schedule.interface';
-import Appointment from '@/models/appointment.model';
+import { Appointment } from '@/models/appointment.model';
+import { HealthCheckCampaign } from '@/models/healthcheck.campaign.model';
 import { HealthCheckResult } from '@/models/healthcheck.result.model';
 import { StudentModel } from '@/models/student.model';
 import { UserModel } from '@/models/user.model';
+import { sendMeetingScheduleNotification } from '@/utils/notification.helper';
 
 export interface CreateAppointmentRequest {
   studentId: string;
@@ -16,7 +20,7 @@ export interface CreateAppointmentRequest {
 }
 
 export interface RespondToAppointmentRequest {
-  action: 'accept' | 'decline';
+  action: 'APPROVED' | 'CANCELLED';
   reason?: string;
 }
 
@@ -29,7 +33,7 @@ export class AppointmentService {
   // Check if student has abnormal health results and create appointment
   static async createAppointmentForAbnormalResult(
     nurseId: string,
-    appointmentData: CreateAppointmentRequest
+    appointmentData: CreateAppointmentRequest,
   ): Promise<IMeetingSchedule> {
     // Verify nurse has permission
     const nurse = await UserModel.findById(nurseId);
@@ -56,11 +60,13 @@ export class AppointmentService {
     // Check if student has abnormal health results
     let hasAbnormalResults = false;
     if (appointmentData.resultId) {
-      const healthResult = await HealthCheckResult.findById(appointmentData.resultId);
+      const healthResult = await HealthCheckResult.findById(
+        appointmentData.resultId,
+      );
       if (!healthResult) {
         throw new Error('Health check result not found');
       }
-      
+
       if (healthResult.studentId.toString() !== appointmentData.studentId) {
         throw new Error('Health result does not belong to this student');
       }
@@ -70,20 +76,22 @@ export class AppointmentService {
       // Check for any abnormal results for this student
       const abnormalResults = await HealthCheckResult.findOne({
         studentId: appointmentData.studentId,
-        isAbnormal: true
+        isAbnormal: true,
       });
-      
+
       hasAbnormalResults = !!abnormalResults;
     }
 
     if (!hasAbnormalResults) {
-      throw new Error('Appointment can only be created for students with abnormal health results');
+      throw new Error(
+        'Appointment can only be created for students with abnormal health results',
+      );
     }
 
     // Check for existing pending appointments
     const existingAppointment = await Appointment.findOne({
       studentId: appointmentData.studentId,
-      status: AppointmentStatus.SCHEDULED
+      status: AppointmentStatus.SCHEDULED,
     });
 
     if (existingAppointment) {
@@ -99,10 +107,17 @@ export class AppointmentService {
       location: appointmentData.location,
       status: AppointmentStatus.SCHEDULED,
       notes: appointmentData.notes || '',
-      afterMeetingNotes: ''
+      afterMeetingNotes: '',
     });
 
     await appointment.save();
+
+    if (appointment) {
+      sendMeetingScheduleNotification(
+        appointment,
+        NotificationType.MEETING_SCHEDULE_NEW,
+      );
+    }
     return appointment.toObject();
   }
 
@@ -110,7 +125,7 @@ export class AppointmentService {
   static async respondToAppointment(
     parentId: string,
     appointmentId: string,
-    response: RespondToAppointmentRequest
+    response: RespondToAppointmentRequest,
   ): Promise<IMeetingSchedule> {
     // Verify parent exists
     const parent = await UserModel.findById(parentId);
@@ -140,16 +155,12 @@ export class AppointmentService {
     }
 
     // Update appointment based on response
-    if (response.action === 'accept') {
-      // Keep status as SCHEDULED when accepted
-      appointment.notes = appointment.notes + 
-        (appointment.notes ? '\n' : '') + 
-        `Parent accepted appointment on ${new Date().toISOString()}`;
-    } else if (response.action === 'decline') {
+    if (response.action === 'APPROVED') {
+      appointment.status = AppointmentStatus.APPROVED;
+      appointment.notes = appointment.notes;
+    } else if (response.action === 'CANCELLED') {
       appointment.status = AppointmentStatus.CANCELLED;
-      appointment.notes = appointment.notes + 
-        (appointment.notes ? '\n' : '') + 
-        `Parent declined appointment on ${new Date().toISOString()}. Reason: ${response.reason}`;
+      appointment.notes = appointment.notes;
     }
 
     await appointment.save();
@@ -165,7 +176,7 @@ export class AppointmentService {
       limit?: number;
       status?: AppointmentStatus;
       studentId?: string;
-    } = {}
+    } = {},
   ) {
     const page = filters.page || 1;
     const limit = Math.min(filters.limit || 10, 100);
@@ -194,12 +205,12 @@ export class AppointmentService {
     const [appointments, total] = await Promise.all([
       Appointment.find(query)
         .populate('studentId', 'fullName dateOfBirth gender')
-        .populate('parentId', 'fullName email phone')
+        .populate('parentId', 'username email phone')
         .populate('resultId', 'checkupDate isAbnormal overallConclusion')
         .sort({ meetingTime: -1 })
         .skip(skip)
         .limit(limit),
-      Appointment.countDocuments(query)
+      Appointment.countDocuments(query),
     ]);
 
     return {
@@ -208,8 +219,8 @@ export class AppointmentService {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     };
   }
 
@@ -217,7 +228,7 @@ export class AppointmentService {
   static async updateAppointmentStatus(
     nurseId: string,
     appointmentId: string,
-    updateData: UpdateAppointmentStatusRequest
+    updateData: UpdateAppointmentStatusRequest,
   ): Promise<IMeetingSchedule> {
     // Verify nurse exists
     const nurse = await UserModel.findById(nurseId);
@@ -233,11 +244,9 @@ export class AppointmentService {
 
     // Update status
     appointment.status = updateData.status;
-    
+
     if (updateData.reason) {
-      appointment.notes = appointment.notes + 
-        (appointment.notes ? '\n' : '') + 
-        `Status updated to ${updateData.status} by nurse on ${new Date().toISOString()}. Reason: ${updateData.reason}`;
+      appointment.notes = appointment.notes;
     }
 
     await appointment.save();
@@ -248,7 +257,7 @@ export class AppointmentService {
   static async addAfterMeetingNotes(
     nurseId: string,
     appointmentId: string,
-    notes: string
+    notes: string,
   ): Promise<IMeetingSchedule> {
     // Verify nurse exists
     const nurse = await UserModel.findById(nurseId);
@@ -278,39 +287,55 @@ export class AppointmentService {
   }
 
   // Get students with abnormal results (for nurses to create appointments)
-  static async getStudentsWithAbnormalResults(nurseId: string) {
+  static async getStudentsWithAbnormalResults(
+    nurseId: string,
+    campaignId: string,
+  ): Promise<any[]> {
     // Verify nurse exists
     const nurse = await UserModel.findById(nurseId);
     if (!nurse || nurse.role !== RoleEnum.Nurse) {
       throw new Error('Only nurses can view students with abnormal results');
     }
 
-    // Find students with abnormal health results who don't have pending appointments
+    const campaign = await HealthCheckCampaign.findById(campaignId);
+
+    if (!campaign) {
+      throw new Error('Health check campaign not found');
+    } else if (campaign.status !== CampaignStatus.COMPLETED) {
+      throw new Error(
+        'Health check campaign is not completed, so no results available',
+      );
+    }
+
+    // Find students with abnormal health results who don't have pending or completed appointments
     const studentsWithAbnormalResults = await HealthCheckResult.aggregate([
       {
-        $match: { isAbnormal: true }
+        $match: {
+          isAbnormal: true,
+          campaignId: campaign._id,
+        },
       },
       {
         $lookup: {
           from: 'students',
           localField: 'studentId',
           foreignField: '_id',
-          as: 'student'
-        }
+          as: 'student',
+        },
       },
       {
-        $unwind: '$student'
+        $unwind: '$student',
       },
       {
         $lookup: {
           from: 'users',
           localField: 'student.parentId',
           foreignField: '_id',
-          as: 'parent'
-        }
+          as: 'parent',
+        },
       },
       {
-        $unwind: { path: '$parent', preserveNullAndEmptyArrays: true }
+        $unwind: { path: '$parent', preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
@@ -322,20 +347,25 @@ export class AppointmentService {
                 $expr: {
                   $and: [
                     { $eq: ['$studentId', '$$studentId'] },
-                    { $eq: ['$status', AppointmentStatus.SCHEDULED] }
-                  ]
-                }
-              }
-            }
+                    {
+                      $or: [
+                        { $eq: ['$status', AppointmentStatus.SCHEDULED] },
+                        { $eq: ['$status', AppointmentStatus.COMPLETED] },
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
           ],
-          as: 'pendingAppointments'
-        }
+          as: 'existingAppointments',
+        },
       },
       {
         $match: {
-          'pendingAppointments': { $size: 0 }, // No pending appointments
-          'parent': { $exists: true } // Has a parent linked
-        }
+          existingAppointments: { $size: 0 }, // No pending or completed appointments
+          parent: { $exists: true }, // Has a parent linked
+        },
       },
       {
         $group: {
@@ -343,8 +373,8 @@ export class AppointmentService {
           student: { $first: '$student' },
           parent: { $first: '$parent' },
           latestResult: { $first: '$$ROOT' },
-          abnormalResultsCount: { $sum: 1 }
-        }
+          abnormalResultsCount: { $sum: 1 },
+        },
       },
       {
         $project: {
@@ -359,14 +389,43 @@ export class AppointmentService {
           parentPhone: '$parent.phone',
           latestCheckupDate: '$latestResult.checkupDate',
           latestResultId: '$latestResult._id',
-          abnormalResultsCount: 1
-        }
+          abnormalResultsCount: 1,
+        },
       },
       {
-        $sort: { latestCheckupDate: -1 }
-      }
+        $sort: { latestCheckupDate: -1 },
+      },
     ]);
 
     return studentsWithAbnormalResults;
+  }
+
+  // Get single appointment by ID
+  static async getAppointmentById(
+    userId: string,
+    role: RoleEnum,
+    appointmentId: string,
+  ): Promise<IMeetingSchedule> {
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('studentId', 'fullName dateOfBirth gender')
+      .populate('parentId', 'username email phone fullName')
+      .populate('resultId', 'checkupDate isAbnormal overallConclusion')
+      .lean();
+
+    if (!appointment) {
+      throw new Error('Appointment not found');
+    }
+
+    // Authorization: ensure user is allowed to see this appointment
+    if (
+      role === RoleEnum.Parent &&
+      appointment.parentId?._id?.toString() !== userId
+    ) {
+      throw new Error('Access denied: This appointment does not belong to you');
+    }
+
+    // Nurses can see all, no restriction needed
+
+    return appointment;
   }
 }

@@ -12,6 +12,7 @@
     "tunnel": "ngrok http 3000",
     "tunnel:delayed": "npx wait-on tcp:3000 && npx ngrok http 3000",
     "dev:tunnel": "concurrently --names \"NODE,NGROK\" --prefix \"[{name}]\" --prefix-colors \"cyan,green\" --raw \"npm run dev\" \"npm run tunnel:delayed\"",
+    "dev:tunnel:worker": "concurrently --names \"NODE,NGROK\" --prefix \"[{name}]\" --prefix-colors \"cyan,green\" --raw \"npm run dev\" \"npm run worker:dev\" \"npm run tunnel:delayed\"",
     "worker:start": "node dist/workers/notification.worker.js",
     "worker:dev": "ts-node-dev -r dotenv/config -r tsconfig-paths/register src/workers/notification.worker.ts"
   },

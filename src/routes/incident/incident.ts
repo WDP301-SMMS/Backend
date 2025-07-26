@@ -7,6 +7,7 @@ const router = express.Router();
 router.post('/', validateIncident, MedicalIncidentController.createIncident);
 router.get('/', MedicalIncidentController.getAllIncidents);
 router.get('/nurse', MedicalIncidentController.getNurseIncidents);
+router.get('/parent', MedicalIncidentController.getParentIncidents);
 router.get('/:id', MedicalIncidentController.getIncidentById);
 router.patch(
   '/:id',

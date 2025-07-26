@@ -7,26 +7,31 @@ import { UserModel } from '@/models/user.model';
 export class AppointmentController {
   // Get students with abnormal results (for nurses)
   static async getStudentsWithAbnormalResults(req: Request, res: Response) {
+    const { campaignId } = req.params;
     try {
       const userId = req.user?._id;
       if (!userId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: 'Authentication required' 
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required',
         });
       }
 
-      const students = await AppointmentService.getStudentsWithAbnormalResults(userId);
+      const students = await AppointmentService.getStudentsWithAbnormalResults(
+        userId,
+        campaignId,
+      );
 
       return res.status(200).json({
         success: true,
         message: 'Students with abnormal results retrieved successfully',
-        data: students
+        data: students,
       });
     } catch (error: any) {
       return res.status(400).json({
         success: false,
-        message: error.message || 'Failed to retrieve students with abnormal results'
+        message:
+          error.message || 'Failed to retrieve students with abnormal results',
       });
     }
   }
@@ -39,15 +44,15 @@ export class AppointmentController {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
       const userId = req.user?._id;
       if (!userId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: 'Authentication required' 
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required',
         });
       }
 
@@ -57,23 +62,24 @@ export class AppointmentController {
         resultId: req.body.resultId,
         meetingTime: new Date(req.body.meetingTime),
         location: req.body.location,
-        notes: req.body.notes
+        notes: req.body.notes,
       };
 
-      const appointment = await AppointmentService.createAppointmentForAbnormalResult(
-        userId,
-        appointmentData
-      );
+      const appointment =
+        await AppointmentService.createAppointmentForAbnormalResult(
+          userId,
+          appointmentData,
+        );
 
       return res.status(201).json({
         success: true,
         message: 'Appointment created successfully',
-        data: appointment
+        data: appointment,
       });
     } catch (error: any) {
       return res.status(400).json({
         success: false,
-        message: error.message || 'Failed to create appointment'
+        message: error.message || 'Failed to create appointment',
       });
     }
   }
@@ -86,15 +92,15 @@ export class AppointmentController {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
       const userId = req.user?._id;
       if (!userId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: 'Authentication required' 
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required',
         });
       }
 
@@ -103,29 +109,35 @@ export class AppointmentController {
       if (!user) {
         return res.status(404).json({
           success: false,
-          message: 'User not found'
+          message: 'User not found',
         });
       }
 
       const filters = {
         page: req.query.page ? parseInt(req.query.page as string) : undefined,
-        limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+        limit: req.query.limit
+          ? parseInt(req.query.limit as string)
+          : undefined,
         status: req.query.status as any,
-        studentId: req.query.studentId as string
+        studentId: req.query.studentId as string,
       };
 
-      const result = await AppointmentService.getAppointments(userId, user.role, filters);
+      const result = await AppointmentService.getAppointments(
+        userId,
+        user.role,
+        filters,
+      );
 
       return res.status(200).json({
         success: true,
         message: 'Appointments retrieved successfully',
         data: result.appointments,
-        pagination: result.pagination
+        pagination: result.pagination,
       });
     } catch (error: any) {
       return res.status(400).json({
         success: false,
-        message: error.message || 'Failed to retrieve appointments'
+        message: error.message || 'Failed to retrieve appointments',
       });
     }
   }
@@ -138,39 +150,39 @@ export class AppointmentController {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
       const userId = req.user?._id;
       if (!userId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: 'Authentication required' 
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required',
         });
       }
 
       const appointmentId = req.params.appointmentId;
       const response = {
         action: req.body.action,
-        reason: req.body.reason
+        reason: req.body.reason,
       };
 
       const appointment = await AppointmentService.respondToAppointment(
         userId,
         appointmentId,
-        response
+        response,
       );
 
       return res.status(200).json({
         success: true,
         message: `Appointment ${response.action}ed successfully`,
-        data: appointment
+        data: appointment,
       });
     } catch (error: any) {
       return res.status(400).json({
         success: false,
-        message: error.message || 'Failed to respond to appointment'
+        message: error.message || 'Failed to respond to appointment',
       });
     }
   }
@@ -183,39 +195,39 @@ export class AppointmentController {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
       const userId = req.user?._id;
       if (!userId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: 'Authentication required' 
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required',
         });
       }
 
       const appointmentId = req.params.appointmentId;
       const updateData = {
         status: req.body.status,
-        reason: req.body.reason
+        reason: req.body.reason,
       };
 
       const appointment = await AppointmentService.updateAppointmentStatus(
         userId,
         appointmentId,
-        updateData
+        updateData,
       );
 
       return res.status(200).json({
         success: true,
         message: 'Appointment status updated successfully',
-        data: appointment
+        data: appointment,
       });
     } catch (error: any) {
       return res.status(400).json({
         success: false,
-        message: error.message || 'Failed to update appointment status'
+        message: error.message || 'Failed to update appointment status',
       });
     }
   }
@@ -228,15 +240,15 @@ export class AppointmentController {
         return res.status(400).json({
           success: false,
           message: 'Validation failed',
-          errors: errors.array()
+          errors: errors.array(),
         });
       }
 
       const userId = req.user?._id;
       if (!userId) {
-        return res.status(401).json({ 
-          success: false, 
-          message: 'Authentication required' 
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required',
         });
       }
 
@@ -246,18 +258,58 @@ export class AppointmentController {
       const appointment = await AppointmentService.addAfterMeetingNotes(
         userId,
         appointmentId,
-        notes
+        notes,
       );
 
       return res.status(200).json({
         success: true,
         message: 'After-meeting notes added successfully',
-        data: appointment
+        data: appointment,
       });
     } catch (error: any) {
       return res.status(400).json({
         success: false,
-        message: error.message || 'Failed to add after-meeting notes'
+        message: error.message || 'Failed to add after-meeting notes',
+      });
+    }
+  }
+
+  // Get appointment by ID (for nurses and parents)
+  static async getAppointmentById(req: Request, res: Response) {
+    try {
+      const userId = req.user?._id;
+      if (!userId) {
+        return res.status(401).json({
+          success: false,
+          message: 'Authentication required',
+        });
+      }
+
+      const appointmentId = req.params.appointmentId;
+
+      const user = await UserModel.findById(userId);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          message: 'User not found',
+        });
+      }
+
+      const appointment = await AppointmentService.getAppointmentById(
+        userId,
+        user.role,
+        appointmentId,
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: 'Appointment retrieved successfully',
+        data: appointment,
+      });
+    } catch (error: any) {
+      return res.status(400).json({
+        success: false,
+        message: error.message || 'Failed to retrieve appointment',
       });
     }
   }

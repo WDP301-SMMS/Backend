@@ -1,4 +1,5 @@
 import { MedicalIncidentModel } from '@/models/medical.incident.model';
+import { StudentModel } from '@/models/student.model';
 import { AppError } from '@/utils/globalErrorHandler';
 import { sendIncidentNotificationToParent } from '@/utils/notification.helper';
 
@@ -23,13 +24,27 @@ class MedicalIncidentService {
     severity?: string;
     nurseId?: string;
     studentId?: string;
+    parentId?: string;
   }) {
-    const { page = 1, limit = 10, severity, nurseId, studentId } = query;
+    const {
+      page = 1,
+      limit = 10,
+      severity,
+      nurseId,
+      studentId,
+      parentId,
+    } = query;
 
     const filters: Record<string, any> = {};
     if (severity) filters.severity = severity;
     if (nurseId) filters.nurseId = nurseId;
-    if (studentId) filters.studentId = studentId;
+    if (studentId) {
+      filters.studentId = studentId;
+    } else if (parentId) {
+      const students = await StudentModel.find({ parentId }, { _id: 1 });
+      const studentIds = students.map((s: any) => s._id);
+      filters.studentId = { $in: studentIds };
+    }
 
     const skip = (page - 1) * limit;
 
@@ -55,7 +70,6 @@ class MedicalIncidentService {
 
     const formattedIncidents = incidents.map((incident) => {
       const i = incident.toObject();
-
       const student = i.studentId as any;
       const nurse = i.nurseId as any;
 

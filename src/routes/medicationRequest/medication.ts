@@ -36,14 +36,14 @@ router.post(
 //Lấy tất cả request
 router.get('/allRequests', RequestController.getAllRequest);
 
-//Lấy request theo id
-router.get('/requests/:id', RequestController.getMedicationRequestById);
-
 //Lấy request theo phụ huynh
 router.get(
   '/requests/parent',
   RequestController.getMedicationRequestByParentId,
 );
+
+//Lấy request theo id
+router.get('/requests/:id', RequestController.getMedicationRequestById);
 
 //Update Request (không đụng item)
 router.patch(
