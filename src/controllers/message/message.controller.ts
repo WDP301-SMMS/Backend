@@ -1,5 +1,5 @@
 import { IMessage } from '@/interfaces/message.interface';
-import Message from '@/models/message.model';
+import { Message } from '@/models/message.model';
 import { handleSuccessResponse } from '@/utils/responseHandler';
 import { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
@@ -20,7 +20,8 @@ const getAllMessagesByRoomId = async (req: Request, res: Response) => {
 
   try {
     const messages = await Message.find({ roomId })
-      .populate('senderId receiverId')
+      .populate('senderId receiverId', 'username email role isActive phone dob') // Populate with specific fields
+      .select('-__v') // Exclude __v field
       .sort({ createdAt: 1 })
       .limit(50);
     if (!messages || messages.length === 0) {
@@ -63,7 +64,10 @@ const getRoomsByUserId = async (req: Request, res: Response) => {
     const messages = await Message.find({
       $or: [{ senderId: userId }, { receiverId: userId }],
     })
-      .populate('senderId receiverId')
+      .populate(
+        'senderId receiverId',
+        '-password -__v -createdAt -authProvider -updatedAt -googleId -pushTokens',
+      )
       .sort({ createdAt: -1 });
 
     if (!messages || messages.length === 0) {
