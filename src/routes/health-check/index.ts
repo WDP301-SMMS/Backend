@@ -10,7 +10,7 @@ const healthCheckRouter = express.Router();
 
 healthCheckRouter.use(
   '/templates',
-  roleBaseAccess([RoleEnum.Manager]),
+  roleBaseAccess([RoleEnum.Manager, RoleEnum.Nurse]),
   templateRouter,
 );
 healthCheckRouter.use(
