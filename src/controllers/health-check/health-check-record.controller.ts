@@ -39,10 +39,10 @@ const createHealthCheckResultBaseOnTemplate = async (
       return;
     }
 
-    if (healthCheckConsent.status !== ConsentStatus.PENDING) {
+    if (healthCheckConsent.status !== ConsentStatus.APPROVED) {
       res.status(400).json({
         message:
-          'Health check consent must be pending before creating a result',
+          'Health check consent must be approved before creating a result',
       });
       return;
     }
