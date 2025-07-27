@@ -5,6 +5,7 @@ import { Class } from '@/models/class.model';
 import { StudentModel } from '@/models/student.model';
 import { UserModel } from '@/models/user.model';
 import { FilterQuery, Types } from 'mongoose';
+import { RoleEnum } from '@/enums/RoleEnum';
 
 const createAppError = (status: number, message: string): AppError => {
   const error: AppError = new Error(message);
@@ -53,7 +54,9 @@ class AdminUserStudentService {
     const [users, total] = await Promise.all([
       this.users
         .find(findQuery)
-        .select('-password -__v -createdAt -authProvider -updatedAt -googleId -pushTokens')
+        .select(
+          '-password -__v -createdAt -authProvider -updatedAt -googleId -pushTokens',
+        )
         .skip(skip)
         .limit(limit)
         .sort({ createdAt: -1 })
@@ -86,6 +89,27 @@ class AdminUserStudentService {
     await user.save();
 
     const { password, ...userToReturn } = user.toObject(); // Destructure to exclude password
+    return userToReturn;
+  }
+
+  public async updateUserRole(userId: string, role: RoleEnum): Promise<IUser> {
+    const user = await this.users.findById(userId);
+    if (!user) {
+      throw createAppError(404, 'User not found');
+    }
+
+    const allowedRoles = [RoleEnum.Manager, RoleEnum.Nurse];
+    if (!allowedRoles.includes(role)) {
+      throw createAppError(
+        400,
+        'Invalid role. Only NURSE or MANAGER are allowed.',
+      );
+    }
+
+    user.role = role;
+    await user.save();
+
+    const { password, ...userToReturn } = user.toObject();
     return userToReturn;
   }
 
