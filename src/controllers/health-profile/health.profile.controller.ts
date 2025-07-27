@@ -1,4 +1,3 @@
-
 import { Request, Response, NextFunction } from 'express';
 import { IUser } from '@/interfaces/user.interface';
 import { StudentModel } from '@/models/student.model';
@@ -17,13 +16,17 @@ declare global {
 const parentService = new HealthProfileService();
 
 export class HealthProfileController {
-
-
-  public claimStudent = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public claimStudent = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const parentId = req.user?._id;
       if (!parentId) {
-        const error: AppError = new Error('User authentication error: Parent ID not found.');
+        const error: AppError = new Error(
+          'User authentication error: Parent ID not found.',
+        );
         error.status = 401;
         throw error;
       }
@@ -35,23 +38,32 @@ export class HealthProfileController {
         throw error;
       }
 
-      const student = await parentService.claimStudentByCode(parentId, invitedCode);
+      const result = await parentService.claimStudentByCode(
+        parentId,
+        invitedCode,
+      );
 
       res.status(200).json({
         success: true,
         message: 'Student connected successfully.',
-        data: student,
+        data: result,
       });
     } catch (error) {
       next(error);
     }
   };
 
-  public getMyStudents = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getMyStudents = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const parentId = req.user?._id;
       if (!parentId) {
-        const error: AppError = new Error('User authentication error: Parent ID not found.');
+        const error: AppError = new Error(
+          'User authentication error: Parent ID not found.',
+        );
         error.status = 401;
         throw error;
       }
@@ -68,23 +80,33 @@ export class HealthProfileController {
     }
   };
 
-
-  private async checkStudentOwnership(parentId: string, studentId: string): Promise<void> {
+  private async checkStudentOwnership(
+    parentId: string,
+    studentId: string,
+  ): Promise<void> {
     const student = await StudentModel.findById(studentId);
     if (!student || !student.parentId || !student.parentId.equals(parentId)) {
-      const error: AppError = new Error('Forbidden: You do not have permission to access this student\'s data.');
+      const error: AppError = new Error(
+        "Forbidden: You do not have permission to access this student's data.",
+      );
       error.status = 403;
       throw error;
     }
   }
 
-  public createProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public createProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const parentId = req.user?._id;
       const { studentId, ...payload } = req.body;
 
       if (!parentId) {
-        const error: AppError = new Error('User authentication error: Parent ID not found.');
+        const error: AppError = new Error(
+          'User authentication error: Parent ID not found.',
+        );
         error.status = 401;
         throw error;
       }
@@ -108,7 +130,11 @@ export class HealthProfileController {
     }
   };
 
-  public getProfileByStudentId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public getProfileByStudentId = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const { studentId } = req.params;
       const user = req.user;
@@ -120,7 +146,9 @@ export class HealthProfileController {
       }
 
       if (!user._id) {
-        const error: AppError = new Error('User authentication error: User ID is missing in token.');
+        const error: AppError = new Error(
+          'User authentication error: User ID is missing in token.',
+        );
         error.status = 401;
         throw error;
       }
@@ -138,13 +166,19 @@ export class HealthProfileController {
     }
   };
 
-  public updateProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public updateProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const { profileId } = req.params;
       const parentId = req.user?._id;
 
       if (!parentId) {
-        const error: AppError = new Error('User authentication error: Parent ID not found.');
+        const error: AppError = new Error(
+          'User authentication error: Parent ID not found.',
+        );
         error.status = 401;
         throw error;
       }
@@ -158,7 +192,10 @@ export class HealthProfileController {
 
       await this.checkStudentOwnership(parentId, profile.studentId.toString());
 
-      const updatedProfile = await parentService.updateProfile(profileId, req.body);
+      const updatedProfile = await parentService.updateProfile(
+        profileId,
+        req.body,
+      );
 
       res.status(200).json({
         success: true,
@@ -170,13 +207,19 @@ export class HealthProfileController {
     }
   };
 
-  public deleteProfile = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  public deleteProfile = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> => {
     try {
       const { profileId } = req.params;
       const parentId = req.user?._id;
 
       if (!parentId) {
-        const error: AppError = new Error('User authentication error: Parent ID not found.');
+        const error: AppError = new Error(
+          'User authentication error: Parent ID not found.',
+        );
         error.status = 401;
         throw error;
       }
