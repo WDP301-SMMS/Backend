@@ -15,7 +15,7 @@ export class HealthProfileService {
   public async claimStudentByCode(
     parentId: string,
     invitedCode: string,
-  ): Promise<IStudent> {
+  ): Promise<{ student: IStudent; profile: IHealthProfile }> {
     const student = await StudentModel.findOne({
       'invitedCode.code': invitedCode,
       'invitedCode.isActive': true,
@@ -43,12 +43,23 @@ export class HealthProfileService {
     }
 
     await student.save();
+    await student.populate({ path: 'classId', select: 'className' });
 
-    await student.populate({
-      path: 'classId',
-      select: 'className',
-    });
-    return student;
+    let profile = await HealthProfileModel.findOne({ studentId: student._id });
+    if (!profile) {
+      profile = new HealthProfileModel({
+        studentId: student._id,
+        allergies: [],
+        chronicConditions: [],
+        medicalHistory: [],
+        visionHistory: [],
+        hearingHistory: [],
+        vaccines: [],
+      });
+      await profile.save();
+    }
+
+    return { student, profile };
   }
 
   public async getMyStudents(parentId: string): Promise<any[]> {

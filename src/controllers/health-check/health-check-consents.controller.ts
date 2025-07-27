@@ -309,6 +309,41 @@ const getConsentDetailById = async (req: Request, res: Response) => {
   }
 };
 
+const getHealthCheckConsentsByNurseId = async (req: Request, res: Response) => {
+  const { campaignId } = req.params;
+  const nurseId = req.user?._id;
+  try {
+    if (!nurseId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized: Nurse ID missing',
+      });
+    }
+
+    const consents = await HealthCheckConsent.find({
+      campaignId,
+      nurseId,
+    })
+      .populate('studentId', 'fullName dateOfBirth gender')
+      .populate('campaignId', 'name startDate endDate schoolYear')
+      .populate('classId', 'className gradeLevel schoolYear')
+      .populate('nurseId', 'username email phone');
+
+    handleSuccessResponse(
+      res,
+      200,
+      'Health check consents retrieved successfully',
+      consents,
+    );
+  } catch (error) {
+    console.error('Error in getHealthCheckConsentsByNurseId:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error',
+    });
+  }
+};
+
 const allowedStatusTransitions = (): Record<ConsentStatus, ConsentStatus[]> => {
   return {
     [ConsentStatus.PENDING]: [
@@ -348,4 +383,5 @@ export default {
   getConsentDetailById,
   addAllStudentToConsentByCampaignId,
   handleStatusConsent,
+  getHealthCheckConsentsByNurseId,
 };
