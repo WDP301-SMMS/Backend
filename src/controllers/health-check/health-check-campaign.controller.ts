@@ -311,9 +311,6 @@ const updateCampaignStatus = async (req: Request, res: Response) => {
           if (consent.status === ConsentStatus.APPROVED) {
             consent.status = ConsentStatus.PENDING;
             consent.save();
-          } else if (consent.status === ConsentStatus.NO_RESPONSE) {
-            consent.status = ConsentStatus.OVERDUE;
-            consent.save();
           }
         });
 
