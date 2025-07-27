@@ -135,13 +135,20 @@ class InventoryService {
     return log[0];
   }
 
-  public async findIncidentsToDispense(
+   public async findIncidentsToDispense(
     filters: FilterQuery<IMedicalIncident>,
   ): Promise<IMedicalIncident[]> {
+    
+    const combinedFilters: FilterQuery<IMedicalIncident> = {
+      ...filters, 
+      isDispensed: { $ne: true } 
+    };
+
     const incidents = await this.incidents
-      .find(filters)
+      .find(combinedFilters) 
       .populate('studentId', 'fullName')
       .sort({ incidentTime: -1 });
+      
     return incidents;
   }
 
@@ -160,6 +167,12 @@ class InventoryService {
         throw createError(404, 'Incident not found');
       }
 
+      if (incident.isDispensed) {
+        throw createError(409, 'Medication has already been dispensed for this incident.');
+      }
+
+
+
       for (const itemToDispense of dispenseData) {
         await this.withdrawItemForIncident(
           {
@@ -170,6 +183,7 @@ class InventoryService {
         );
       }
 
+      incident.isDispensed = true;
       await incident.save();
       return incident;
     } catch (error) {
@@ -230,8 +244,8 @@ class InventoryService {
       newQuantity: number;
       reason: string;
       type:
-        | InventoryLogType.MANUAL_ADJUSTMENT
-        | InventoryLogType.DISPOSE_EXPIRED;
+      | InventoryLogType.MANUAL_ADJUSTMENT
+      | InventoryLogType.DISPOSE_EXPIRED;
     },
     managerId: string,
   ): Promise<IInventoryLog> {
@@ -283,7 +297,7 @@ class InventoryService {
       // { $sort: { createdAt: -1 } },
       { $lookup: { from: 'medicalinventories', localField: 'inventoryId', foreignField: '_id', as: 'itemInfo' } },
       { $unwind: '$itemInfo' },
-        { $sort: { createdAt: -1 } },
+      { $sort: { createdAt: -1 } },
       { $group: { _id: "$incidentId", dispensedItems: { $push: { itemName: '$itemInfo.itemName', quantity: { $abs: '$quantityChanged' }, unit: '$itemInfo.unit', usageInstructions: '$usageInstructions' } }, dispensedAt: { $first: "$createdAt" } } },
       { $lookup: { from: 'medicalincidents', localField: '_id', foreignField: '_id', as: 'incidentInfo' } },
       { $unwind: '$incidentInfo' },

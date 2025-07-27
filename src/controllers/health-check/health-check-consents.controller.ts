@@ -20,7 +20,6 @@ const addAllStudentToConsentByCampaignId = async (
       });
     }
 
-
     const campaign = await HealthCheckCampaign.findById(campaignId);
     if (!campaign) {
       return res.status(404).json({
@@ -92,7 +91,7 @@ const addAllStudentToConsentByCampaignId = async (
         classId: student.classId,
         parentId: student.parentId || new Types.ObjectId(),
         nurseId: nurseId ? new Types.ObjectId(nurseId) : null,
-        status: ConsentStatus.NO_RESPONSE,
+        status: ConsentStatus.PENDING,
         reasonForDeclining: null,
         confirmedAt: null,
       };
@@ -182,7 +181,8 @@ const handleStatusConsent = async (req: Request, res: Response) => {
 
     consent.status = status;
     consent.confirmedAt = new Date();
-    consent.reasonForDeclining = status === ConsentStatus.DECLINED ? reasonForDeclining : null;
+    consent.reasonForDeclining =
+      status === ConsentStatus.DECLINED ? reasonForDeclining : null;
     await consent.save();
 
     handleSuccessResponse(

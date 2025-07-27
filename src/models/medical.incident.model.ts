@@ -8,13 +8,13 @@ const MedicalIncidentSchema: Schema = new Schema<IMedicalIncident>({
     ref: 'Student',
     required: true,
     index: true,
-  }, // Foreign key, indexed for lookups
+  }, 
   nurseId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
     index: true,
-  }, // Foreign key
+  },
   incidentType: { type: String, required: true },
   description: { type: String, required: true },
   severity: {
@@ -27,6 +27,10 @@ const MedicalIncidentSchema: Schema = new Schema<IMedicalIncident>({
     type: String,
     default: null,
     sparse: true,
+  },
+  isDispensed: {
+    type: Boolean,
+    default: false,
   },
   incidentTime: { type: Date, required: true },
 });
