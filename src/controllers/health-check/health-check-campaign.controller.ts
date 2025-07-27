@@ -308,8 +308,8 @@ const updateCampaignStatus = async (req: Request, res: Response) => {
         }
 
         healthCheckConsents.forEach((consent) => {
-          if (consent.status === ConsentStatus.APPROVED) {
-            consent.status = ConsentStatus.PENDING;
+          if (consent.status === ConsentStatus.PENDING) {
+            consent.status = ConsentStatus.NO_RESPONSE;
             consent.save();
           }
         });
